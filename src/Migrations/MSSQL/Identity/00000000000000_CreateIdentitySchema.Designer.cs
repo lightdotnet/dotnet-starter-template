@@ -7,7 +7,7 @@ using Monolith.Identity.Data;
 
 #nullable disable
 
-namespace Monolith.Admin.Migrator.SqlServer.Migrations
+namespace MSSQL.Identity
 {
     [DbContext(typeof(AppIdentityDbContext))]
     [Migration("00000000000000_CreateIdentitySchema")]

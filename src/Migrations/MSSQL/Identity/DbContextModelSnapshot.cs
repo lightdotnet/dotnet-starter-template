@@ -6,7 +6,7 @@ using Monolith.Identity.Data;
 
 #nullable disable
 
-namespace Monolith.Admin.Migrator.SqlServer.Migrations
+namespace MSSQL.Identity
 {
     [DbContext(typeof(AppIdentityDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot

@@ -7,7 +7,7 @@ using Monolith.Database;
 using Monolith.Identity.Data;
 using System.Reflection;
 
-namespace MSSQL;
+namespace PostgreSQL;
 
 public static class DependencyInjection
 {
@@ -17,7 +17,7 @@ public static class DependencyInjection
 
         services.AddDbContext<AppIdentityDbContext>(options =>
             options
-                .UseSqlServer(connectionString, o =>
+                .UseNpgsql(connectionString, o =>
                 {
                     o.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
                 })

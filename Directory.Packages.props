@@ -12,7 +12,6 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="$(AspnetVersion)" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(AspnetVersion)" />
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="$(AspnetVersion)" />
     <PackageVersion Include="System.Text.Encodings.Web" Version="$(AspnetVersion)" />
     <!-- Light framework -->
@@ -35,6 +34,7 @@
 	<PackageVersion Include="FluentValidation" Version="12.0.0" />
 	<PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
 	<PackageVersion Include="Mapster" Version="7.4.0" />
+	<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
 	<PackageVersion Include="Spectre.Console" Version="0.50.0" />
   </ItemGroup>
 </Project>

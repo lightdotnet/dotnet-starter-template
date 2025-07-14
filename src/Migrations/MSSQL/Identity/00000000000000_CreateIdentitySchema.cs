@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Monolith.Admin.Migrator.SqlServer.Migrations
+namespace MSSQL.Identity
 {
     /// <inheritdoc />
     public partial class CreateIdentitySchema : Migration
