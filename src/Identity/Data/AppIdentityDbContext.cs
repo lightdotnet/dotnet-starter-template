@@ -5,21 +5,19 @@ namespace Monolith.Identity.Data;
 
 public class AppIdentityDbContext(
     ICurrentUser currentUser,
-    TimeProvider timeProvider,
+    IDateTime clock,
     DbContextOptions<AppIdentityDbContext> options) :
     IdentityContext(options)
 {
     public override int SaveChanges()
     {
-        var now = timeProvider.GetUtcNow();
-        this.AuditEntries(currentUser.UserId, now, false);
+        this.AuditEntries(currentUser.UserId, clock.Now, false);
         return base.SaveChanges();
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var now = timeProvider.GetUtcNow();
-        this.AuditEntries(currentUser.UserId, now, false);
+        this.AuditEntries(currentUser.UserId, clock.Now, false);
         return base.SaveChangesAsync(cancellationToken);
     }
 

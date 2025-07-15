@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSSQL", "src\Migrations\MSS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostgreSQL", "src\Migrations\PostgreSQL\PostgreSQL.csproj", "{B26FC89B-993D-DDAA-A14B-7DEBEC3B8B96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog", "src\Catalog\Catalog.csproj", "{19359820-4327-BF3C-158E-15075E0D991F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{B26FC89B-993D-DDAA-A14B-7DEBEC3B8B96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B26FC89B-993D-DDAA-A14B-7DEBEC3B8B96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B26FC89B-993D-DDAA-A14B-7DEBEC3B8B96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19359820-4327-BF3C-158E-15075E0D991F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19359820-4327-BF3C-158E-15075E0D991F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19359820-4327-BF3C-158E-15075E0D991F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19359820-4327-BF3C-158E-15075E0D991F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +74,7 @@ Global
 		{A1796537-F8D6-4E17-A64E-2504A62272EF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{BF6E92C5-A7DB-65C9-E36A-098A9693D211} = {A1796537-F8D6-4E17-A64E-2504A62272EF}
 		{B26FC89B-993D-DDAA-A14B-7DEBEC3B8B96} = {A1796537-F8D6-4E17-A64E-2504A62272EF}
+		{19359820-4327-BF3C-158E-15075E0D991F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C46F8D43-2A20-4831-9E83-E42588CB9D7D}

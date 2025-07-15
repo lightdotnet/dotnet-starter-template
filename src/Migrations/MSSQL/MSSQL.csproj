@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Catalog\Catalog.csproj" />
     <ProjectReference Include="..\..\Identity\Identity.csproj" />
   </ItemGroup>
 
