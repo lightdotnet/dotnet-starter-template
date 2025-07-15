@@ -2,9 +2,11 @@
 using Light.Identity.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Monolith;
 using Monolith.Database;
 using Monolith.Identity.Data;
@@ -50,7 +52,7 @@ public static class DependencyInjection
             options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         })
         .AddCookie();
-
+        
         services.AddScoped<IdentityContextInitialiser>();
 
         return services;

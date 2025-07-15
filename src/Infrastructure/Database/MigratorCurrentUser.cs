@@ -4,23 +4,21 @@ internal class MigratorCurrentUser : ICurrentUser
 {
     public string? UserId => "Migrator";
 
-    public string? Username => throw new NotImplementedException();
+    public string? Username => null;
 
-    public string? FirstName => throw new NotImplementedException();
+    public string? FirstName => null;
 
-    public string? LastName => throw new NotImplementedException();
+    public string? LastName => null;
 
-    public string? FullName => throw new NotImplementedException();
+    public string? FullName => null;
 
-    public string? PhoneNumber => throw new NotImplementedException();
+    public string? PhoneNumber => null;
 
-    public string? Email => throw new NotImplementedException();
+    public string? Email => null;
 
-    public bool IsAuthenticated => throw new NotImplementedException();
+    public bool IsAuthenticated => false;
 
-    public bool IsMasterUser => throw new NotImplementedException();
-
-    public string? EmployeeId => throw new NotImplementedException();
+    public bool IsMasterUser => false;
 
     public bool HasPermission(string permission)
     {

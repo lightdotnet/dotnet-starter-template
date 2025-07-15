@@ -1,7 +1,4 @@
 ﻿using Light.Identity;
-using Light.Identity.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,14 +39,6 @@ public static class DependencyInjection
                 .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
         services.AddIdentity<AppIdentityDbContext>();
-
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        })
-        .AddCookie();
 
         services.AddScoped<IdentityContextInitialiser>();
 
