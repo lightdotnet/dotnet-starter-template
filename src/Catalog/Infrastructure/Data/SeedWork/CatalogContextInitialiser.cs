@@ -1,54 +1,54 @@
 ﻿using Microsoft.Extensions.Logging;
+using Monolith.Database;
 using Monolith.Domain.Categories;
 using Monolith.Domain.Products;
+using Monolith.Domain.Shops;
 
 namespace Monolith.Infrastructure.Data.SeedWork;
 
-public class CatalogContextInitialiser(CatalogContext context, ILogger<CatalogContextInitialiser> logger)
+public class CatalogContextInitialiser(
+    CatalogContext context,
+    ILogger<CatalogContextInitialiser> logger)
 {
     public virtual async Task InitialiseAsync()
     {
-        logger.LogInformation("Seeding...");
-
-        try
-        {
-            if (context.Database.GetMigrations().Any())
-            {
-                if ((await context.Database.GetPendingMigrationsAsync()).Any())
-                {
-                    await context.Database.MigrateAsync();
-
-                    var dbName = context.Database.GetDbConnection().Database;
-
-                    logger.LogInformation("Database {name} initialized", dbName);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "An error occurred while initialising the database.");
-            throw;
-        }
+        await context.SeedDatabase(logger);
     }
 
     public async Task TrySeedAsync()
     {
+        logger.LogInformation("catalog_module seeding data...");
+
         try
         {
             if (await context.Database.CanConnectAsync())
             {
                 await SeedAsync();
+                logger.LogInformation("catalog_module seed data completed");
+            }
+            else
+            {
+                logger.LogError("catalog_module cannot connect to DB");
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while seeding the database.");
+            logger.LogError(ex, "catalog_module seeding data error: {mess}", ex.Message);
             throw;
         }
     }
 
     public async Task SeedAsync()
     {
+        var shops = new[]
+        {
+            Shop.Create("Shop 1 Test"),
+            Shop.Create("Shop 2 Test"),
+            Shop.Create("Shop 3 Test"),
+        };
+
+        await context.Set<Shop>().AddRangeAsync(shops);
+
         var drinkCategory = Category.Create("Drinks");
         var foodCategory = Category.Create("Foods");
 
@@ -77,7 +77,7 @@ public class CatalogContextInitialiser(CatalogContext context, ILogger<CatalogCo
         {
             var random = new Random();
 
-            var product = Product.Create("1", categories[random.Next(2, 5)].Id, $"Product Name {i}", $"Product Description {i}");
+            var product = Product.Create(shops[random.Next(0, 2)].Id, categories[random.Next(2, 5)].Id, $"Product Name {i}", $"Product Description {i}");
             product.ImageUrl = productImages.First();
             product.UpdateCode($"{100000 + i}");
             product.UpdateImages(productImages);

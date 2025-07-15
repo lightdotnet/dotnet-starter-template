@@ -12,7 +12,7 @@ using Monolith.Infrastructure.Data;
 namespace MSSQL.Catalog
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20250715040306_CreateCatalogSchema")]
+    [Migration("20250715063449_CreateCatalogSchema")]
     partial class CreateCatalogSchema
     {
         /// <inheritdoc />
@@ -187,6 +187,33 @@ namespace MSSQL.Catalog
                     b.ToTable("ProductPrices");
                 });
 
+            modelBuilder.Entity("Monolith.Domain.Shops.Shop", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Shop");
+                });
+
             modelBuilder.Entity("Monolith.Domain.Products.Product", b =>
                 {
                     b.HasOne("Monolith.Domain.Categories.Category", "Category")
@@ -207,6 +234,29 @@ namespace MSSQL.Catalog
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Monolith.Domain.Shops.Shop", b =>
+                {
+                    b.OwnsOne("Monolith.Status", "Status", b1 =>
+                        {
+                            b1.Property<string>("ShopId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<int>("Value")
+                                .HasColumnType("int")
+                                .HasColumnName("Status");
+
+                            b1.HasKey("ShopId");
+
+                            b1.ToTable("Shop");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ShopId");
+                        });
+
+                    b.Navigation("Status")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Monolith.Domain.Categories.Category", b =>

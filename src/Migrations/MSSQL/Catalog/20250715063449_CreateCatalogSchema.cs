@@ -50,6 +50,23 @@ namespace MSSQL.Catalog
                 });
 
             migrationBuilder.CreateTable(
+                name: "Shop",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModified = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shop", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
@@ -119,6 +136,9 @@ namespace MSSQL.Catalog
 
             migrationBuilder.DropTable(
                 name: "ProductPrices");
+
+            migrationBuilder.DropTable(
+                name: "Shop");
 
             migrationBuilder.DropTable(
                 name: "Products");
