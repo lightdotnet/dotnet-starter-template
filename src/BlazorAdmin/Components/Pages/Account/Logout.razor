@@ -1,0 +1,10 @@
+﻿@page "/account/logout"
+
+@inject LoginService LoginService
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        return LoginService.LogoutAsync();
+    }
+}

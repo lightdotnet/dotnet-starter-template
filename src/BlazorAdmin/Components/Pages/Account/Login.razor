@@ -1,0 +1,94 @@
+﻿@page "/account/login"
+@attribute [AllowAnonymous]
+
+<PageTitle>Log in</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical"
+             HorizontalAlignment="HorizontalAlignment.Center"
+             VerticalAlignment="VerticalAlignment.Center"
+             VerticalGap="20" Style="height: 100vh;">
+
+    <div class="d-flex flex-column">
+
+        <FluentCard>
+            <StatusMessage Message="@errorMessage" />
+
+            <EditForm Model="@Input" method="post" OnValidSubmit=LoginSubmit FormName="login_form">
+
+                <DataAnnotationsValidator />
+
+                <h3>Sign In</h3>
+
+                <FluentValidationSummary class="text-danger" role="alert" />
+
+                <FluentStack Orientation="Orientation.Vertical">
+
+                    @*
+                    Must use Name="Input.{Prop_name}" for fix InvalidOperationException:
+                    EditForm requires either a Model parameter, or an EditContext parameter, please provide one of these.
+                    *@
+                    <FluentTextField Name="Input.Username" @bind-Value="Input.Username" Required="true" Placeholder="username" Size="30">
+                        <FluentIcon Value="@(new Icons.Regular.Size16.Person())" Color="@Color.Neutral" Slot="start" />
+                    </FluentTextField>
+                    <FluentValidationMessage For="() => Input.Username" class="text-danger" />
+
+                    <FluentTextField Name="Input.Password" @bind-Value="Input.Password" Required="true" TextFieldType="TextFieldType.Password" Placeholder="password" Size="30">
+                        <FluentIcon Value="@(new Icons.Regular.Size16.Key())" Color="@Color.Neutral" Slot="start" />
+                    </FluentTextField>
+                    <FluentValidationMessage For="() => Input.Password" class="text-danger" />
+
+                    <FluentCheckbox Name="Input.RememberMe" @bind-Value="@Input.RememberMe">Remember</FluentCheckbox>
+
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in</FluentButton>
+
+                </FluentStack>
+            </EditForm>
+        </FluentCard>
+
+    </div>
+
+</FluentStack>
+
+@inject LoginService LoginService
+
+@code {
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+    public async Task LoginSubmit()
+    {
+        var login = await LoginService.LoginAsync(Input.Username, Input.Password, Input.RememberMe);
+
+        if (login.Succeeded)
+        {
+            ToastDisplay.ShowSuccess("Login success");
+        }
+        else
+        {
+            ToastDisplay.ShowError("Login error");
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string Username { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+}
