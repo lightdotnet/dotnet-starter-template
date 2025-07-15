@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Core -->
+    <PackageVersion Include="Lightsoft.Blazor" Version="0.0.0.1-beta3" />
     <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(AspnetVersion)" />
@@ -36,5 +37,9 @@
     <PackageVersion Include="Mapster" Version="7.4.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="Spectre.Console" Version="0.50.0" />
+    <!-- Blazor -->
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.12.0" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.12.0" />
   </ItemGroup>
 </Project>

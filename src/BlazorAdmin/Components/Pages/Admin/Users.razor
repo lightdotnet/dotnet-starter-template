@@ -1,0 +1,56 @@
+﻿@page "/users"
+
+
+<Table State="state">
+    <HeadContent>
+        <th></th>
+        <th>User</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Status</th>
+        <th>Action</th>
+    </HeadContent>
+    <RowTemplate>
+        <td class="text-center">
+            @if (!string.IsNullOrEmpty(context.AuthProvider))
+            {
+                <Badge Value="@context.AuthProvider" />
+            }
+        </td>
+        <td>
+            @context.UserName
+        </td>
+        <td>@context.FirstName @context.LastName</td>
+        <td>@context.Email</td>
+        <td>@context.PhoneNumber</td>
+        <td>
+            <Badge Value="@context.Status" Appearance="Appearance.Accent" />
+        </td>
+        <td>
+            
+        </td>
+
+    </RowTemplate>
+</Table>
+
+@inject IUserService UserService
+
+@code {
+    private DataTable<UserDto> state = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(GetUsersAsync)
+        {
+            SearchFunc = (searchValue, e) =>
+                e.UserName.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+                || e.PhoneNumber.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+                || e.Email.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+        };
+
+        await state.ReloadAsync();
+    }
+
+    private Task<IEnumerable<UserDto>> GetUsersAsync() => UserService.GetAllAsync();
+}

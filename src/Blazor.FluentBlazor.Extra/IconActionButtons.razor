@@ -1,0 +1,54 @@
+﻿<FluentButton 
+    Type="buttonType"
+    IconStart="@(CustomIcon == null ? icon : CustomIcon)"
+    Color="color"
+    OnClick="OnClick" />
+
+@code {
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    [Parameter]
+    public string? Href { get; set; }
+
+    [Parameter]
+    public bool Submit { get; set; }
+
+    [Parameter]
+    public Action IconAction { get; set; } = Action.View;
+
+    [Parameter]
+    public Icon? CustomIcon { get; set; }
+
+    public enum Action
+    {
+        View,
+        Create,
+        Update,
+        Delete,
+        Save,
+        Refresh,
+        Cancel
+    }
+
+    private Icon icon = ViewIcon.View;
+
+
+    private ButtonType buttonType => Submit ? ButtonType.Submit : ButtonType.Button;
+
+    protected override void OnInitialized()
+    {
+        switch (IconAction)
+        {
+            case Action.Create:
+                {
+                    break;
+                }
+            case Action.Refresh:
+                {
+                    icon = ViewIcon.Refresh;
+                    break;
+                }
+        }
+    }
+}
