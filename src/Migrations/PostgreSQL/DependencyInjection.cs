@@ -1,5 +1,4 @@
-﻿using Light.Identity;
-using Light.Identity.Models;
+﻿using Light.Identity.Models;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
