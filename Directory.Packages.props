@@ -16,6 +16,7 @@
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="$(AspnetVersion)" />
     <PackageVersion Include="System.Text.Encodings.Web" Version="$(AspnetVersion)" />
     <!-- Light framework -->
+    <PackageVersion Include="Lightsoft.ActiveDirectory" Version="1.0.0.0" />
     <PackageVersion Include="Lightsoft.AspNetCore.Extensions" Version="9.0.7.2" />
     <PackageVersion Include="Lightsoft.AspNetCore.Modularity" Version="0.0.0.5" />
     <PackageVersion Include="Lightsoft.AspNetCore.Swagger" Version="9.0.7.2" />

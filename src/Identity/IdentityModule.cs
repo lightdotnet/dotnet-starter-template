@@ -1,5 +1,5 @@
+using Light.ActiveDirectory;
 using Light.Extensions.DependencyInjection;
-using Light.Identity;
 using Light.Identity.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,9 +45,23 @@ public class IdentityModule : AppModule
         services.AddOptions<JwtOptions>().BindConfiguration(sectionName);
         services.AddJwtTokenProvider();
 
+        services.AddScoped<ILoginService, LoginService>();
+
         // add JWT Auth
         var jwtSettings = configuration.GetSection(sectionName).Get<JwtOptions>();
         ArgumentNullException.ThrowIfNull(jwtSettings, nameof(JwtOptions));
         services.AddJwtAuth(jwtSettings.Issuer, jwtSettings.SecretKey, ClaimTypes.Role); // inject this for use jwt auth
+
+        // connect to AD
+        var domainName = configuration.GetValue<string>("MemberOfDomain");
+        if (!string.IsNullOrEmpty(domainName))
+        {
+            services.AddActiveDirectory(x => x.Name = domainName);
+        }
+        else
+        {
+            // fake service
+            services.AddActiveDirectory();
+        }
     }
 }

@@ -1,5 +1,4 @@
 using Light.Serilog;
-using Monolith;
 using Serilog;
 using Spectre.Console;
 
