@@ -1,0 +1,16 @@
+﻿@page "/object-viewer"
+
+<PageTitle>Data</PageTitle>
+
+<ObjectViewer Model="dictionary" />
+
+@code {
+    IDictionary<string, object> dictionary = new Dictionary<string, object>()
+    {
+        { "Id", "1"},
+        { "Name", "sdasasd dasd"},
+        { "Value", "1"},
+        { "Address", "AASA"},
+        { "City", "HCM"},
+    };
+}

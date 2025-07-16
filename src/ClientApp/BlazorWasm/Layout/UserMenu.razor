@@ -1,0 +1,105 @@
+﻿@*implements IDisposable*@
+
+@inject IIdentityManager IdentityManager
+
+<AuthorizeView>
+    <Authorized>
+        <MudMenu Class="ml-1 mr-2" PositionAtCursor="false" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.BottomLeft" Style="min-width: 120px">
+            <ActivatorContent>
+                <MudStack Row="true" AlignItems="AlignItems.Center">
+                    @if (string.IsNullOrEmpty(username))
+                    {
+                        <MudAvatar Size="Size.Medium" Square="true">@username</MudAvatar>
+                    }
+                    else
+                    {
+                        <MudAvatar Size="Size.Medium" Square="true" Color="Color.Transparent">
+                            <MudImage Src="/images/avatar.jpg" Class="bg-transparent"></MudImage>
+                        </MudAvatar>
+                    }
+                    <MudStack Justify="Justify.Center" Spacing="0">
+                        <MudText Typo="Typo.body1">@username</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">@email</MudText>
+                    </MudStack>
+                </MudStack>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem Href="/profiles">
+                    <div class="d-flex align-center">
+                        <MudIcon Class="mr-1" Size="Size.Small"
+                                 Icon="@Icons.Material.Filled.Person" />
+                        <MudText Align="Align.Center">Profile</MudText>
+                    </div>
+                </MudMenuItem>
+                <MudMenuItem Href="/tokens">
+                    <div class="d-flex align-center">
+                        <MudIcon Class="mr-1" Size="Size.Small"
+                                 Icon="@Icons.Material.Filled.Key" />
+                        <MudText Align="Align.Center">Tokens</MudText>
+                    </div>
+                </MudMenuItem>
+                <MudMenuItem Href="/notifications">
+                    <div class="d-flex align-center">
+                        <MudIcon Class="mr-1" Size="Size.Small"
+                                 Icon="@Icons.Material.Filled.EditNotifications" />
+                        <MudText Align="Align.Center">Notifications</MudText>
+                    </div>
+                </MudMenuItem>
+                <MudMenuItem OnClick="LogoutAsync">
+                    <div class="d-flex align-center">
+                        <MudIcon Class="mr-1" Size="Size.Small"
+                                 Icon="@Icons.Material.Filled.Logout" />
+                        <MudText Align="Align.Center">Logout</MudText>
+                    </div>
+                </MudMenuItem>
+            </ChildContent>
+        </MudMenu>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private string username => CurrentUser.Username ?? "";
+
+    private string firstName => CurrentUser.FirstName ?? "";
+
+    private string lastName => CurrentUser.LastName ?? "";
+
+    private string? phone => CurrentUser.PhoneNumber;
+
+    private string? email => CurrentUser.Email;
+
+    /*
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+    */
+    public async Task LogoutAsync()
+    {
+        await IdentityManager.LogoutAsync();
+        /*
+        var loginUrl = "account/login";
+
+        if (!string.IsNullOrEmpty(currentUrl))
+        {
+            loginUrl += $"?returnUrl={currentUrl}";
+        }
+
+        NavigationManager.NavigateTo(loginUrl);
+        */
+    }
+}

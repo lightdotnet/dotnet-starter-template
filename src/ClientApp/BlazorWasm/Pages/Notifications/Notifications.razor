@@ -1,0 +1,82 @@
+﻿@page "/notifications"
+
+<Remote_Table State="state" SearchPermission="@Permissions.System.Notification">
+    <SearchContent>
+        
+        <SelectUser List="users" SelectedUserChanged="OnSelectUserChanged" />
+
+    </SearchContent>
+    <ButtonsContent>
+        <Button EndIcon="@Icons.Material.Filled.Send" OnClick="OpenPushDialogAsync" Label="Push" />
+    </ButtonsContent>
+    <HeadContent>
+        <th Style="width:15%;">From</th>
+        <th Style="width:20%;">Title</th>
+        <th Style="width:40%;">Message</th>
+        <th Style="width:25%;">Time</th>
+    </HeadContent>
+    <RowTemplate>
+        <td>@context.FromName</td>
+        <td>@context.Title</td>
+        <td class="text-break">@context.Message</td>
+        <td>@context.Created.ToUniversalTime()</td>
+    </RowTemplate>
+</Remote_Table>
+
+@code {
+    private RemoteTable<NotificationDto, NotificationLookup> state = null!;
+
+    private NotificationLookup lookup => state.Lookup;
+
+    private IEnumerable<UserDto> users = new List<UserDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(NotificationService.GetAsync);
+
+        lookup.ToUser = CurrentUser.UserId;
+
+        await state.ReloadAsync();
+        
+        @if (CurrentUser.HasPermission(Permissions.System.Notification))
+        {
+            var getUsers = await UserService.GetAsync();
+
+            if (getUsers.Succeeded)
+            {
+                users = getUsers.Data;
+            }
+        }
+    }
+
+    private void OnSelectUserChanged(UserDto? userDto)
+    {
+        lookup.ToUser = userDto?.Id;
+    }
+
+    private async Task OpenPushDialogAsync()
+    {
+        var options = new DialogOptions()
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = false,
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var parameters = new DialogParameters<PushNotification_Dialog>
+        {
+            { x => x.Users, users }
+        };
+
+        var dialog = await DialogService.ShowAsync<PushNotification_Dialog>($"Push Notification", parameters, options);
+
+        var result = await CallGuarded.GetDialogResultAsync(dialog);
+
+        if (result.Succeeded)
+        {
+            
+        }
+    }
+}

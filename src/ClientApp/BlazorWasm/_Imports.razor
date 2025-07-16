@@ -1,0 +1,46 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using System.ComponentModel.DataAnnotations
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+@attribute [Authorize]
+
+@using MudBlazor
+@inject IDialogService DialogService
+
+@using Mapster
+
+@using Light.Contracts
+@using Light.Blazor
+@using Light.MudBlazor
+@using Light.Extensions
+@using Light.File.Excel
+@inject IExcelService ExcelService
+@inject IToastDisplay ToastService
+@inject ICallGuardedService CallGuarded
+@inject SpinnerService SpinnerService
+
+@using Monolith
+@using Monolith.Auth
+@inject ICurrentUser CurrentUser
+
+@using BlazorApp.Components
+@using BlazorApp.Core
+@using BlazorApp.Core.Constants
+@using BlazorApp.Core.Extensions
+@using BlazorApp.Core.ViewModels
+@using BlazorApp.Layout
+@using BlazorApp.Pages
+@inject IWebSettings WebSettings
+
+
