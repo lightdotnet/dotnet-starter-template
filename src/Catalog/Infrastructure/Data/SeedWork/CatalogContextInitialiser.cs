@@ -12,7 +12,7 @@ public class CatalogContextInitialiser(
 {
     public virtual async Task InitialiseAsync()
     {
-        await context.SeedDatabase(logger);
+        await context.MigrateDatabaseAsync(logger);
     }
 
     public async Task TrySeedAsync()

@@ -17,7 +17,7 @@ public static class DependencyInjection
     {
         services.AddInfrastructureServices();
 
-        services.AddMigratorServices();
+        services.AddMigrationsServices();
 
         services.AddIdentity(configuration);
 
