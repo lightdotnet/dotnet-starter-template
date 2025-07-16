@@ -7,23 +7,26 @@ namespace Monolith.Database;
 
 public static class DbContextExtensions
 {
-    public enum DbProviders
+    public enum DbProvider
     {
         InMemory = 0,
         PostgreSQL = 1,
         MSSQL = 2,
     }
 
-    internal static DbContextOptionsBuilder ConfigureDatabase(this DbContextOptionsBuilder builder, DbProviders dbProvider, string connectionString)
+    public static DbProvider GetDbProvider(this IConfiguration configuration) =>
+        configuration.GetValue<DbProvider>("DbProvider");
+
+    internal static DbContextOptionsBuilder ConfigureDatabase(this DbContextOptionsBuilder builder, DbProvider dbProvider, string connectionString)
     {
         builder
             .ConfigureWarnings(w => w.Log(RelationalEventId.PendingModelChangesWarning));
 
         return dbProvider switch
         {
-            DbProviders.PostgreSQL =>
+            DbProvider.PostgreSQL =>
                 builder.UseNpgsql(connectionString).EnableSensitiveDataLogging(),
-            DbProviders.MSSQL =>
+            DbProvider.MSSQL =>
                 builder.UseSqlServer(connectionString),
             _ => throw new InvalidOperationException($"DB Provider {dbProvider} is not supported."),
         };
@@ -32,9 +35,9 @@ public static class DbContextExtensions
     public static IServiceCollection AddDbContext<TContext>(this IServiceCollection services, IConfiguration configuration, string connectionName)
         where TContext : DbContext
     {
-        var dbProvider = configuration.GetValue<DbProviders>("DbProvider");
+        var dbProvider = configuration.GetDbProvider();
 
-        if (dbProvider == DbProviders.InMemory)
+        if (dbProvider == DbProvider.InMemory)
         {
             services.AddDbContext<TContext>(options => options.UseInMemoryDatabase($"InMemoryDb"));
         }
