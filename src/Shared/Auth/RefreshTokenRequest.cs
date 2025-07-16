@@ -1,3 +1,3 @@
-namespace Monolith.Identity.Dtos;
+namespace Monolith.Auth;
 
 public record RefreshTokenRequest(string AccessToken, string RefreshToken);

@@ -1,5 +1,6 @@
 ﻿using Light.Identity.EntityFrameworkCore;
 using Monolith.Database;
+using Monolith.Identity.Models;
 
 namespace Monolith.Identity.Data;
 
@@ -9,6 +10,8 @@ public class AppIdentityDbContext(
     DbContextOptions<AppIdentityDbContext> options) :
     IdentityContext(options)
 {
+    public virtual DbSet<Notification> Notifications => Set<Notification>();
+
     public override int SaveChanges()
     {
         this.AuditEntries(currentUser.UserId, clock.Now, false);
@@ -24,5 +27,7 @@ public class AppIdentityDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<Notification>().ToTable(name: "Notifications", Schemas.System);
     }
 }

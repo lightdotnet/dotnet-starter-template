@@ -14,6 +14,9 @@ namespace PostgreSQL.Identity
             migrationBuilder.EnsureSchema(
                 name: "Identity");
 
+            migrationBuilder.EnsureSchema(
+                name: "System");
+
             migrationBuilder.CreateTable(
                 name: "JwtTokens",
                 schema: "Identity",
@@ -32,6 +35,29 @@ namespace PostgreSQL.Identity
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_JwtTokens", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                schema: "System",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    FromUserId = table.Column<string>(type: "text", nullable: false),
+                    FromName = table.Column<string>(type: "text", nullable: true),
+                    ToUserId = table.Column<string>(type: "text", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Message = table.Column<string>(type: "text", nullable: true),
+                    Url = table.Column<string>(type: "text", nullable: true),
+                    ReadStatus = table.Column<bool>(type: "boolean", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<string>(type: "text", nullable: true),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -264,6 +290,10 @@ namespace PostgreSQL.Identity
             migrationBuilder.DropTable(
                 name: "JwtTokens",
                 schema: "Identity");
+
+            migrationBuilder.DropTable(
+                name: "Notifications",
+                schema: "System");
 
             migrationBuilder.DropTable(
                 name: "RoleClaims",
