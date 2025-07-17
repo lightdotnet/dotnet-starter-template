@@ -28,6 +28,11 @@ To create module projects template:
 dotnet new mm -n YourModuleName
 ```
 
+To create module projects with clean architecture template:
+```bash
+dotnet new ca-mm -n YourModuleName
+```
+
 ## Migrate data with DB Provider before run:
 PostgreSQL
 ```bash
