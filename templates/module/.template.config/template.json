@@ -4,7 +4,7 @@
   "classifications": [ "AspNetCore", "Web" ],
   "identity": "Modular.Monolith.Project.CSharp",
   "groupIdentity": "Modular.Monolith.Project",
-  "name": "Modular Monolith Project",
+  "name": "Module Projects",
   "shortName": "mm",
   "tags": {
     "language": "C#",

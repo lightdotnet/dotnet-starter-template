@@ -2,9 +2,9 @@
   "$schema": "http://json.schemastore.org/template",
   "author": "minhvu",
   "classifications": [ "AspNetCore", "Web" ],
-  "identity": "Modular.Monolith.Clean.Architech.Project.CSharp",
-  "groupIdentity": "Modular.Monolith.Clean.Architech.Project",
-  "name": "Modular Monolith Clean Architech Project",
+  "identity": "Clean.Architecture.Modular.Monolith.Project.CSharp",
+  "groupIdentity": "Clean.Architecture.Modular.Monolith.Project",
+  "name": "Clean Architecture Module Projects",
   "shortName": "ca-mm",
   "tags": {
     "language": "C#",
