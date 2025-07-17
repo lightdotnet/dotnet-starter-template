@@ -12,6 +12,7 @@
 * Redis
 * RabbitMQ
 
+## Getting Started
 The easiest way to get started is to install the [.NET template](https://www.nuget.org/packages/ModularMonolith.Solution.Template):
 ```bash
 dotnet new install ModularMonolith.Solution.Template
@@ -27,7 +28,7 @@ To create module projects template:
 dotnet new mm -n YourModuleName
 ```
 
-Migrate data with DB Provider before run:
+## Migrate data with DB Provider before run:
 PostgreSQL
 ```bash
 dotnet run -p src\Migrations\PostgreSQL\PostgreSQL.csproj
