@@ -7,8 +7,10 @@
   <ItemGroup>
     <!-- Core -->
     <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="$(AspnetVersion)" />
@@ -42,6 +44,9 @@
     <!-- WebUI -->
     <PackageVersion Include="Lightsoft.Blazor" Version="0.0.0.1-beta3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="$(AspnetVersion)" />
+	<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(AspnetVersion)" />
+	<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="$(AspnetVersion)" />
+	<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.12.0" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.12.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
