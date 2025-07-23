@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Monolith.Identity.Controllers;
+namespace Monolith.Features.Identity;
 
 [MustHavePermission(Permissions.Roles.View)]
 public class RoleController(IRoleService roleService) : ApiControllerBase

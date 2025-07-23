@@ -1,6 +1,6 @@
-﻿namespace Monolith.Identity;
+﻿namespace Monolith.Identity.Jwt;
 
-public interface ILoginService
+public interface ITokenService
 {
     Task<IResult<TokenDto>> GetTokenAsync(
         string username, string password,

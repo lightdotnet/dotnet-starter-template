@@ -2,7 +2,7 @@
 using Light.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Monolith.Identity.Controllers;
+namespace Monolith.Features.Identity;
 
 /// <summary>
 /// move to other controller for current_user can get data when login without permission
