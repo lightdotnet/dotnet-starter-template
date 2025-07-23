@@ -1,8 +1,12 @@
 ﻿using Light.AspNetCore.Middlewares;
+using Light.Extensions.DependencyInjection;
+using Light.Identity.EntityFrameworkCore;
 using Light.Mediator;
+using Microsoft.AspNetCore.Identity;
 using Monolith.BlazorApp.Services;
 using Monolith.Identity;
 using Monolith.Identity.Notifications.SignalR;
+using Monolith.Modularity;
 using System.Reflection;
 
 namespace Monolith.BlazorApp;
@@ -22,6 +26,7 @@ public static class ConfigureExtensions
         services.AddMediatorFromAssemblies(assemblies);
         services.AddBehaviors(typeof(ValidationBehaviour<,>));
         services.AddOptions<RequestLoggingOptions>().BindConfiguration("RequestLogging");
+        services.AddModules<AppModule>(configuration, assemblies);
 
         services.AddInfrastructureServices();
         services.AddHealthChecks();
@@ -29,6 +34,9 @@ public static class ConfigureExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, ServerCurrentUser>();
         services.AddPermissions();
+
+        // custom Claims for Identity user
+        services.AddScoped<IUserClaimsPrincipalFactory<User>, AppUserClaimsPrincipalFactory>();
 
         return services;
     }

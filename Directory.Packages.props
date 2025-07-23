@@ -29,7 +29,7 @@
     <PackageVersion Include="Lightsoft.EventBus.MassTransit.RabbitMQ" Version="0.0.1" />
     <PackageVersion Include="Lightsoft.FileGenerator" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.Identity" Version="9.0.7.5" />
-    <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.7.5" />
+    <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.7.7" />
     <PackageVersion Include="Lightsoft.Mail.Contracts" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.Result" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.Serilog" Version="1.0.0" />
@@ -44,9 +44,9 @@
     <!-- WebUI -->
     <PackageVersion Include="Lightsoft.Blazor" Version="0.0.0.1-beta3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="$(AspnetVersion)" />
-	<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(AspnetVersion)" />
-	<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="$(AspnetVersion)" />
-	<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.12.0" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.12.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />

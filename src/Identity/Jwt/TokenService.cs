@@ -2,18 +2,17 @@
 using Light.Identity.EntityFrameworkCore;
 using Light.Identity.Extensions;
 using Light.Identity.Models;
-using Light.Identity.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using ClaimTypes = Light.Identity.ClaimTypes;
 
-namespace Monolith.Identity;
+namespace Monolith.Identity.Jwt;
 
-internal class LoginService(
+internal class TokenService(
     IOptions<JwtOptions> jwtOptions,
     JwtTokenMananger jwtTokenMananger,
-    IActiveDirectoryService domainService) : ILoginService
+    IActiveDirectoryService domainService) : ITokenService
 {
     private readonly UserManager<User> _userManager = jwtTokenMananger.UserManager;
 

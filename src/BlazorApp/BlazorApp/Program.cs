@@ -1,74 +1,88 @@
 global using Light.Identity.Models;
 global using Monolith.Identity.Data;
-using Monolith.BlazorApp.Components;
+using Light.Serilog;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Monolith;
 using Monolith.BlazorApp;
+using Monolith.BlazorApp.Components;
 using Monolith.BlazorApp.Components.Account;
+using Serilog;
+using Spectre.Console;
 
-var builder = WebApplication.CreateBuilder(args);
+AnsiConsole.Write(new FigletText("Blazor App").Color(Color.Purple));
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents()
-    .AddAuthenticationStateSerialization();
+StaticLogger.EnsureInitialized();
 
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthentication(options =>
+    builder.Host.ConfigureSerilog();
+
+    // Add services to the container.
+    builder.Services.AddRazorComponents()
+        .AddInteractiveServerComponents()
+        .AddInteractiveWebAssemblyComponents()
+        .AddAuthenticationStateSerialization();
+
+    builder.Services.AddCascadingAuthenticationState();
+    builder.Services.AddScoped<IdentityUserAccessor>();
+    builder.Services.AddScoped<IdentityRedirectManager>();
+    builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+    builder.Services
+        .AddAuthentication(options =>
+        {
+            options.DefaultScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+        })
+        .AddIdentityCookies();
+
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+    builder.Services.ConfigureServices(builder.Configuration);
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
     {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
+        app.UseWebAssemblyDebugging();
+        app.UseMigrationsEndPoint();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<AppIdentityDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+    app.UseHttpsRedirection();
 
-builder.Services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddRoles<Role>()
-    .AddEntityFrameworkStores<AppIdentityDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
+    app.UseAntiforgery();
 
-builder.Services.ConfigureServices(builder.Configuration);
+    app.MapStaticAssets();
+    app.MapRazorComponents<App>()
+        .AddInteractiveServerRenderMode()
+        .AddInteractiveWebAssemblyRenderMode()
+        .AddAdditionalAssemblies(typeof(Monolith.BlazorApp.Client._Imports).Assembly);
 
-var app = builder.Build();
+    // Add additional endpoints required by the Identity /Account Razor components.
+    app.MapAdditionalIdentityEndpoints();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseWebAssemblyDebugging();
-    app.UseMigrationsEndPoint();
+    app.Run();
 }
-else
+catch (Exception ex) when (!ex.GetType().Name.Equals("StopTheHostException", StringComparison.Ordinal))
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    StaticLogger.EnsureInitialized();
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.Information("Shut down complete.");
+    Log.CloseAndFlush();
 }
 
-app.UseHttpsRedirection();
-
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Monolith.BlazorApp.Client._Imports).Assembly);
-
-// Add additional endpoints required by the Identity /Account Razor components.
-app.MapAdditionalIdentityEndpoints();
-
-app.Run();

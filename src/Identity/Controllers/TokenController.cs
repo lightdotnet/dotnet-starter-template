@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Monolith.Identity.Jwt;
 
 namespace Monolith.Identity.Controllers;
 
 [AllowAnonymous]
 [Route("api/v{version:apiVersion}/oauth")]
-public class TokenController(ILoginService loginService) : ApiControllerBase
+public class TokenController(ITokenService loginService) : ApiControllerBase
 {
     [HttpPost("token/get")]
     public async Task<IActionResult> GetToken(

@@ -10,12 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Identity\Identity.csproj" />
-    <ProjectReference Include="..\BlazorApp.Client\BlazorApp.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+	<PackageReference Include="Spectre.Console" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\..\Identity\Identity.csproj" />
+	<ProjectReference Include="..\BlazorApp.Client\BlazorApp.Client.csproj" />
   </ItemGroup>
 
 </Project>
