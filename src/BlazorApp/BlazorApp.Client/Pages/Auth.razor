@@ -10,4 +10,11 @@
 
 <AuthorizeView>
     Hello @context.User.Identity?.Name!
+    <br />
+    <br />
+    @foreach (var claim in context.User.Claims)
+    {
+        <b>@claim.Type: @claim.Value</b>
+        <br />
+    }
 </AuthorizeView>
