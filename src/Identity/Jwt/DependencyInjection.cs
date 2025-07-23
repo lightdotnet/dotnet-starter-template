@@ -6,19 +6,17 @@ namespace Monolith.Identity.Jwt;
 
 public static class DependencyInjection
 {
-    public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
+    public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var sectionName = "Jwt";
-
         // Override by BindConfiguration
+        var sectionName = "Jwt";
         services.AddOptions<JwtOptions>().BindConfiguration(sectionName);
-        services.AddJwtTokenProvider();
+        var jwtSettings = configuration.GetSection(sectionName).Get<JwtOptions>();
+        ArgumentNullException.ThrowIfNull(jwtSettings, nameof(JwtOptions));
 
         services.AddScoped<ITokenService, TokenService>();
 
         // add JWT Auth
-        var jwtSettings = configuration.GetSection(sectionName).Get<JwtOptions>();
-        ArgumentNullException.ThrowIfNull(jwtSettings, nameof(JwtOptions));
         services.AddJwtAuth(jwtSettings.Issuer, jwtSettings.SecretKey, ClaimTypes.Role); // inject this for use jwt auth
     }
 }

@@ -8,6 +8,7 @@ using Light.AspNetCore.Swagger;
 using Light.Mediator;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Monolith.Identity;
+using Monolith.Identity.Jwt;
 using Monolith.Identity.Notifications.SignalR;
 using Monolith.Modularity;
 using Monolith.Services;
@@ -22,7 +23,6 @@ public static class ConfigureExtensions
     private static readonly Assembly[] assemblies =
         [
             typeof(Program).Assembly,
-            typeof(IdentityModule).Assembly,
             typeof(SignalRModule).Assembly,
         ];
 

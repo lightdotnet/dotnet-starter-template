@@ -18,7 +18,6 @@ internal class TokenService(
 
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
-
     public async Task<IResult<TokenDto>> GetTokenAsync(
         string username, string password,
         string? deviceId = null, string? deviceName = null)

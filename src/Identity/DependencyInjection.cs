@@ -4,20 +4,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Monolith.Database;
 using Monolith.Identity.Data;
-using Monolith.Identity.Jwt;
-using Monolith.Modularity;
 
 namespace Monolith.Identity;
 
-public class IdentityModule : AppModule
+public static class DependencyInjection
 {
-    public override void Add(IServiceCollection services, IConfiguration configuration)
+    public static IdentityBuilder AddIdentityModule(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<AppIdentityDbContext>(configuration, DbConnectionNames.IDENTITY);
-        
-        services.AddJwt(configuration);
+        AddActiveDirectory(services, configuration);
 
-        services
+        services.AddDbContext<AppIdentityDbContext>(configuration, DbConnectionNames.IDENTITY);
+
+        var identityBuilder = services
             .AddIdentity<AppIdentityDbContext>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = false;
@@ -38,6 +36,13 @@ public class IdentityModule : AppModule
             })
             .AddDefaultTokenProviders();
 
+        services.AddJwtTokenProvider();
+
+        return identityBuilder;
+    }
+
+    private static void AddActiveDirectory(IServiceCollection services, IConfiguration configuration)
+    {
         // connect to AD
         var domainName = configuration.GetValue<string>("MemberOfDomain");
         if (!string.IsNullOrEmpty(domainName))
