@@ -1,7 +1,8 @@
 ﻿using Light.ActiveDirectory.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Monolith.Identity;
 
-namespace Monolith.Identity.Controllers;
+namespace Monolith.Features.Identity;
 
 [MustHavePermission(Permissions.Users.View)]
 public class UserController(
@@ -40,7 +41,7 @@ public class UserController(
     {
         if (id != request.Id)
         {
-            return Ok(Result.Error("Validate User ID not match"));
+            return Ok(Light.Contracts.Result.Error("Validate User ID not match"));
         }
 
         return Ok(await userService.UpdateAsync(request));
