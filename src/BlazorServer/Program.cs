@@ -1,62 +1,86 @@
+using Light.FluentBlazor;
+using Light.Serilog;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.FluentUI.AspNetCore.Components;
+using Monolith;
 using Monolith.BlazorServer;
 using Monolith.BlazorServer.Components;
 using Monolith.BlazorServer.Components.Account;
-using Light.FluentBlazor;
+using Serilog;
+using Spectre.Console;
 
-var builder = WebApplication.CreateBuilder(args);
+AnsiConsole.Write(new FigletText("Blazor Server").Color(Color.Purple));
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+StaticLogger.EnsureInitialized();
 
-builder.Services.AddFluentBlazorExtraComponents();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+    builder.Host.ConfigureSerilog();
 
-builder.Services.AddAuthentication(options =>
+    // Add services to the container.
+    builder.Services.AddRazorComponents()
+        .AddInteractiveServerComponents();
+
+    builder.Services.AddFluentBlazorExtraComponents();
+
+    builder.Services.AddCascadingAuthenticationState();
+    builder.Services.AddScoped<IdentityUserAccessor>();
+    builder.Services.AddScoped<IdentityRedirectManager>();
+    builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+    builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
-    .AddIdentityCookies();
+        .AddIdentityCookies();
 
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.ConfigureServices(builder.Configuration);
+    builder.Services.ConfigureServices(builder.Configuration);
 
-builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
+    builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
-var app = builder.Build();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseMigrationsEndPoint();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseAntiforgery();
+
+    app.ConfigurePipelines();
+
+    app.MapStaticAssets();
+    app.MapRazorComponents<App>()
+        .AddInteractiveServerRenderMode();
+
+    // Add additional endpoints required by the Identity /Account Razor components.
+    app.MapAdditionalIdentityEndpoints();
+
+    app.Run();
 }
-else
+catch (Exception ex) when (!ex.GetType().Name.Equals("StopTheHostException", StringComparison.Ordinal))
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    StaticLogger.EnsureInitialized();
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.Information("Shut down complete.");
+    Log.CloseAndFlush();
 }
 
-app.UseHttpsRedirection();
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-// Add additional endpoints required by the Identity /Account Razor components.
-app.MapAdditionalIdentityEndpoints();
-
-app.Run();
