@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -18,9 +19,9 @@ namespace Sqlite.Catalog
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Disable = table.Column<bool>(type: "INTEGER", nullable: false),
                     SubOfId = table.Column<string>(type: "TEXT", maxLength: 450, nullable: true),
-                    Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Created = table.Column<long>(type: "INTEGER", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    LastModified = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    LastModified = table.Column<long>(type: "INTEGER", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -38,9 +39,9 @@ namespace Sqlite.Catalog
                     Price = table.Column<decimal>(type: "TEXT", nullable: false),
                     StartingDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndingDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Created = table.Column<long>(type: "INTEGER", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    LastModified = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    LastModified = table.Column<long>(type: "INTEGER", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -77,9 +78,9 @@ namespace Sqlite.Catalog
                     CategoryId = table.Column<string>(type: "TEXT", maxLength: 450, nullable: false),
                     ImageUrl = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
                     Tags = table.Column<string>(type: "TEXT", nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Created = table.Column<long>(type: "INTEGER", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    LastModified = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    LastModified = table.Column<long>(type: "INTEGER", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -100,9 +101,9 @@ namespace Sqlite.Catalog
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     ProductId = table.Column<string>(type: "TEXT", maxLength: 450, nullable: false),
                     ImageUrl = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Created = table.Column<long>(type: "INTEGER", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    LastModified = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    LastModified = table.Column<long>(type: "INTEGER", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

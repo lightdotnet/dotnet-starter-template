@@ -29,5 +29,7 @@ public class AppIdentityDbContext(
         base.OnModelCreating(builder);
 
         builder.Entity<Notification>().ToTable(name: "Notifications", Schemas.System);
+
+        Database.FixDateTimeOffsetSqlite(builder);
     }
 }

@@ -22,8 +22,8 @@ namespace Sqlite.Catalog
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("Created")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
@@ -31,8 +31,8 @@ namespace Sqlite.Catalog
                     b.Property<bool>("Disable")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset?>("LastModified")
-                        .HasColumnType("TEXT");
+                    b.Property<long?>("LastModified")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
@@ -64,8 +64,8 @@ namespace Sqlite.Catalog
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("Created")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
@@ -78,8 +78,8 @@ namespace Sqlite.Catalog
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("LastModified")
-                        .HasColumnType("TEXT");
+                    b.Property<long?>("LastModified")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
@@ -110,8 +110,8 @@ namespace Sqlite.Catalog
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("Created")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
@@ -121,8 +121,8 @@ namespace Sqlite.Catalog
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("LastModified")
-                        .HasColumnType("TEXT");
+                    b.Property<long?>("LastModified")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
@@ -144,8 +144,8 @@ namespace Sqlite.Catalog
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("Created")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
@@ -153,8 +153,8 @@ namespace Sqlite.Catalog
                     b.Property<DateTime?>("EndingDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset?>("LastModified")
-                        .HasColumnType("TEXT");
+                    b.Property<long?>("LastModified")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
