@@ -1,5 +1,7 @@
 ﻿@page "/Account/Login"
 
+@attribute [AllowAnonymous]
+
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
@@ -11,42 +13,51 @@
 
 <PageTitle>Log in</PageTitle>
 
-<h1>Log in</h1>
-<FluentGrid>
-    <FluentGridItem xs="8" sm="4">
-        <StatusMessage Message="@errorMessage" />
-        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-            <DataAnnotationsValidator />
-            <h2>Use a local account to log in.</h2>
-            <hr />
-            <FluentValidationSummary class="text-danger" role="alert" />
-            <FluentStack Orientation="Orientation.Vertical">
-                <FluentTextField Name="Input.Username" @bind-Value="Input.Username" AutoComplete="username" Required="true" Placeholder="name@example.com" Label="Email" Style="width: 100%" />
-                <FluentValidationMessage For="() => Input.Username" class="text-danger" />
-                <FluentTextField type="password" Name="Input.Password" @bind-Value="Input.Password" AutoComplete="current-password" Required="true" Placeholder="password" Label="Password" Style="width: 100%" />
-                <FluentValidationMessage For="() => Input.Password" class="text-danger" />
-                <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" />
-                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in</FluentButton>
-                <div>
-                    <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ForgotPassword">Forgot your password?</FluentAnchor>
-                    </p>
-                    <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</FluentAnchor>
-                    </p>
-                    <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ResendEmailConfirmation">Resend email confirmation</FluentAnchor>
-                    </p>
-                </div>
-            </FluentStack>
-        </EditForm>
-    </FluentGridItem>
-    <FluentGridItem xs="12" sm="8">
-        <h3>Use another service to log in.</h3>
-        <hr />
-        <ExternalLoginPicker />
-    </FluentGridItem>
-</FluentGrid>
+<FluentStack Orientation="Orientation.Vertical"
+             HorizontalAlignment="HorizontalAlignment.Center"
+             VerticalAlignment="VerticalAlignment.Center"
+             VerticalGap="20" Style="height: 100vh;">
+
+    <div class="d-flex flex-column" style="max-width: 450px">
+        @if (processing is false)
+        {
+            <Card>
+                <StatusMessage Message="@errorMessage" />
+                <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <h2>Use a local account to log in.</h2>
+                    <hr />
+                    <FluentValidationSummary class="text-danger" role="alert" />
+                    <FluentStack Orientation="Orientation.Vertical">
+                        <FluentTextField Name="Input.Username" @bind-Value="Input.Username" AutoComplete="username" Required="true" Placeholder="username" Label="Username" Style="width: 100%" />
+                        <FluentValidationMessage For="() => Input.Username" class="text-danger" />
+                        <FluentTextField type="password" Name="Input.Password" @bind-Value="Input.Password" AutoComplete="current-password" Required="true" Placeholder="password" Label="Password" Style="width: 100%" />
+                        <FluentValidationMessage For="() => Input.Password" class="text-danger" />
+                        <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" />
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%" Disabled=@processing>Log in</FluentButton>
+                        <div>
+                            <p>
+                                <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ForgotPassword">Forgot your password?</FluentAnchor>
+                            </p>
+                            <p>
+                                <FluentAnchor Appearance="Appearance.Hypertext" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</FluentAnchor>
+                            </p>
+                            <p>
+                                <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ResendEmailConfirmation">Resend email confirmation</FluentAnchor>
+                            </p>
+                        </div>
+                    </FluentStack>
+                </EditForm>
+            </Card>
+
+            <Card Class="mt-5">
+                <h3>Use another service to log in.</h3>
+                <hr />
+                <ExternalLoginPicker />
+            </Card>
+        }
+    </div>
+</FluentStack>
 
 @code {
     private string? errorMessage;
@@ -60,6 +71,8 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
+    private bool processing;
+
     protected override async Task OnInitializedAsync()
     {
         if (HttpMethods.IsGet(HttpContext.Request.Method))
@@ -71,6 +84,8 @@
 
     public async Task LoginUser()
     {
+        ToggleState();
+
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
         var result = await SignInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, lockoutOnFailure: false);
@@ -94,6 +109,14 @@
         {
             errorMessage = "Error: Invalid login attempt.";
         }
+
+        ToggleState();
+    }
+
+    private void ToggleState()
+    {
+        processing = !processing;
+        StateHasChanged();
     }
 
     private sealed class InputModel
