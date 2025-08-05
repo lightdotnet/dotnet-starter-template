@@ -58,7 +58,8 @@ public static class ConfigureExtensions
 
     public static WebApplication ConfigurePipelines(this WebApplication app)
     {
-        app.UseUlidTraceId()
+        app
+            .UseUlidTraceId()
             .UseLightRequestLogging()
             .UseLightExceptionHandler()
             .UseRouting()

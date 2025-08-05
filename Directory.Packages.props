@@ -2,12 +2,13 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
-    <AspnetVersion>9.0.7</AspnetVersion>
+    <AspnetVersion>9.0.8</AspnetVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Core -->
     <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(AspnetVersion)" />

@@ -12,6 +12,7 @@ public static class DbContextExtensions
         InMemory = 0,
         PostgreSQL = 1,
         MSSQL = 2,
+        Sqlite = 3,
     }
 
     public static DbProvider GetDbProvider(this IConfiguration configuration) =>
@@ -28,6 +29,8 @@ public static class DbContextExtensions
                 builder.UseNpgsql(connectionString).EnableSensitiveDataLogging(),
             DbProvider.MSSQL =>
                 builder.UseSqlServer(connectionString),
+            DbProvider.Sqlite =>
+                builder.UseSqlite(connectionString),
             _ => throw new InvalidOperationException($"DB Provider {dbProvider} is not supported."),
         };
     }
