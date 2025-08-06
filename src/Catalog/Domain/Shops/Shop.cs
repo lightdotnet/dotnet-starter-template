@@ -1,6 +1,6 @@
 ﻿namespace Monolith.Domain.Shops;
 
-public class Shop : EntityBase
+public class Shop : AuditableEntity
 {
     public string Name { get; set; } = null!;
 

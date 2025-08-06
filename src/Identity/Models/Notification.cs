@@ -1,6 +1,6 @@
 ﻿namespace Monolith.Identity.Models;
 
-public class Notification : Light.Domain.Entities.AuditableEntity
+public class Notification : AuditableEntity
 {
     public string FromUserId { get; set; } = null!;
 

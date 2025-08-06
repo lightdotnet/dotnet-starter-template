@@ -2,7 +2,7 @@
 
 namespace Monolith.Domain.Products;
 
-public class Product : EntityBase
+public class Product : AuditableEntity
 {
     public string ShopId { get; set; } = null!;
 

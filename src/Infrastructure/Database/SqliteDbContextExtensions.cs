@@ -12,7 +12,13 @@ public static class SqliteDbContextExtensions
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                foreach (var property in entityType.GetProperties())
+                var dateTimeOffsetProps = entityType
+                    .GetProperties()
+                    .Where(p =>
+                        p.ClrType == typeof(DateTimeOffset)
+                        || p.ClrType == typeof(DateTimeOffset?));
+
+                foreach (var property in dateTimeOffsetProps)
                 {
                     if (property.ClrType == typeof(DateTimeOffset))
                     {
