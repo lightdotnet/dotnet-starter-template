@@ -42,6 +42,10 @@ MSSQL
 ```bash
 dotnet run -p src\Migrations\MSSQL\MSSQL.csproj
 ```
+Sqlite (copy Seed.db to WebApi project after migrate)
+```bash
+dotnet run -p src\Migrations\Sqlite\Sqlite.csproj
+```
 Or use In Memory Database, you will need to update WebApi/appsettings.json as follows:
 ```json
   "DbProvider": "InMemory",

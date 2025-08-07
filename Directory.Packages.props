@@ -2,13 +2,14 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
-    <AspnetVersion>9.0.7</AspnetVersion>
+    <AspnetVersion>9.0.8</AspnetVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Core -->
     <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(AspnetVersion)" />
@@ -18,22 +19,22 @@
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="$(AspnetVersion)" />
     <PackageVersion Include="System.Text.Encodings.Web" Version="$(AspnetVersion)" />
     <!-- Light framework -->
-    <PackageVersion Include="Lightsoft.ActiveDirectory" Version="1.0.0.0" />
-    <PackageVersion Include="Lightsoft.AspNetCore.Extensions" Version="9.0.7.2" />
+    <PackageVersion Include="Lightsoft.ActiveDirectory" Version="1.0.0.1" />
+    <PackageVersion Include="Lightsoft.AspNetCore.Extensions" Version="9.0.8" />
     <PackageVersion Include="Lightsoft.AspNetCore.Modularity" Version="0.0.0.7" />
-    <PackageVersion Include="Lightsoft.AspNetCore.Swagger" Version="9.0.7.2" />
+    <PackageVersion Include="Lightsoft.AspNetCore.Swagger" Version="9.0.8" />
     <PackageVersion Include="Lightsoft.Caching" Version="9.0.7.2" />
     <PackageVersion Include="Lightsoft.EntityFrameworkCore" Version="9.0.7.1" />
     <PackageVersion Include="Lightsoft.Extensions" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.EventBus" Version="0.0.1" />
     <PackageVersion Include="Lightsoft.EventBus.MassTransit.RabbitMQ" Version="0.0.1" />
-    <PackageVersion Include="Lightsoft.FileGenerator" Version="1.0.0" />
-    <PackageVersion Include="Lightsoft.Identity" Version="9.0.7.7" />
-    <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.7.7" />
+    <PackageVersion Include="Lightsoft.FileGenerator" Version="1.0.0.1" />
+    <PackageVersion Include="Lightsoft.Identity" Version="9.0.8.2" />
+    <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.8.2" />
     <PackageVersion Include="Lightsoft.Mail.Contracts" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.Result" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.Serilog" Version="1.0.0" />
-    <PackageVersion Include="Lightsoft.SharedKernel" Version="1.0.0.0" />
+    <PackageVersion Include="Lightsoft.SharedKernel" Version="1.0.0.3" />
     <!-- Miscellaneous -->
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageVersion Include="FluentValidation" Version="12.0.0" />

@@ -2,7 +2,7 @@
 
 namespace Monolith.Domain.Categories;
 
-public class Category : EntityBase
+public class Category : AuditableEntity
 {
     public string Name { get; set; } = null!;
 

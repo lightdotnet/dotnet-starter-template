@@ -1,6 +1,6 @@
 ﻿namespace Monolith.Domain.Products;
 
-public class ProductPrice : EntityBase
+public class ProductPrice : AuditableEntity
 {
     public ProductPriceType Type { get; set; }
 

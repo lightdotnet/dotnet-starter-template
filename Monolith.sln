@@ -40,6 +40,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorServer", "src\BlazorS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.FluentBlazor.Extra", "src\Blazor.FluentBlazor.Extra\Blazor.FluentBlazor.Extra.csproj", "{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sqlite", "src\Migrations\Sqlite\Sqlite.csproj", "{3AE17DC2-7CF7-D8D5-8AA0-5BE9EC859CF3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,10 @@ Global
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AE17DC2-7CF7-D8D5-8AA0-5BE9EC859CF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE17DC2-7CF7-D8D5-8AA0-5BE9EC859CF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE17DC2-7CF7-D8D5-8AA0-5BE9EC859CF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE17DC2-7CF7-D8D5-8AA0-5BE9EC859CF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -102,6 +108,7 @@ Global
 		{1B0A04C3-E6BC-0FB7-7994-7C99BDAB1788} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{C18B80E4-8F0A-48B3-AE4E-CB8CE876F1D5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3AE17DC2-7CF7-D8D5-8AA0-5BE9EC859CF3} = {A1796537-F8D6-4E17-A64E-2504A62272EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C46F8D43-2A20-4831-9E83-E42588CB9D7D}

@@ -1,6 +1,6 @@
 ﻿namespace Monolith.Domain.Products;
 
-public class ProductImage : EntityBase
+public class ProductImage : AuditableEntity
 {
     public string ProductId { get; set; } = null!;
 

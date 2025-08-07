@@ -8,7 +8,7 @@ namespace Monolith.Infrastructure.Data;
 public class CatalogContext(
     ICurrentUser currentUser,
     IDateTime clock,
-    DbContextOptions<CatalogContext> options) : DbContext(options)
+    DbContextOptions<CatalogContext> options) : BaseDbContext(options)
 {
     public virtual DbSet<Category> Categories => Set<Category>();
 

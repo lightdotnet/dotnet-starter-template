@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Monolith.Database;
 
-public static class AuditExtensions
+public static class TrackingExtensions
 {
     public static void AuditEntries<TContext>(this TContext context, string? userId, DateTimeOffset auditTime, bool enableSoftDelete = false)
         where TContext : DbContext
@@ -31,29 +31,38 @@ public static class AuditExtensions
                 });
         }
 
-        // auto set LastModified for Entities inherited IModified
-        changeTracker.Entries<IModified>()
-            .Where(x => x.State is EntityState.Modified)
-            .ToList()
-            .ForEach(e =>
-            {
-                e.Entity.LastModified = auditTime;
-                e.Entity.LastModifiedBy = userId;
-            });
-
-        // auto set Created & LastModified for Entities inherited ICreated
-        changeTracker.Entries<ICreated>()
+        // tracking creation time for Entities inherited IHasCreationTime
+        changeTracker.Entries<IHasCreationTime>()
             .Where(x => x.State is EntityState.Added)
             .ToList()
             .ForEach(e =>
             {
                 e.Entity.Created = auditTime;
-                e.Entity.CreatedBy = userId;
+            });
 
-                if (e.Entity is IModified modified)
+        // tracking modification time for Entities inherited IHasModificationTime
+        changeTracker.Entries<IHasModificationTime>()
+            .Where(x => x.State is EntityState.Modified)
+            .ToList()
+            .ForEach(e =>
+            {
+                e.Entity.LastModified = auditTime;
+            });
+
+        // tracking users actions for Entities inherited IHasAuditUser
+        changeTracker.Entries<IHasAuditUser>()
+            .Where(x => x.State is EntityState.Added or EntityState.Modified)
+            .ToList()
+            .ForEach(e =>
+            {
+                switch (e.State)
                 {
-                    modified.LastModified = auditTime;
-                    modified.LastModifiedBy = userId;
+                    case EntityState.Added:
+                        e.Entity.CreatedBy = userId;
+                        break;
+                    case EntityState.Modified:
+                        e.Entity.LastModifiedBy = userId;
+                        break;
                 }
             });
     }

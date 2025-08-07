@@ -53,7 +53,7 @@ public class IdentityContextInitialiser(
             logger.LogInformation("Role {name} added", role.Name);
         }
 
-        var user = new User()
+        var superUser = new User()
         {
             UserName = "super",
             FirstName = "Super",
@@ -62,27 +62,34 @@ public class IdentityContextInitialiser(
 
         var defaultPassword = "123";
 
-        if (userManager.Users.All(u => u.UserName != user.UserName))
+        if (userManager.Users.All(u => u.UserName != superUser.UserName))
         {
-            await userManager.CreateAsync(user, defaultPassword);
+            await userManager.CreateAsync(superUser, defaultPassword);
 
-            logger.LogInformation("User {name} added", user.UserName);
+            logger.LogInformation("User {name} added", superUser.UserName);
 
-            await userManager.AddToRolesAsync(user, [role.Name!]);
+            await userManager.AddToRolesAsync(superUser, [role.Name!]);
 
-            logger.LogInformation("Assigned role {role} to user {user}", role.Name, user.UserName);
+            logger.LogInformation("Assigned role {role} to user {user}", role.Name, superUser.UserName);
         }
+
+        await userManager.CreateAsync(new User
+        {
+            UserName = "user",
+            FirstName = "Normal",
+            LastName = "User",
+        }, defaultPassword);
 
         for (var i = 1; i < 50; i++)
         {
-            var normalUser = new User()
+            var user = new User()
             {
                 UserName = $"user{i}",
                 FirstName = $"User",
                 LastName = $"00{i}",
             };
 
-            await userManager.CreateAsync(normalUser, defaultPassword);
+            await userManager.CreateAsync(user, defaultPassword);
         }
     }
 }
