@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Monolith.Domain.Products;
+using Monolith.Catalog.Domain.Products;
 
-namespace Monolith.Infrastructure.Data.EntityConfigurations;
+namespace Monolith.Catalog.Infrastructure.Data.EntityConfigurations;
 
 internal class ProductConfiguration : IEntityTypeConfiguration<Product>
 {

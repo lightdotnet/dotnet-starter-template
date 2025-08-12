@@ -1,4 +1,4 @@
-﻿namespace Monolith.Domain.Products;
+﻿namespace Monolith.Catalog.Domain.Products;
 
 internal class ProductByIdSpec : Specification<Product>
 {

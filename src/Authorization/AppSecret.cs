@@ -1,5 +1,8 @@
 ﻿namespace Monolith;
 
+/// <summary>
+/// Default user with full permissions.
+/// </summary>
 public abstract class DefaultUser
 {
     public const string USER_NAME = "super";

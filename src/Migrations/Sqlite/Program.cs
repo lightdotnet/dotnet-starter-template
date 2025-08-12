@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Monolith.Catalog.Infrastructure.Data.SeedWork;
 using Monolith.Identity.Data;
-using Monolith.Infrastructure.Data.SeedWork;
 using Sqlite;
 
 // set Environment

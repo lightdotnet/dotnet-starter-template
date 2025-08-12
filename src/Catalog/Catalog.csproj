@@ -4,11 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Monolith</RootNamespace>
+    <RootNamespace>Monolith.Catalog</RootNamespace>
     <AssemblyName>Monolith.Catalog</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Api.Contracts\Api.Contracts.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 

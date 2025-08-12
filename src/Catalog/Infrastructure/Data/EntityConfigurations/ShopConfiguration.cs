@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Monolith.Domain.Shops;
+using Monolith.Catalog.Domain.Shops;
 
-namespace Monolith.Infrastructure.Data.EntityConfigurations;
+namespace Monolith.Catalog.Infrastructure.Data.EntityConfigurations;
 
 internal class ShopConfiguration : IEntityTypeConfiguration<Shop>
 {

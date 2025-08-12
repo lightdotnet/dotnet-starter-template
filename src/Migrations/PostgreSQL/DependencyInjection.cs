@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Monolith;
+using Monolith.Catalog.Infrastructure.Data;
+using Monolith.Catalog.Infrastructure.Data.SeedWork;
 using Monolith.Database;
 using Monolith.Identity.Data;
-using Monolith.Infrastructure.Data;
-using Monolith.Infrastructure.Data.SeedWork;
 using System.Reflection;
 
 namespace PostgreSQL;

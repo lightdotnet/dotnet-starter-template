@@ -1,6 +1,6 @@
-﻿using Monolith.Domain.Products;
+﻿using Monolith.Catalog.Domain.Products;
 
-namespace Monolith.Domain.Categories;
+namespace Monolith.Catalog.Domain.Categories;
 
 public class Category : AuditableEntity
 {

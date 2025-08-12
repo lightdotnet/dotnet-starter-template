@@ -1,4 +1,4 @@
-﻿namespace Monolith.Domain.Categories;
+﻿namespace Monolith.Catalog.Domain.Categories;
 
 internal class CategoryByIdSpec : Specification<Category>
 {

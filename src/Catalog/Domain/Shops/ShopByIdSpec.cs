@@ -1,4 +1,4 @@
-﻿namespace Monolith.Domain.Shops;
+﻿namespace Monolith.Catalog.Domain.Shops;
 
 internal class ShopByIdSpec : Specification<Shop>
 {
