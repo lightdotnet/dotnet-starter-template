@@ -1,6 +1,4 @@
-﻿using Monolith.Domain.Categories;
-
-namespace Monolith.Domain.Products;
+﻿namespace Monolith.Catalog.Domain.Products;
 
 public class Product : AuditableEntity
 {

@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Monolith.Catalog.Domain.Products;
+using Monolith.Catalog.Domain.Shops;
 using Monolith.Database;
-using Monolith.Domain.Categories;
-using Monolith.Domain.Products;
-using Monolith.Domain.Shops;
 
-namespace Monolith.Infrastructure.Data.SeedWork;
+namespace Monolith.Catalog.Infrastructure.Data.SeedWork;
 
 public class CatalogContextInitialiser(
     CatalogContext context,

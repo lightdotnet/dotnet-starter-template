@@ -1,4 +1,4 @@
-﻿namespace Monolith.Domain.Products;
+﻿namespace Monolith.Catalog.Domain.Products;
 
 public class ProductImage : AuditableEntity
 {

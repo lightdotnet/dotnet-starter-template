@@ -7,6 +7,7 @@ using Light.AspNetCore.Middlewares;
 using Light.AspNetCore.Swagger;
 using Light.Mediator;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Monolith.Catalog;
 using Monolith.Identity.Notifications.SignalR;
 using Monolith.Modularity;
 using Monolith.Services;
@@ -22,6 +23,7 @@ public static class ConfigureExtensions
         [
             typeof(Program).Assembly,
             typeof(SignalRModule).Assembly,
+            typeof(CatalogModule).Assembly,
         ];
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)

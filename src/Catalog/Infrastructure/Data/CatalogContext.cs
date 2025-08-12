@@ -1,9 +1,8 @@
-﻿using Monolith.Database;
-using Monolith.Domain.Categories;
-using Monolith.Domain.Products;
+﻿using Monolith.Catalog.Domain.Products;
+using Monolith.Database;
 using System.Reflection;
 
-namespace Monolith.Infrastructure.Data;
+namespace Monolith.Catalog.Infrastructure.Data;
 
 public class CatalogContext(
     ICurrentUser currentUser,
