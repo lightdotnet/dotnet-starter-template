@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ModuleName.Infrastructure</RootNamespace>
+    <AssemblyName>ModuleName.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModuleName.Application\ModuleName.Application.csproj" />
+    <ProjectReference Include="..\ModuleName.Domain\ModuleName.Domain.csproj" />
+	<ProjectReference Include="..\Monolith.Infrastructure\Monolith.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
