@@ -6,6 +6,9 @@ namespace Monolith.Database;
 
 public static class SqliteDbContextExtensions
 {
+    /// <summary>
+    /// Sqlite does not support orderby DateTimeOffset natively, so we convert it to long (Unix time seconds).
+    /// </summary>
     public static void FixDateTimeOffsetSqlite(this DatabaseFacade database, ModelBuilder modelBuilder)
     {
         if (database.IsSqlite())
