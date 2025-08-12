@@ -55,6 +55,11 @@ public static class DbContextExtensions
             });
         }
 
+        StaticLogger.Write(
+            "DbContext {name} configured with {dbProvider} provider.",
+            typeof(TContext).Name,
+            dbProvider);
+
         return services;
     }
 }

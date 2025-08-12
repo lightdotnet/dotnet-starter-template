@@ -1,4 +1,5 @@
 using Light.FluentBlazor;
+using Light.FluentBlazor.Settings;
 using Light.Serilog;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -24,6 +25,7 @@ try
         .AddInteractiveServerComponents();
 
     builder.Services.AddFluentBlazorExtraComponents();
+    builder.Services.AddFluentUIDemoServices();
 
     builder.Services.AddCascadingAuthenticationState();
     builder.Services.AddScoped<IdentityUserAccessor>();

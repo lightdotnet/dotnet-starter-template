@@ -31,6 +31,11 @@ public class StaticLogger
         Log.Logger.Warning("Endpoints {name} injected", Convert(moduleName));
     }
 
+    public static void Write(string message, params object[] values)
+    {
+        Log.Logger.Warning(message, values);
+    }
+
     private static string Convert(string input, string separate = "_")
     {
         string newValue = "";

@@ -21,6 +21,9 @@
     <Routes @rendermode="PageRenderMode" />
     <script src="_framework/blazor.web.js"></script>
 
+    <!-- Set the default theme ("mode" value overrides "storage-name" mode value) -->
+    <loading-theme storage-name="@WebConstants.THEME_STORAGE_NAME" random-color="true"></loading-theme>
+
     <script src="@Assets["js/site.js"]"></script>
 </body>
 

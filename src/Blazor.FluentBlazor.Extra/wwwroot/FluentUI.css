@@ -22,3 +22,9 @@
     background: var(--fill-color);
     color: var(--neutral-foreground-rest);
 }
+
+/* Table */
+.table thead th {
+    text-align: center;
+    text-transform: uppercase;
+}
