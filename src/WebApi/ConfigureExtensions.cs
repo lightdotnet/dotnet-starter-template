@@ -97,7 +97,7 @@ public static class ConfigureExtensions
         var isDebug = false;
 
 #if DEBUG
-        //isDebug = true;
+        isDebug = true;
 #endif
 
         if (isDebug)
