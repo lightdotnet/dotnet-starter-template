@@ -52,7 +52,13 @@
                 || e.Email.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
         };
 
+        SpinnerService.Show();
+
         await state.ReloadAsync();
+
+        await Task.Delay(5000);
+
+        SpinnerService.Hide();
     }
 
     private Task<IEnumerable<UserDto>> GetUsersAsync() => UserService.GetAllAsync();

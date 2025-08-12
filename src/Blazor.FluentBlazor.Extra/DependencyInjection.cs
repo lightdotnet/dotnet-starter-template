@@ -12,7 +12,7 @@ public static class DependencyInjection
 
         services.AddScoped<IDialogDisplay, DialogDisplay>();
         services.AddScoped<IToastDisplay, ToastDisplay>();
-        services.AddSingleton<SpinnerService>();
+        services.AddScoped<SpinnerService>();
 
         services.AddScoped<ICallGuardedService, CallGuardedService>();
 

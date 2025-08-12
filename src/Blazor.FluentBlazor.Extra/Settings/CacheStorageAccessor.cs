@@ -1,9 +1,10 @@
 using Microsoft.FluentUI.AspNetCore.Components.Utilities;
 using Microsoft.JSInterop;
+using System.Reflection;
 
 namespace Light.FluentBlazor.Settings;
 
-public class CacheStorageAccessor(IJSRuntime js) : JSModule(js, "./js/CacheStorageAccessor.js")
+public class CacheStorageAccessor(IJSRuntime js) : JSModule(js, $".{Assembly.GetExecutingAssembly().FullName}/js/CacheStorageAccessor.js")
 {
     public async ValueTask PutAsync(HttpRequestMessage requestMessage, HttpResponseMessage responseMessage)
     {
