@@ -1,13 +1,13 @@
-﻿using Monolith.HttpApi.Common.Interfaces;
+﻿using Monolith.BlazorServer.Core.Auth;
 
 namespace Monolith.BlazorServer.Services;
 
-public class TokenSessionProvider(IHttpContextAccessor httpContextAccessor)
-    : ITokenProvider
+public class TokenSessionStorage(IHttpContextAccessor httpContextAccessor)
+    : TokenStorage
 {
     private const string AccessTokenCookieName = "AccessToken";
 
-    public Task<string?> GetAccessTokenAsync()
+    public override Task<string?> GetAccessTokenAsync()
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
@@ -17,7 +17,7 @@ public class TokenSessionProvider(IHttpContextAccessor httpContextAccessor)
         return Task.FromResult<string?>(default);
     }
 
-    public Task SetAccessTokenAsync(string accessToken)
+    public override Task SetAccessTokenAsync(string accessToken)
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
@@ -27,7 +27,7 @@ public class TokenSessionProvider(IHttpContextAccessor httpContextAccessor)
         return Task.CompletedTask;
     }
 
-    public Task ClearAsync()
+    public override Task ClearAsync()
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {

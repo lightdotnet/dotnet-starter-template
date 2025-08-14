@@ -2,7 +2,9 @@
 using Light.Mediator;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Monolith.BlazorServer.Components.Account;
+using Monolith.BlazorServer.Core.Auth;
 using Monolith.BlazorServer.Services;
 using Monolith.HealthChecks;
 using Monolith.HttpApi;
@@ -36,22 +38,10 @@ public static class ConfigureExtensions
 
         services.AddScoped<ICurrentUser, CurrentUser>();
 
-        /*
-        services.AddDistributedMemoryCache();
-        services.AddSession(options =>
-        {
-            options.IdleTimeout = TimeSpan.FromDays(6);
-            options.Cookie.HttpOnly = true;
-            options.Cookie.SameSite = SameSiteMode.Strict;
-            options.Cookie.MaxAge = TimeSpan.FromDays(6);
-        });
-        */
-
+        services.AddScoped<TokenStorage, TokenCookieStorage>();
         services.AddCascadingAuthenticationState();
         services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
-        //services.AddScoped<ITokenProvider, TokenProvider>();
-        //services.AddScoped<ITokenProvider, TokenSessionProvider>();
-        services.AddScoped<ITokenProvider, TokenCookieProvider>();
+        services.AddScoped<ITokenProvider>(sp => (JwtAuthStateProvider)sp.GetRequiredService<AuthenticationStateProvider>());
 
         services
             .AddAuthentication(options =>

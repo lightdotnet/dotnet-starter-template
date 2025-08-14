@@ -1,6 +1,7 @@
 ﻿using Light.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
+using Monolith.BlazorServer.Core.Auth;
 using Monolith.HttpApi.Common.Interfaces;
 using Monolith.HttpApi.Identity;
 using System.Security.Claims;
@@ -9,12 +10,14 @@ namespace Monolith.BlazorServer;
 
 public class JwtAuthStateProvider(
     IHttpContextAccessor httpContextAccessor,
-    ITokenProvider tokenProvider)
-    : AuthenticationStateProvider
+    TokenStorage tokenStorage)
+    : AuthenticationStateProvider, ITokenProvider
 {
     private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
     public ClaimsPrincipal? CurrentUser { get; private set; }
+
+    public Task<string?> GetAccessTokenAsync() => tokenStorage.GetAccessTokenAsync();
 
     public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
@@ -37,7 +40,7 @@ public class JwtAuthStateProvider(
             {
                 var accessToken = getToken.Data.AccessToken;
 
-                await tokenProvider.SetAccessTokenAsync(accessToken);
+                await tokenStorage.SetAccessTokenAsync(accessToken);
 
                 var userClaims = JwtReader.ReadClaims(accessToken);
                 var claimsIdentity = new ClaimsIdentity(userClaims, "Jwt");
@@ -66,7 +69,7 @@ public class JwtAuthStateProvider(
     {
         if (httpContextAccessor.HttpContext is HttpContext context)
         {
-            await tokenProvider.ClearAsync();
+            await tokenStorage.ClearAsync();
 
             await context.SignOutAsync();
         }

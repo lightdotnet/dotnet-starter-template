@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Monolith.HttpApi.Common.Interfaces;
+using Monolith.BlazorServer.Core.Auth;
 
 namespace Monolith.BlazorServer.Services;
 
-public class TokenProvider(ProtectedLocalStorage storage)
-    : ITokenProvider
+public class TokenLocalStorage(ProtectedLocalStorage storage) : TokenStorage
 {
     private const string AccessTokenCookieName = "AccessToken";
 
     private const string Key = "jwt";
 
-    public async Task<string?> GetAccessTokenAsync()
+    public override async Task<string?> GetAccessTokenAsync()
     {
         try
         {
@@ -25,12 +24,12 @@ public class TokenProvider(ProtectedLocalStorage storage)
         }
     }
 
-    public async Task SetAccessTokenAsync(string accessToken)
+    public override async Task SetAccessTokenAsync(string accessToken)
     {
         await storage.SetAsync(Key, accessToken);
     }
 
-    public async Task ClearAsync()
+    public override async Task ClearAsync()
     {
         await storage.DeleteAsync(Key);
     }

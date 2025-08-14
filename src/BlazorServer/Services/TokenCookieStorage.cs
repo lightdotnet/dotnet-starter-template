@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
-using Monolith.HttpApi.Common.Interfaces;
+using Monolith.BlazorServer.Core.Auth;
 
 namespace Monolith.BlazorServer.Services;
 
-public class TokenCookieProvider(
+public class TokenCookieStorage(
     IHttpContextAccessor httpContextAccessor,
     IDataProtectionProvider dataProtectionProvider)
-    : ITokenProvider
+    : TokenStorage
 {
     private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector("jwt");
 
-    public Task<string?> GetAccessTokenAsync()
+    public override Task<string?> GetAccessTokenAsync()
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
@@ -25,7 +25,7 @@ public class TokenCookieProvider(
         return Task.FromResult<string?>(default);
     }
 
-    public Task SetAccessTokenAsync(string accessToken)
+    public override Task SetAccessTokenAsync(string accessToken)
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
@@ -46,7 +46,7 @@ public class TokenCookieProvider(
         return Task.CompletedTask;
     }
 
-    public Task ClearAsync()
+    public override Task ClearAsync()
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
