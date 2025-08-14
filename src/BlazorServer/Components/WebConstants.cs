@@ -2,5 +2,5 @@
 
 public abstract class WebConstants
 {
-    public const string THEME_STORAGE_NAME = "theme-mode";
+    public const string THEME_STORAGE_NAME = "theme";
 }

@@ -26,7 +26,7 @@
                 <FluentStack>
                     <FluentSpacer />
 
-                    <form action="Account/Logout" method="post">
+                    <form action="account/post-logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <FluentButton Type="ButtonType.Submit" Style="width: 100%;">Logout</FluentButton>
@@ -35,9 +35,7 @@
                 </FluentStack>
             </FooterTemplate>
         </FluentProfileMenu>
-        <form method="post" hidden>
-            <AntiforgeryToken />
-        </form>
+
     </Authorized>
 </AuthorizeView>
 
@@ -59,10 +57,5 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
-    }
-
-    public void Logout()
-    {
-        NavigationManager.NavigateTo($"account/logout?returnUrl={currentUrl}", forceLoad: true);
     }
 }

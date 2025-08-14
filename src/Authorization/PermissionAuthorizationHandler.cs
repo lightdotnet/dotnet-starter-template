@@ -6,7 +6,8 @@ public class PermissionAuthorizationHandler(ICurrentUser currentUser) : Authoriz
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
-        if (currentUser.HasPermission(requirement.Permission))
+        var canAccess = currentUser.HasPermission(requirement.Permission);
+        if (canAccess)
         {
             context.Succeed(requirement);
         }

@@ -1,12 +1,9 @@
 using Light.FluentBlazor;
 using Light.FluentBlazor.Settings;
 using Light.Serilog;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Monolith;
 using Monolith.BlazorServer;
 using Monolith.BlazorServer.Components;
-using Monolith.BlazorServer.Components.Account;
 using Serilog;
 using Spectre.Console;
 
@@ -27,25 +24,9 @@ try
     builder.Services.AddFluentBlazorExtraComponents();
     builder.Services.AddFluentUIDemoServices();
 
-    builder.Services.AddCascadingAuthenticationState();
-    builder.Services.AddScoped<IdentityUserAccessor>();
-    builder.Services.AddScoped<IdentityRedirectManager>();
-    builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-    builder.Services
-        .AddAuthentication(options =>
-        {
-            options.DefaultScheme = IdentityConstants.ApplicationScheme;
-            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-        })
-        .AddIdentityCookies();
-
-
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
     builder.Services.ConfigureServices(builder.Configuration);
-
-    builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
     var app = builder.Build();
 
@@ -72,9 +53,6 @@ try
     app.MapStaticAssets();
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
-
-    // Add additional endpoints required by the Identity /Account Razor components.
-    app.MapAdditionalIdentityEndpoints();
 
     app.Run();
 }

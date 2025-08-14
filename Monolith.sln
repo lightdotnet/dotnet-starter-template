@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sqlite", "src\Migrations\Sq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Contracts", "src\Api.Contracts\Api.Contracts.csproj", "{12DBF191-4379-49B8-B3B7-21F06C5485EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpApi.Client", "src\HttpApi.Client\HttpApi.Client.csproj", "{94CFD06C-B3C7-4CD8-806A-53BDE8FD9018}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,10 @@ Global
 		{12DBF191-4379-49B8-B3B7-21F06C5485EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12DBF191-4379-49B8-B3B7-21F06C5485EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12DBF191-4379-49B8-B3B7-21F06C5485EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94CFD06C-B3C7-4CD8-806A-53BDE8FD9018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94CFD06C-B3C7-4CD8-806A-53BDE8FD9018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94CFD06C-B3C7-4CD8-806A-53BDE8FD9018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94CFD06C-B3C7-4CD8-806A-53BDE8FD9018}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{3AE17DC2-7CF7-D8D5-8AA0-5BE9EC859CF3} = {A1796537-F8D6-4E17-A64E-2504A62272EF}
 		{12DBF191-4379-49B8-B3B7-21F06C5485EA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{94CFD06C-B3C7-4CD8-806A-53BDE8FD9018} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C46F8D43-2A20-4831-9E83-E42588CB9D7D}

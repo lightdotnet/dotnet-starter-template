@@ -1,13 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
-using Monolith.BlazorServer.Components.Account.Pages;
-using Monolith.BlazorServer.Components.Account.Pages.Manage;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Monolith.BlazorServer.Components.Account
 {
@@ -18,113 +10,33 @@ namespace Monolith.BlazorServer.Components.Account
         {
             ArgumentNullException.ThrowIfNull(endpoints);
 
-            var accountGroup = endpoints.MapGroup("/Account");
+            var accountGroup = endpoints.MapGroup("/account");
 
-            accountGroup.MapPost("/PerformExternalLogin", (
-                HttpContext context,
-                [FromServices] SignInManager<User> signInManager,
-                [FromForm] string provider,
-                [FromForm] string returnUrl) =>
+            accountGroup.MapGet("/logout", async (
+                [FromServices] AuthenticationStateProvider authProvider,
+                [FromQuery] string returnUrl) =>
             {
-                IEnumerable<KeyValuePair<string, StringValues>> query = [
-                    new("ReturnUrl", returnUrl),
-                    new("Action", ExternalLogin.LoginCallbackAction)];
+                if (authProvider is JwtAuthStateProvider state)
+                {
+                    await state.LogoutAsync();
+                }
 
-                var redirectUrl = UriHelper.BuildRelative(
-                    context.Request.PathBase,
-                    "/Account/ExternalLogin",
-                    QueryString.Create(query));
-
-                provider = TemporaryFluentButtonFix(provider);
-
-                var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-                return TypedResults.Challenge(properties, [provider]);
-            });
-
-            accountGroup.MapPost("/Logout", async (
-                ClaimsPrincipal user,
-                [FromServices] SignInManager<User> signInManager,
-                [FromForm] string returnUrl) =>
-            {
-                await signInManager.SignOutAsync();
                 return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 
-            var manageGroup = accountGroup.MapGroup("/Manage").RequireAuthorization();
-
-            manageGroup.MapPost("/LinkExternalLogin", async (
-                HttpContext context,
-                [FromServices] SignInManager<User> signInManager,
-                [FromForm] string provider) =>
+            accountGroup.MapPost("/post-logout", async (
+                [FromServices] AuthenticationStateProvider authProvider,
+                [FromForm] string returnUrl) =>
             {
-                // Clear the existing external cookie to ensure a clean login process
-                await context.SignOutAsync(IdentityConstants.ExternalScheme);
-
-                var redirectUrl = UriHelper.BuildRelative(
-                    context.Request.PathBase,
-                    "/Account/Manage/ExternalLogins",
-                    QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
-
-                provider = TemporaryFluentButtonFix(provider);
-
-                var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
-                return TypedResults.Challenge(properties, [provider]);
-            });
-
-            var loggerFactory = endpoints.ServiceProvider.GetRequiredService<ILoggerFactory>();
-            var downloadLogger = loggerFactory.CreateLogger("DownloadPersonalData");
-
-            manageGroup.MapPost("/DownloadPersonalData", async (
-                HttpContext context,
-                [FromServices] UserManager<User> userManager,
-                [FromServices] AuthenticationStateProvider authenticationStateProvider) =>
-            {
-                var user = await userManager.GetUserAsync(context.User);
-                if (user is null)
+                if (authProvider is JwtAuthStateProvider state)
                 {
-                    return Results.NotFound($"Unable to load user with ID '{userManager.GetUserId(context.User)}'.");
+                    await state.LogoutAsync();
                 }
 
-                var userId = await userManager.GetUserIdAsync(user);
-                downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
-
-                // Only include personal data for download
-                var personalData = new Dictionary<string, string>();
-                var personalDataProps = typeof(User).GetProperties().Where(
-                    prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
-                foreach (var p in personalDataProps)
-                {
-                    personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
-                }
-
-                var logins = await userManager.GetLoginsAsync(user);
-                foreach (var l in logins)
-                {
-                    personalData.Add($"{l.LoginProvider} external login provider key", l.ProviderKey);
-                }
-
-                personalData.Add("Authenticator Key", (await userManager.GetAuthenticatorKeyAsync(user))!);
-                var fileBytes = JsonSerializer.SerializeToUtf8Bytes(personalData);
-
-                context.Response.Headers.TryAdd("Content-Disposition", "attachment; filename=PersonalData.json");
-                return TypedResults.File(fileBytes, contentType: "application/json", fileDownloadName: "PersonalData.json");
+                return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 
             return accountGroup;
-        }
-
-        private static string TemporaryFluentButtonFix(string provider)
-        {
-            // Temporary workaround for FluentButton returning a provider value twice
-            // Split the comma-separated list of strings
-            var providers = provider.Split(',');
-
-            // Find the value that appears twice in the list
-            provider = providers.GroupBy(p => p)
-                                .Where(g => g.Count() == 2)
-                                .Select(g => g.Key)
-                                .First();
-            return provider;
         }
     }
 }

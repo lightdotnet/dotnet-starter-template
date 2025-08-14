@@ -1,5 +1,4 @@
 ﻿using Light.Blazor;
-using Light.Contracts;
 
 namespace Light.FluentBlazor;
 

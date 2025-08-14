@@ -1,0 +1,16 @@
+﻿@page "/account/logout1"
+
+@inject AuthenticationStateProvider AuthProvider
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthProvider is JwtAuthStateProvider provider)
+        {
+            await provider.LogoutAsync();
+        }
+    }
+}

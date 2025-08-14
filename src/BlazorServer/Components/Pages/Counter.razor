@@ -1,5 +1,7 @@
 ﻿@page "/counter"
 
+@attribute [MustHavePermission(Permissions.Users.View)]
+
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>

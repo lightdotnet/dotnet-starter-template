@@ -1,16 +1,15 @@
-﻿global using Light.Identity.Models;
-
-using HealthChecks.UI.Client;
-using Light.AspNetCore.Builder;
-using Light.AspNetCore.Middlewares;
-using Light.Extensions.DependencyInjection;
+﻿using Light.AspNetCore.Middlewares;
 using Light.Mediator;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
+using Monolith.BlazorServer.Components.Account;
+using Monolith.BlazorServer.Core.Auth;
 using Monolith.BlazorServer.Services;
-using Monolith.Identity;
-using Monolith.Identity.Notifications.SignalR;
-using Monolith.Modularity;
+using Monolith.HealthChecks;
+using Monolith.HttpApi;
+using Monolith.HttpApi.Common.HttpFactory;
+using Monolith.HttpApi.Common.Interfaces;
 using System.Reflection;
 
 namespace Monolith.BlazorServer;
@@ -20,7 +19,6 @@ public static class ConfigureExtensions
     private static readonly Assembly[] assemblies =
         [
             typeof(Program).Assembly,
-            typeof(SignalRModule).Assembly,
         ];
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
@@ -29,36 +27,67 @@ public static class ConfigureExtensions
         services.AddMediatorFromAssemblies(assemblies);
         services.AddBehaviors(typeof(ValidationBehaviour<,>));
         services.AddOptions<RequestLoggingOptions>().BindConfiguration("RequestLogging");
-        services.AddModules<AppModule>(configuration, assemblies);
 
         services.AddInfrastructureServices();
         services.AddHealthChecks();
 
+        services.AddHttpClients(configuration);
+        services.AddHttpClientServices(typeof(HttpApiClientModule).Assembly);
+
         services.AddHttpContextAccessor();
+
         services.AddScoped<ICurrentUser, ServerCurrentUser>();
-        services.AddPermissions();
+
+        /*
+        services.AddDistributedMemoryCache();
+        services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromDays(6);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Strict;
+            options.Cookie.MaxAge = TimeSpan.FromDays(6);
+        });
+        */
+
+        services.AddCascadingAuthenticationState();
+        services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
+        //services.AddScoped<ITokenProvider, TokenProvider>();
+        //services.AddScoped<ITokenProvider, TokenSessionProvider>();
+        services.AddScoped<ITokenProvider, TokenCookieProvider>();
 
         services
-            .AddIdentityModule(configuration)
-            .AddSignInManager();
+            .AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(options =>
+            {
+                options.Cookie.Name = "mini-session";
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(6);
+                options.SlidingExpiration = true;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.LoginPath = "/account/login";
+                options.LogoutPath = "/account/logout";
+                options.AccessDeniedPath = "/access-denied";
+            });
 
-        // custom Claims for Identity user
-        services.AddScoped<IUserClaimsPrincipalFactory<User>, AppUserClaimsPrincipalFactory>();
+        services.AddPermissions();
 
         return services;
     }
 
     public static WebApplication ConfigurePipelines(this WebApplication app)
     {
-        app.UseModules<AppModule>(assemblies);
+        //app.UseSession();
 
-        app.MapHealthChecks("/hc", new HealthCheckOptions()
-        {
-            Predicate = _ => true,
-            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        });
+        //app.UseAuthentication(); // must be before UseAuthorization
+        //app.UseAuthorization();
 
-        app.MapModuleEndpoints<AppHub>(assemblies);
+        app.MapHealthChecksEndpoint();
+
+        app.MapAdditionalIdentityEndpoints();
 
         return app;
     }

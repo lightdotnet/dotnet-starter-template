@@ -1,0 +1,39 @@
+﻿@page "/roles"
+
+@using Light.Identity
+
+@attribute [MustHavePermission(Permissions.Roles.View)]
+
+<Table State="state">
+    <HeadContent>
+        <th>Name</th>
+        <th>Desc.</th>
+        <th></th>
+    </HeadContent>
+    <RowTemplate>
+
+        <td>
+            @context.Name
+        </td>
+        <td>@context.Description</td>
+        <td>
+            
+        </td>
+
+    </RowTemplate>
+</Table>
+
+@code {
+    private DataTable<RoleDto> state = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(RoleService.GetAsync)
+        {
+            SearchFunc = (searchValue, e) =>
+                e.Name.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+        };
+
+        await state.ReloadAsync();
+    }
+}

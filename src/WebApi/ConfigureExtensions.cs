@@ -1,13 +1,12 @@
 ﻿using Asp.Versioning.Conventions;
 using FluentValidation;
-using HealthChecks.UI.Client;
 using Light.AspNetCore.Builder;
 using Light.AspNetCore.Cors;
 using Light.AspNetCore.Middlewares;
 using Light.AspNetCore.Swagger;
 using Light.Mediator;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Monolith.Catalog;
+using Monolith.HealthChecks;
 using Monolith.Identity.Notifications.SignalR;
 using Monolith.Modularity;
 using Monolith.Services;
@@ -70,11 +69,7 @@ public static class ConfigureExtensions
 
         app.UseModules<AppModule>(assemblies);
 
-        app.MapHealthChecks("/hc", new HealthCheckOptions()
-        {
-            Predicate = _ => true,
-            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        });
+        app.MapHealthChecksEndpoint();
 
         app.MapModuleEndpoints<AppHub>(assemblies);
 
