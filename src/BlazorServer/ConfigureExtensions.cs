@@ -1,10 +1,8 @@
 ﻿using Light.AspNetCore.Middlewares;
 using Light.Mediator;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Monolith.BlazorServer.Components.Account;
-using Monolith.BlazorServer.Core.Auth;
 using Monolith.BlazorServer.Services;
 using Monolith.HealthChecks;
 using Monolith.HttpApi;
@@ -36,7 +34,7 @@ public static class ConfigureExtensions
 
         services.AddHttpContextAccessor();
 
-        services.AddScoped<ICurrentUser, ServerCurrentUser>();
+        services.AddScoped<ICurrentUser, CurrentUser>();
 
         /*
         services.AddDistributedMemoryCache();
