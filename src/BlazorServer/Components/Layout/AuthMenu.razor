@@ -1,15 +1,9 @@
-﻿@implements IDisposable
-
-@inject AuthenticationStateProvider AuthProvider
+﻿@inject AuthenticationStateProvider AuthProvider
 
 <AuthorizeView>
     <Authorized>
         <FluentNavLink Href="Account/Manage">@CurrentUser.Username</FluentNavLink>
-        <form action="Account/Logout" method="post">
-            <AntiforgeryToken />
-            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-            <FluentButton Type="ButtonType.Button" Style="width: 100%;" OnClick="Logout">Logout</FluentButton>
-        </form>
+        <FluentButton Type="ButtonType.Button" Style="width: 100%;" OnClick="Logout">Logout</FluentButton>
     </Authorized>
     <NotAuthorized>
         <FluentNavLink Href="Account/Login">Login</FluentNavLink>
@@ -17,6 +11,7 @@
 </AuthorizeView>
 
 @code {
+    /*
     private string? currentUrl;
 
     protected override void OnInitialized()
@@ -35,16 +30,9 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
-
+    */
     public void Logout()
     {
-        NavigationManager.NavigateTo("account/logout?returnUrl=" + currentUrl, true);
-        /*
-        if (AuthProvider is JwtAuthStateProvider provider)
-        {
-            await provider.LogoutAsync();
-            NavigationManager.RedirectToLogin();
-        }
-        */
+        NavigationManager.RedirectToLogout();
     }
 }

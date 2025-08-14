@@ -4,14 +4,20 @@ namespace Monolith.BlazorServer;
 
 public static class NavigationManagerExtensions
 {
+    private static string GetPathAndQuery(NavigationManager navigationManager)
+    {
+        var absoluteUri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+
+        // pathAndQuery will start with "/", get from char at number 1 for remove that
+        return absoluteUri.PathAndQuery[1..];
+    }
+
+
     public static void RedirectToLogin(this NavigationManager navigationManager)
     {
         var loginPath = "account/login";
 
-        var absoluteUri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
-
-        // pathAndQuery will start with "/", get from char at number 1 for remove that
-        var pathAndQuery = absoluteUri.PathAndQuery[1..];
+        var pathAndQuery = GetPathAndQuery(navigationManager);
 
         if (pathAndQuery.StartsWith(loginPath))
         {
@@ -51,11 +57,8 @@ public static class NavigationManagerExtensions
     public static void RedirectToLogout(this NavigationManager navigationManager)
     {
         var logoutPath = "account/logout";
-
-        var absoluteUri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
-
-        // pathAndQuery will start with "/", get from char at number 1 for remove that
-        var pathAndQuery = absoluteUri.PathAndQuery[1..];
+        
+        var pathAndQuery = GetPathAndQuery(navigationManager);
 
         if (!string.IsNullOrEmpty(pathAndQuery))
         {

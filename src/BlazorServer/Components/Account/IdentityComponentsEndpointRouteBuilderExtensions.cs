@@ -14,7 +14,7 @@ namespace Monolith.BlazorServer.Components.Account
 
             accountGroup.MapGet("/logout", async (
                 [FromServices] AuthenticationStateProvider authProvider,
-                [FromQuery] string returnUrl) =>
+                [FromQuery] string? returnUrl) =>
             {
                 if (authProvider is JwtAuthStateProvider state)
                 {
@@ -26,7 +26,7 @@ namespace Monolith.BlazorServer.Components.Account
 
             accountGroup.MapPost("/post-logout", async (
                 [FromServices] AuthenticationStateProvider authProvider,
-                [FromForm] string returnUrl) =>
+                [FromForm] string? returnUrl) =>
             {
                 if (authProvider is JwtAuthStateProvider state)
                 {
