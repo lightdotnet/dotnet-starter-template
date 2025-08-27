@@ -31,7 +31,7 @@
     <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.8.2" />
     <PackageVersion Include="Lightsoft.Mail.Contracts" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.Result" Version="1.0.0" />
-    <PackageVersion Include="Lightsoft.Serilog" Version="1.0.0" />
+    <PackageVersion Include="Lightsoft.Serilog" Version="1.0.0.1" />
     <PackageVersion Include="Lightsoft.SharedKernel" Version="1.0.0.3" />
     <!-- Miscellaneous -->
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />

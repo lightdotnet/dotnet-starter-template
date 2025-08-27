@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.*" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.*" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.*" />
-    <PackageReference Include="Lightsoft.Serilog" Version="1.0.0" />
+	<PackageReference Include="Lightsoft.Serilog" Version="1.*" />
   </ItemGroup>
 
   <ItemGroup>
