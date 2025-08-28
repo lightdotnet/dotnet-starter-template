@@ -7,9 +7,9 @@ namespace Monolith.Features.Identity;
 public class RoleController(IRoleService roleService) : ApiControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAsync()
     {
-        return Ok(await roleService.GetAllAsync(cancellationToken));
+        return Ok(await roleService.GetAllAsync());
     }
 
     [HttpGet("{id}")]
