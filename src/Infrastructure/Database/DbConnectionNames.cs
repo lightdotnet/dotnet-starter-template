@@ -2,9 +2,13 @@
 
 public abstract class DbConnectionNames
 {
-    public const string DEFAULT = "DefaultConnection";
+    public const string SQLITE = "SqliteConnection"; // Sqlite
 
-    public const string IDENTITY = DEFAULT;
+    public const string POSTGRESQL = "PostgreConnection"; // PostgreSql
 
-    public const string CATALOG = DEFAULT;
+    public const string DEFAULT = "DefaultConnection"; // MSSQL
+
+    public const string IDENTITY = SQLITE;
+
+    public const string CATALOG = SQLITE;
 }

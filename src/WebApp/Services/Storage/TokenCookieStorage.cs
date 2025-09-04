@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
-using Monolith.BlazorServer.Core.Auth;
+using Monolith.WebAdmin.Core.Auth;
 
-namespace Monolith.BlazorServer.Services.Storage;
+namespace Monolith.WebAdmin.Services.Storage;
 
 public class TokenCookieStorage(
     IHttpContextAccessor httpContextAccessor,

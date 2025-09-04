@@ -1,5 +1,4 @@
-﻿using Light.Identity;
-using Monolith.Catalog;
+﻿using Monolith.Catalog;
 
 namespace Monolith.HttpApi.Catalogs;
 
@@ -20,6 +19,13 @@ public class CategoryHttpService(IHttpClientFactory httpClientFactory)
         var url = BasePath;
 
         return TryPostAsync(url, request);
+    }
+
+    public Task<Result> UpdateAsync(CategoryDto request)
+    {
+        var url = BasePath;
+
+        return TryPutAsync(url, request);
     }
 
     public Task<Result> DeleteAsync(string id)

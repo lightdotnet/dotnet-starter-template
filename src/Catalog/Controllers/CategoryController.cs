@@ -18,6 +18,12 @@ public class CategoryController : ApiControllerBase
         return Ok(await Mediator.Send(new CreateCategoryCommand(request)));
     }
 
+    [HttpPut]
+    public async Task<IActionResult> Update([FromBody] CategoryDto request)
+    {
+        return Ok(await Mediator.Send(new UpdateCategoryCommand(request)));
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {

@@ -1,4 +1,4 @@
-﻿namespace Monolith.BlazorServer.Services.Storage;
+﻿namespace Monolith.WebAdmin.Services.Storage;
 
 public class HttpContextEntensions
 {

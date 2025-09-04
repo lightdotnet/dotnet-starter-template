@@ -2,17 +2,17 @@
 using Light.AspNetCore.Middlewares;
 using Light.Mediator;
 using Microsoft.AspNetCore.Components.Authorization;
-using Monolith.BlazorServer.Components.Account;
-using Monolith.BlazorServer.Core.Auth;
-using Monolith.BlazorServer.Services;
-using Monolith.BlazorServer.Services.Storage;
+using Monolith.WebAdmin.Components.Account;
+using Monolith.WebAdmin.Core.Auth;
+using Monolith.WebAdmin.Services;
+using Monolith.WebAdmin.Services.Storage;
 using Monolith.HealthChecks;
 using Monolith.HttpApi;
 using Monolith.HttpApi.Common.HttpFactory;
 using Monolith.HttpApi.Common.Interfaces;
 using System.Reflection;
 
-namespace Monolith.BlazorServer;
+namespace Monolith.WebAdmin;
 
 public static class ConfigureExtensions
 {

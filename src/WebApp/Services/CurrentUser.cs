@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Monolith.BlazorServer.Services;
+namespace Monolith.WebAdmin.Services;
 
 public class CurrentUser(IHttpContextAccessor httpContextAccessor)
     : CurrentUserBase, ICurrentUser

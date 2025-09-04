@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Monolith.BlazorServer.Services;
+using Monolith.WebAdmin.Services;
 
-namespace Monolith.BlazorServer.Components.Account
+namespace Monolith.WebAdmin.Components.Account
 {
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
     {

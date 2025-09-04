@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Monolith.BlazorServer.Core.Auth;
+using Monolith.WebAdmin.Core.Auth;
 using Monolith.HttpApi.Identity;
 using System.Security.Claims;
 
-namespace Monolith.BlazorServer.Services;
+namespace Monolith.WebAdmin.Services;
 
 public interface IAuthService
 {

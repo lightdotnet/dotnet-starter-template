@@ -2,8 +2,8 @@ using Light.FluentBlazor;
 using Light.FluentBlazor.Settings;
 using Light.Serilog;
 using Monolith;
-using Monolith.BlazorServer;
-using Monolith.BlazorServer.Components;
+using Monolith.WebAdmin;
+using Monolith.WebAdmin.Components;
 using Serilog;
 using Spectre.Console;
 

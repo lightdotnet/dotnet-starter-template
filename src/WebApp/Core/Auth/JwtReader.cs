@@ -2,7 +2,7 @@
 using System.Text.Json;
 using ClaimTypes = Light.Identity.ClaimTypes;
 
-namespace Monolith.BlazorServer.Core.Auth;
+namespace Monolith.WebAdmin.Core.Auth;
 
 public class JwtReader
 {

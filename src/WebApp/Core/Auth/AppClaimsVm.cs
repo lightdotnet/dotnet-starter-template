@@ -1,4 +1,4 @@
-﻿namespace Monolith.BlazorServer.Core.Auth;
+﻿namespace Monolith.WebAdmin.Core.Auth;
 
 public class AppClaimsVm
 {

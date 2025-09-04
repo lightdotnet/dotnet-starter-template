@@ -24,6 +24,8 @@ internal class CreateCategoryCommandHandler(CatalogContext context)
         return Result<string>.Success(entity.Id);
     }
 
-    public Task<bool> CheckExisting(string id) =>
-        context.Set<Category>().Where(new CategoryByIdSpec(id)).AnyAsync();
+    public Task<bool> CheckExisting(string id)
+        => context.Set<Category>()
+        .Where(new CategoryByIdSpec(id).IsMainCategory().MustActive())
+        .AnyAsync();
 }

@@ -2,7 +2,7 @@
 using Monolith.Auth;
 using System.Reflection;
 
-namespace Monolith.BlazorServer.Core.Auth;
+namespace Monolith.WebAdmin.Core.Auth;
 
 public class ClientClaimsExtensions
 {

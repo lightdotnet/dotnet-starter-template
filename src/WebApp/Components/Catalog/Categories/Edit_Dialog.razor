@@ -1,0 +1,27 @@
+﻿@implements IDialogContentComponent
+
+<div>
+    <Input Class="w-100" @bind-Value="@model.Name" Label="Name" Required />
+</div>
+
+<FluentDialogFooter>
+    <Button_Save OnClick="SaveAsync" />
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = null!;
+
+    [Parameter]
+    public CategoryDto Content { get; set; } = null!;
+
+    private CategoryDto model => Content;
+
+    private async Task SaveAsync()
+    {
+        await CallGuarded.ExecuteAsync(
+            () => CategoryService.UpdateAsync(model),
+            $"Entity {model.Name} updated",
+            Dialog);
+    }
+}

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
-using Monolith.BlazorServer.Core.Auth;
+using Monolith.WebAdmin.Core.Auth;
 using Monolith.HttpApi.Common.Interfaces;
 using System.Security.Claims;
 
-namespace Monolith.BlazorServer.Services;
+namespace Monolith.WebAdmin.Services;
 
 public class JwtAuthStateProvider(
     IHttpContextAccessor httpContextAccessor,

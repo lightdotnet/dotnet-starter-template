@@ -26,8 +26,13 @@
         </td>
 
         <td>
-            <IconActionButtons IconAction="@IconActionButtons.Action.Create" OnClick="() => OpenAddDialogAsync(context.Id)" />
+            @if (!context.Disable)
+            {
+                <IconActionButtons IconAction="@IconActionButtons.Action.Create" OnClick="() => OpenAddDialogAsync(context)" />
+            }
 
+            <IconActionButtons IconAction="@IconActionButtons.Action.Update" OnClick="() => OpenEditDialogAsync(context)" />
+            
             @if (!context.SubCategories.Any())
             {
                 <IconActionButtons IconAction="@IconActionButtons.Action.Delete" OnClick="() => DeleteAsync(context.Name, context.Id)" />
@@ -51,19 +56,26 @@
         await state.ReloadAsync();
     }
 
-    private async Task OpenAddDialogAsync(string id = "")
+    private async Task OpenAddDialogAsync(CategoryDto? category = null)
     {
-        DialogParameters<CategoryDto> parameters = new()
-        {
-            Title = $"Add new",
-            PreventDismissOnOverlayClick = true,
-            PreventScroll = true,
-            Width = "400px",
-        };
+        var dialog = category is null
+            ? await DialogService.ShowDialogAsync<Add_Dialog>(WebConstants.DefaultDialog($"Add new"))
+            : await DialogService.ShowDialogAsync<Add_Dialog>(category, WebConstants.DefaultDialog($"Add new sub-category"));
 
-        var dialog = await DialogService.ShowDialogAsync<Add_Dialog>(id, parameters);
         var result = await CallGuarded.GetDialogResultAsync(dialog);
         
+        if (result.Succeeded)
+        {
+            await state.ReloadAsync();
+        }
+    }
+
+    private async Task OpenEditDialogAsync(CategoryDto category)
+    {
+        var dialog = await DialogService.ShowDialogAsync<Edit_Dialog>(category, WebConstants.DefaultDialog($"Update category {category.Name}"));
+
+        var result = await CallGuarded.GetDialogResultAsync(dialog);
+
         if (result.Succeeded)
         {
             await state.ReloadAsync();

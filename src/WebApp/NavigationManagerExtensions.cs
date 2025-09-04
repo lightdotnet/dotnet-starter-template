@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace Monolith.BlazorServer;
+namespace Monolith.WebAdmin;
 
 public static class NavigationManagerExtensions
 {

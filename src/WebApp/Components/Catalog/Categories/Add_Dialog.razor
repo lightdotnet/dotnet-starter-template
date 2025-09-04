@@ -1,8 +1,8 @@
-﻿@implements IDialogContentComponent<string>
+﻿@implements IDialogContentComponent
 
-@if (model.SubOfId != null)
+@if (Content != null)
 {
-    <h3 class="text-danger">@model.SubOfId</h3>
+    <h4 class="text-danger">Main Category: @Content.Name</h4>
 }
 
 <div>
@@ -18,15 +18,15 @@
     public FluentDialog Dialog { get; set; } = null!;
 
     [Parameter]
-    public string Content { get; set; } = null!;
+    public CategoryDto? Content { get; set; }
 
     private CreateCategoryRequest model = new();
 
     protected override void OnParametersSet()
     {
-        if (!string.IsNullOrEmpty(Content))
+        if (!string.IsNullOrEmpty(Content?.Id))
         {
-            var mainCategoryId = Content;
+            var mainCategoryId = Content.Id;
             model.SubOfId = mainCategoryId;
         }
     }
