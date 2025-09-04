@@ -1,0 +1,37 @@
+﻿@implements IDialogContentComponent
+
+<div>
+    <Input Class="w-100" @bind-Value="@newRole.Name" Label="Name" Required />
+</div>
+
+<div class="mt-3">
+    <Input Class="w-100" @bind-Value="@newRole.Description" Label="Description" />
+</div>
+
+<FluentDialogFooter>
+    <Button_Save OnClick="CreateAsync" />
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = null!;
+
+    private CreateRoleRequest newRole = new();
+
+    private async Task CreateAsync()
+    {
+        await CallGuarded.ExecuteAsync(
+            async () =>
+            {
+                var create = await RoleService.CreateAsync(newRole);
+                if (create.Succeeded)
+                {
+                    return Result.Success();
+                }
+
+                return Result.Error(create.Message);
+            },
+            $"New role {newRole.Name} created",
+            Dialog);
+    }
+}

@@ -1,0 +1,115 @@
+﻿@using Monolith.BlazorServer.Core.Auth
+@implements IDialogContentComponent<string>
+
+<FluentDialogBody>
+
+    @if (role != null)
+    {
+        <div>
+            <Input Class="w-100" @bind-Value="@role.Name" Label="Name" Required />
+        </div>
+
+        <div class="mt-3">
+            <Input Class="w-100" @bind-Value="@role.Description" Label="Description" />
+        </div>
+
+        <FluentLabel Typo="Typography.H5" Class="mt-3 mb-2">Permissions</FluentLabel>
+
+        <FluentStack Orientation="Orientation.Vertical">
+            @foreach (var group in appClaims.Groups)
+            {
+                var groupClaims = appClaims.Claims.Where(x => x.GroupName == group.Name);
+
+                var isChecked = groupClaims.All(x => x.IsOwned == true);
+
+                <FluentCheckbox 
+                    Label="@group.ToString()"
+                    @bind-Value:get="isChecked"
+                    @bind-Value:set="c => OnResourceTypeVisibilityChanged(group.Name, c)" />
+
+                @foreach (var claim in groupClaims)
+                {
+                    <FluentCheckbox Label="@claim.ToString()" Style="margin-left: 30px" @bind-Value="@claim.IsOwned" />
+                }
+
+            }
+        </FluentStack>
+
+        <div class="mt-3 text-end">
+            <Button_Save OnClick="UpdateRoleAsync" />
+        </div>
+    }
+
+</FluentDialogBody>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = null!;
+
+    [Parameter]
+    public string Content { get; set; } = default!;
+
+    private RoleDto role { get; set; } = default!;
+
+    private AppClaimsVm appClaims = ClientClaimsExtensions.GetAll();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRolesAsync();
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        var getRoleDetails = await RoleService.GetByIdAsync(Content);
+        if (getRoleDetails.Succeeded)
+        {
+            role = getRoleDetails.Data;
+
+            foreach (var claim in role.Claims)
+            {
+                var appClaim = appClaims.Claims.Where(x => x.Value == claim.Value).FirstOrDefault();
+
+                if (appClaim != null)
+                {
+                    appClaim.IsOwned = true;
+                }
+            }
+        }
+    }
+
+    protected void OnResourceTypeVisibilityChanged(string resourceType, bool isVisible)
+    {
+        var groupClaims = appClaims.Claims.Where(x => x.GroupName == resourceType);
+
+        foreach (var groupClaim in groupClaims)
+        {
+            groupClaim.IsOwned = isVisible;
+        }
+    }
+
+    private async Task UpdateRoleAsync()
+    {
+        role.Claims = appClaims.Claims
+            .Where(x => x.IsOwned == true)
+            .Select(s => new ClaimDto
+            {
+                Type = ClaimTypes.Permission,
+                Value = s.Value
+            });
+
+        await CallGuarded.ExecuteAsync(
+            async () =>
+            {
+                var update = await RoleService.UpdateAsync(role);
+                if (update.Succeeded)
+                {
+                    return Result.Success();
+                }
+
+                await LoadRolesAsync();
+                return Result.Error(update.Message);
+            },
+            $"Update role {role.Name} success",
+            () => Dialog.CloseAsync(Result.Success()));
+    }
+}

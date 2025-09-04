@@ -1,0 +1,26 @@
+﻿<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    @if (CurrentUser.IsAuthenticated)
+                    {
+                        <AccessDenied />
+                    }
+                    else
+                    {
+                        <Monolith.BlazorServer.Components.Account.Login />
+                        @*<RedirectToLogin />*@
+                    }
+                </NotAuthorized>
+                <Authorizing>
+                    <p>Please wait...</p>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <RedirectToHome />
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

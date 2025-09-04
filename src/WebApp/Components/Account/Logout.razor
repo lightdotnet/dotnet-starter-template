@@ -1,0 +1,14 @@
+﻿@page "/account/logout1"
+@using Monolith.BlazorServer.Services
+
+@inject IAuthService AuthProvider
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthProvider.LogoutAsync();
+    }
+}

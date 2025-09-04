@@ -1,0 +1,167 @@
+﻿@inject NavigationManager NavigationManager
+
+<div class="navmenu">
+    <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
+    <label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
+    <nav class="sitenav" aria-labelledby="main-menu">
+        <FluentNavMenu Id="main-menu" Collapsible="true" Width="250" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
+
+            @foreach (var groupLv0 in menu.Groups)
+            {
+                if (!string.IsNullOrEmpty(groupLv0.Permission) && !hasPermission(groupLv0.Permission))
+                {
+                    continue;
+                }
+
+                var hrefs = new List<string>();
+
+                <FluentNavGroup Title="@groupLv0.Title" Icon="groupLv0.Icon" Expanded="@isActive(groupLv0.Hrefs)">
+                    @if (groupLv0.Links != null)
+                    {
+                        foreach (var navLink in groupLv0.Links)
+                        {
+                            if (!string.IsNullOrEmpty(navLink.Permission) && !hasPermission(navLink.Permission))
+                            {
+                                continue;
+                            }
+
+                            <FluentNavLink Href="@navLink.Href">@navLink.Name</FluentNavLink>
+                        }
+                    }
+
+                    @if (groupLv0.Level1 != null)
+                    {
+                        foreach (var groupLv1 in groupLv0.Level1)
+                        {
+                            if (!string.IsNullOrEmpty(groupLv1.Permission) && !hasPermission(groupLv1.Permission))
+                            {
+                                continue;
+                            }
+
+                            <FluentNavGroup Title="@groupLv1.Title" Icon="groupLv1.Icon" Expanded="@isActive(groupLv1.Hrefs)">
+                                @foreach (var navLink in groupLv1.Links)
+                                {
+                                    if (!string.IsNullOrEmpty(navLink.Permission) && !hasPermission(navLink.Permission))
+                                    {
+                                        continue;
+                                    }
+
+                                    <FluentNavLink Href="@navLink.Href">@navLink.Name</FluentNavLink>
+                                }
+                            </FluentNavGroup>
+                        }
+                    }
+                </FluentNavGroup>
+            }
+
+            <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
+            <FluentNavLink Href="counter" Icon="@(new Icons.Regular.Size20.NumberSymbolSquare())" IconColor="Color.Accent">Counter</FluentNavLink>
+            <FluentNavLink Href="weather" Icon="@(new Icons.Regular.Size20.WeatherPartlyCloudyDay())" IconColor="Color.Accent">Weather</FluentNavLink>
+            <FluentNavLink Href="auth" Icon="@(new Icons.Regular.Size20.LockClosedKey())" IconColor="Color.Accent">Auth Required</FluentNavLink>
+
+            <AuthMenu />
+
+        </FluentNavMenu>
+    </nav>
+</div>
+
+@code {
+    private bool expanded = true;
+
+    private MainNavMenu menu = new()
+        {
+            Groups = new List<NavGroupLv0>()
+        {
+            new()
+            {
+                Title = "Administration",
+                Icon = new Icons.Regular.Size20.Shield(),
+                Permission = Permissions.System.Manager,
+                Links = new List<NavLink>()
+                {
+                    new NavLink("Users", "/users", Permissions.Users.View),
+                    new NavLink("Roles", "/roles", Permissions.Roles.View)
+                }
+            }
+        }
+    };
+
+    private bool hasPermission(string permission)
+    {
+        //return userPermissions.Any(x => x == permission);
+        return CurrentUser.HasPermission(permission);
+    }
+
+    private bool isActive(IEnumerable<string> links)
+    {
+        var url = new Uri(NavigationManager.Uri);
+
+        var path = url.AbsolutePath;
+
+        return links.Any(x => x.Equals(path));
+    }
+
+    public class NavGroup
+    {
+        public string Title { get; init; } = "";
+
+        public Icon? Icon { get; init; }
+
+        public string? Permission { get; init; }
+
+        public List<NavLink> Links { get; init; } = [];
+    }
+
+    public record NavLink(string Name, string Href, string? Permission = "");
+
+    public class MainNavMenu
+    {
+        public IEnumerable<NavGroupLv0> Groups { get; init; } = [];
+    }
+
+    public class NavGroupLv0 : NavGroup
+    {
+        public IEnumerable<NavGroupLv1> Level1 { get; init; } = [];
+
+        public IEnumerable<string> Hrefs
+        {
+            get
+            {
+                var hrefs = new List<string>();
+
+                if (Links != null)
+                {
+                    hrefs.AddRange(Links.Select(s => s.Href));
+                }
+
+                if (Level1 != null)
+                {
+                    foreach (var groupLv1 in Level1)
+                    {
+                        hrefs.AddRange(groupLv1.Links.Select(s => s.Href));
+                    }
+                }
+
+                return hrefs;
+            }
+        }
+    }
+
+    public class NavGroupLv1 : NavGroup
+    {
+        public IEnumerable<string> Hrefs
+        {
+            get
+            {
+                var hrefs = new List<string>();
+
+                if (Links != null)
+                {
+                    hrefs.AddRange(Links.Select(s => s.Href));
+                }
+
+                return hrefs;
+            }
+        }
+    }
+}

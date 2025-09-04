@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpApi.Client", "src\HttpA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.FluentBlazor.Extra", "src\Blazor.FluentBlazor.Extra\Blazor.FluentBlazor.Extra.csproj", "{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "src\WebApp\WebApp.csproj", "{E3CF19E4-5622-64B9-34FF-31DCC94C3E01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,10 @@ Global
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3CF19E4-5622-64B9-34FF-31DCC94C3E01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3CF19E4-5622-64B9-34FF-31DCC94C3E01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3CF19E4-5622-64B9-34FF-31DCC94C3E01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3CF19E4-5622-64B9-34FF-31DCC94C3E01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{11E30C01-24FD-0B8C-259D-F6A4851E5068} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FB07F991-2C23-00DD-C75C-2FB454661810} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{4FA6A938-38C0-2526-28A8-99CEFD8F90DB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E3CF19E4-5622-64B9-34FF-31DCC94C3E01} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C46F8D43-2A20-4831-9E83-E42588CB9D7D}

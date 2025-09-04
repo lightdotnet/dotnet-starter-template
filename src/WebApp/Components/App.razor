@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/loader/smile-loader.css"]" />
+
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["Monolith.BlazorServer.styles.css"]" />
+
+    <link rel="stylesheet" href="@Assets["_content/Lightsoft.Blazor/style.css"]" />
+    <link rel="stylesheet" href="@Assets["_content/Lightsoft.FluentBlazor/FluentUI.css"]" />
+    <ImportMap />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <HeadOutlet @rendermode="PageRenderMode" />
+</head>
+
+<body>
+    <Routes @rendermode="PageRenderMode" />
+    <script src="_framework/blazor.web.js"></script>
+
+    <!-- Set the default theme ("mode" value overrides "storage-name" mode value) -->
+    <loading-theme storage-name="@WebConstants.THEME_STORAGE_NAME" random-color="true"></loading-theme>
+
+    <script type="module" src="@Assets["_content/Lightsoft.FluentBlazor/js/CacheStorageAccessor.js"]"></script>
+    <script type="module" src="@Assets["_content/Lightsoft.FluentBlazor/js/highlight-extensions.js"]"></script>
+
+    <script src="@Assets["js/site.js"]"></script>
+</body>
+
+</html>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? PageRenderMode =>
+        HttpContext.AcceptsInteractiveRouting()
+        ? InteractiveServer
+        : null;
+}

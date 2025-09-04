@@ -1,0 +1,112 @@
+﻿@page "/Account/Login"
+@using Monolith.BlazorServer.Services
+
+@attribute [AllowAnonymous, ExcludeFromInteractiveRouting]
+
+@inject ILogger<Login> Logger
+@inject IAuthService AuthProvider
+
+<PageTitle>Log in</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical"
+             HorizontalAlignment="HorizontalAlignment.Center"
+             VerticalAlignment="VerticalAlignment.Center"
+             VerticalGap="20" Style="height: 100vh; min-height: 800px;">
+
+    <div class="d-flex flex-column" style="max-width: 450px">
+        @if (processing is false)
+        {
+            <Card>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    var statusMessageClass = errorMessage.StartsWith("Error") ? "danger" : "success";
+                    <div class="alert alert-@statusMessageClass" role="alert">
+                        @errorMessage
+                    </div>
+                }
+
+                <EditForm Model="Input" method="post" OnValidSubmit="LoginHandle" FormName="login">
+                    <DataAnnotationsValidator />
+                    <h2>Use a local account to log in.</h2>
+                    <hr />
+                    <FluentValidationSummary class="text-danger" role="alert" />
+                    <FluentStack Orientation="Orientation.Vertical">
+                        <FluentTextField Name="Input.Username" @bind-Value="Input.Username" AutoComplete="username" Required="true" Placeholder="username" Label="Username" Style="width: 100%" />
+                        <FluentValidationMessage For="() => Input.Username" class="text-danger" />
+                        <FluentTextField type="password" Name="Input.Password" @bind-Value="Input.Password" AutoComplete="current-password" Required="true" Placeholder="password" Label="Password" Style="width: 100%" />
+                        <FluentValidationMessage For="() => Input.Password" class="text-danger" />
+                        <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" />
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%" Disabled=@processing>Log in</FluentButton>
+                        <div>
+                            <p>
+                                <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ForgotPassword">Forgot your password?</FluentAnchor>
+                            </p>
+                            <p>
+                                <FluentAnchor Appearance="Appearance.Hypertext" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</FluentAnchor>
+                            </p>
+                            <p>
+                                <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ResendEmailConfirmation">Resend email confirmation</FluentAnchor>
+                            </p>
+                        </div>
+                    </FluentStack>
+                </EditForm>
+            </Card>
+
+        }
+    </div>
+</FluentStack>
+
+@code {
+    private string? errorMessage;
+
+    //[CascadingParameter]
+    //private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private bool processing;
+
+    protected override void OnInitialized()
+    {
+        if (CurrentUser.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    public async Task LoginHandle()
+    {
+        var login = await AuthProvider.LoginAsync(Input.Username, Input.Password, Input.RememberMe);
+
+        if (login.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
+        }
+
+        errorMessage = "Error: Invalid login attempt.";
+    }
+
+    private void ToggleState()
+    {
+        processing = !processing;
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string Username { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+}

@@ -1,0 +1,38 @@
+﻿@inject AuthenticationStateProvider AuthProvider
+
+<AuthorizeView>
+    <Authorized>
+        <FluentNavLink Href="Account/Manage">@CurrentUser.Username</FluentNavLink>
+        <FluentButton Type="ButtonType.Button" Style="width: 100%;" OnClick="Logout">Logout</FluentButton>
+    </Authorized>
+    <NotAuthorized>
+        <FluentNavLink Href="Account/Login">Login</FluentNavLink>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    /*
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+    */
+    public void Logout()
+    {
+        NavigationManager.RedirectToLogout();
+    }
+}

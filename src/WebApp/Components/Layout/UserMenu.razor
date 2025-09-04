@@ -1,0 +1,61 @@
+﻿@implements IDisposable
+
+<AuthorizeView>
+    <Authorized>
+        <FluentProfileMenu Initials="@CurrentUser.Username?.First().ToString().ToUpper()">
+            <StartTemplate>
+                @CurrentUser.FirstName @CurrentUser.LastName
+            </StartTemplate>
+            <HeaderTemplate>
+                <FluentLabel Typo="@Typography.Header">COMPANY_NAME</FluentLabel>
+            </HeaderTemplate>
+            <ChildContent>
+                <FluentPersona Name="@CurrentUser.FullName"
+                               Status="PresenceStatus.Available"
+                               StatusSize="PresenceBadgeSize.Small"
+                               StatusTitle="He is available"
+                               Image="/images/avatar.jpg"
+                               ImageSize="50px">
+                </FluentPersona>
+                <FluentMenuItem Class="mt-3">
+                    <span slot="start"><FluentIcon Value="@(new Icons.Regular.Size24.ClipboardPaste())" Color="Color.Neutral" Slot="start" /></span>
+                    Menu item 4 with Icon
+                </FluentMenuItem>
+            </ChildContent>
+            <FooterTemplate>
+                <FluentStack>
+                    <FluentSpacer />
+
+                    <form action="account/post-logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <FluentButton Type="ButtonType.Submit" Style="width: 100%;">Logout</FluentButton>
+                    </form>
+
+                </FluentStack>
+            </FooterTemplate>
+        </FluentProfileMenu>
+
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

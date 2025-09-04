@@ -1,0 +1,95 @@
+﻿@page "/roles"
+
+@using Light.Identity
+
+@attribute [MustHavePermission(Permissions.Roles.View)]
+
+<Table State="state">
+    <ButtonsContent>
+        <IconActionButtons IconAction="@IconActionButtons.Action.Create" OnClick="OpenCreateDialogAsync" />
+    </ButtonsContent>
+    <HeadContent>
+        <th>Name</th>
+        <th>Desc.</th>
+        <th></th>
+    </HeadContent>
+    <RowTemplate>
+
+        <td>
+            @context.Name
+        </td>
+        <td>@context.Description</td>
+        <td>
+            <IconActionButtons IconAction="@IconActionButtons.Action.Update" OnClick="() => OpenUpdatePanel(context)" />
+            <IconActionButtons IconAction="@IconActionButtons.Action.Delete" OnClick="() => DeleteRoleAsync(context)" />
+        </td>
+
+    </RowTemplate>
+</Table>
+
+@code {
+    private DataTable<RoleDto> state = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(RoleService.GetAsync)
+        {
+            SearchFunc = (searchValue, e) =>
+                e.Name.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+        };
+
+        await state.ReloadAsync();
+    }
+
+    private async Task OpenCreateDialogAsync()
+    {
+        DialogParameters parameters = new()
+        {
+            Title = $"Create new role",
+            PreventDismissOnOverlayClick = true,
+            PreventScroll = true,
+        };
+
+        var dialog = await DialogService.ShowDialogAsync<AddRole_Dialog>(parameters);
+        DialogResult? dialogResult = await dialog.Result;
+
+        if (!dialogResult.Cancelled && dialogResult.Data != null)
+        {
+            var result = (Result)dialogResult.Data;
+
+            if (result.Succeeded)
+            {
+                await state.ReloadAsync();
+            }
+        }
+    }
+
+    private Task DeleteRoleAsync(RoleDto role)
+    {
+        return CallGuarded.ExecuteIfConfirmAsync(
+            () => RoleService.DeleteAsync(role.Id),
+            $"Confirm delete role {role.Name}?",
+            $"{role.Name} deleted",
+            state.ReloadAsync);
+    }
+
+    private async Task OpenUpdatePanel(RoleDto role)
+    {
+        var dialog = await DialogService.ShowPanelAsync<UpdateRoles_Panel>(role.Id, new DialogParameters<string>()
+        {
+            Content = role.Id,
+            Alignment = HorizontalAlignment.Right,
+            Title = $"{role.Name}",
+            PrimaryAction = null,
+            SecondaryAction = null,
+            PreventDismissOnOverlayClick = true,
+        });
+
+        var dialogResult = await CallGuarded.GetDialogResultAsync(dialog);
+
+        if (dialogResult.Succeeded)
+        {
+            await state.ReloadAsync();
+        }
+    }
+}
