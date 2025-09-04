@@ -1,3 +1,8 @@
 ﻿namespace Monolith.Catalog;
 
-public record CreateCategoryRequest(string Name, string? SubOfId = null);
+public record CreateCategoryRequest
+{
+    public string Name { get; set; } = null!;
+
+    public string? SubOfId { get; set; }
+}

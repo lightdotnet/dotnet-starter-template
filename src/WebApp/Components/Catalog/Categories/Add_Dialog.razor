@@ -1,0 +1,41 @@
+﻿@implements IDialogContentComponent<string>
+
+@if (model.SubOfId != null)
+{
+    <h3 class="text-danger">@model.SubOfId</h3>
+}
+
+<div>
+    <Input Class="w-100" @bind-Value="@model.Name" Label="Name" Required />
+</div>
+
+<FluentDialogFooter>
+    <Button_Save OnClick="CreateAsync" />
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = null!;
+
+    [Parameter]
+    public string Content { get; set; } = null!;
+
+    private CreateCategoryRequest model = new();
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Content))
+        {
+            var mainCategoryId = Content;
+            model.SubOfId = mainCategoryId;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        await CallGuarded.ExecuteAsync(
+            () => CategoryService.CreateAsync(model),
+            $"Entity {model.Name} created",
+            Dialog);
+    }
+}

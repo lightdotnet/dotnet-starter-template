@@ -52,16 +52,11 @@
         };
 
         var dialog = await DialogService.ShowDialogAsync<AddRole_Dialog>(parameters);
-        DialogResult? dialogResult = await dialog.Result;
-
-        if (!dialogResult.Cancelled && dialogResult.Data != null)
+        var dialogResult = await CallGuarded.GetDialogResultAsync(dialog);
+        
+        if (dialogResult.Succeeded)
         {
-            var result = (Result)dialogResult.Data;
-
-            if (result.Succeeded)
-            {
-                await state.ReloadAsync();
-            }
+            await state.ReloadAsync();
         }
     }
 
@@ -78,7 +73,6 @@
     {
         var dialog = await DialogService.ShowPanelAsync<UpdateRoles_Panel>(role.Id, new DialogParameters<string>()
         {
-            Content = role.Id,
             Alignment = HorizontalAlignment.Right,
             Title = $"{role.Name}",
             PrimaryAction = null,

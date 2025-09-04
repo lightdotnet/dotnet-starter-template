@@ -1,0 +1,81 @@
+﻿@page "/categories"
+
+<Table State="state">
+    <ButtonsContent>
+        <IconActionButtons IconAction="@IconActionButtons.Action.Create" OnClick="() => OpenAddDialogAsync()" />
+    </ButtonsContent>
+    <HeadContent>
+        <th>Name</th>
+        <th>Sub Categories</th>
+        <th></th>
+    </HeadContent>
+    <RowTemplate>
+
+        <td>
+            @context.Name
+        </td>
+
+        <td>
+            @foreach (var subCategory in context.SubCategories)
+            {
+                <div>
+                    @subCategory.Name
+                    <IconActionButtons IconAction="@IconActionButtons.Action.Delete" OnClick="() => DeleteAsync(subCategory.Name, subCategory.Id)" />
+                </div>
+            }
+        </td>
+
+        <td>
+            <IconActionButtons IconAction="@IconActionButtons.Action.Create" OnClick="() => OpenAddDialogAsync(context.Id)" />
+
+            @if (!context.SubCategories.Any())
+            {
+                <IconActionButtons IconAction="@IconActionButtons.Action.Delete" OnClick="() => DeleteAsync(context.Name, context.Id)" />
+            }
+        </td>
+
+    </RowTemplate>
+</Table>
+
+@code {
+    private DataTable<CategoryVm> state = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(CategoryService.GetAsync)
+        {
+            SearchFunc = (searchValue, e) =>
+                e.Name.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+        };
+
+        await state.ReloadAsync();
+    }
+
+    private async Task OpenAddDialogAsync(string id = "")
+    {
+        DialogParameters<CategoryDto> parameters = new()
+        {
+            Title = $"Add new",
+            PreventDismissOnOverlayClick = true,
+            PreventScroll = true,
+            Width = "400px",
+        };
+
+        var dialog = await DialogService.ShowDialogAsync<Add_Dialog>(id, parameters);
+        var result = await CallGuarded.GetDialogResultAsync(dialog);
+        
+        if (result.Succeeded)
+        {
+            await state.ReloadAsync();
+        }
+    }
+
+    private Task DeleteAsync(string name, string id)
+    {
+        return CallGuarded.ExecuteIfConfirmAsync(
+            () => CategoryService.DeleteAsync(id),
+            $"Confirm delete {name}?",
+            $"{name} deleted",
+            state.ReloadAsync);
+    }
+}
