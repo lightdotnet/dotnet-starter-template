@@ -10,4 +10,10 @@ public class ViewIcon
     public static Icon View => new Icons20.ContentView();
 
     public static Icon Refresh => new Icons20.ArrowClockwise();
+
+    public static Icon Add => new Icons20.AddCircle();
+
+    public static Icon Edit => new Icons20.Edit();
+
+    public static Icon Delete => new Icons20.Delete();
 }

@@ -14,11 +14,8 @@ public class Permissions
         [Display(Name = "Push notifications", Description = "use this to push notifications")]
         public const string Notification = $"{nameof(System)}.{nameof(Notification)}";
 
-        [Display(Name = "Job Queue", Description = "Hangfire jobs management")]
-        public const string JobQueue = $"{nameof(System)}.{nameof(JobQueue)}";
-
         [Display(Name = "", Description = "Use this for access manager resources")]
-        public const string Manager = $"{nameof(System)}.{nameof(JobQueue)}";
+        public const string Manager = $"{nameof(System)}.{nameof(Manager)}";
     }
 
     [DisplayName("Users")]
@@ -41,8 +38,11 @@ public class Permissions
 
         [Display(Description = "use this to view roles list")]
         public const string View = $"{_role}.{nameof(View)}";
+
         public const string Create = $"{_role}.{nameof(Create)}";
+
         public const string Update = $"{_role}.{nameof(Update)}";
+
         public const string Delete = $"{_role}.{nameof(Delete)}";
     }
 }

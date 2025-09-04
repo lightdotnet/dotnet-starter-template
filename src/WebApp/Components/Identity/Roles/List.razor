@@ -48,6 +48,7 @@
             Title = $"Create new role",
             PreventDismissOnOverlayClick = true,
             PreventScroll = true,
+            Width = "400px",
         };
 
         var dialog = await DialogService.ShowDialogAsync<AddRole_Dialog>(parameters);

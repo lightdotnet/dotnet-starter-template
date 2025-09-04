@@ -1,8 +1,9 @@
 ﻿<FluentButton 
     Type="buttonType"
-    IconStart="@(CustomIcon == null ? icon : CustomIcon)"
-    Color="color"
-    OnClick="OnClick" />
+    Class="@Class"
+    OnClick="OnClick">
+    <FluentIcon Value="@(CustomIcon == null ? icon : CustomIcon)" Color="@color" />
+</FluentButton>
 
 @code {
     [Parameter]
@@ -20,6 +21,9 @@
     [Parameter]
     public Icon? CustomIcon { get; set; }
 
+    [Parameter]
+    public string? Class { get; set; }
+
     public enum Action
     {
         View,
@@ -33,20 +37,33 @@
 
     private Icon icon = ViewIcon.View;
 
-
     private ButtonType buttonType => Submit ? ButtonType.Submit : ButtonType.Button;
+
+    private Color? color;
 
     protected override void OnInitialized()
     {
         switch (IconAction)
         {
-            case Action.Create:
-                {
-                    break;
-                }
             case Action.Refresh:
                 {
                     icon = ViewIcon.Refresh;
+                    break;
+                }
+            case Action.Create:
+                {
+                    icon = ViewIcon.Add;
+                    break;
+                }
+            case Action.Update:
+                {
+                    icon = ViewIcon.Edit;
+                    break;
+                }
+            case Action.Delete:
+                {
+                    icon = ViewIcon.Delete;
+                    color = Color.Error;
                     break;
                 }
         }

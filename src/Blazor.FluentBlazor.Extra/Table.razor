@@ -3,7 +3,14 @@
 <Card>
 
     <div class="d-flex justify-content-between mb-3">
-        <IconActionButtons IconAction="@IconActionButtons.Action.Refresh" OnClick="ReloadAsync" />
+        <div>
+            <IconActionButtons IconAction="@IconActionButtons.Action.Refresh" OnClick="ReloadAsync" />
+
+            @if (ButtonsContent?.HasSingleTarget is true)
+            {
+                @ButtonsContent
+            }
+        </div>
 
         <FluentSearch Value="@searchValue" ValueChanged="OnLocalSearchAsync" Placeholder="search..." Class="mt-0" />
     </div>
@@ -52,9 +59,6 @@
 </Card>
 
 @code {
-    [Parameter]
-    public RenderFragment? SearchContent { get; set; }
-
     [Parameter]
     public RenderFragment? ButtonsContent { get; set; }
 

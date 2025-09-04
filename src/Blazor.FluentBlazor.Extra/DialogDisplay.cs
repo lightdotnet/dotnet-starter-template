@@ -7,8 +7,10 @@ internal class DialogDisplay(IDialogService dialogService) : IDialogDisplay
 {
     public async Task<bool> ShowWarning(string message)
     {
-        var res = await dialogService.ShowWarningAsync(message);
+        var dialog = await dialogService.ShowWarningAsync(message);
 
-        return !res.Result.IsCanceled;
+        DialogResult? dialogResult = await dialog.Result;
+
+        return !dialogResult.Cancelled;
     }
 }
