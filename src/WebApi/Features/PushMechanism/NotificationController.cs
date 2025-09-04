@@ -4,7 +4,7 @@ using Monolith.Endpoints;
 using Monolith.Identity.Notifications;
 using Monolith.Notifications;
 
-namespace Monolith.Features.Identity;
+namespace Monolith.Features.PushMechanism;
 
 [ApiExplorerSettings(GroupName = "Push")]
 public class NotificationController(

@@ -36,6 +36,8 @@ public static class DependencyInjection
             })
             .AddDefaultTokenProviders();
 
+        services.AddDefaultUserManager();
+        services.AddDefaultRoleManager();
         services.AddJwtTokenProvider();
 
         return identityBuilder;

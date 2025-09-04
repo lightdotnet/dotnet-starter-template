@@ -94,7 +94,7 @@ internal class TokenService(
 
     public virtual Task<bool> CheckInvalidUser(User user)
     {
-        var isInvalid = user.Status.IsActive is false // use is not active
+        var isInvalid = user.Status.IsActive is false // user is not active
             || user.Deleted != null; // user is deleted
 
         return Task.FromResult(isInvalid);

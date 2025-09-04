@@ -11,5 +11,7 @@ public class IdentityModule : AppModule
         services.AddIdentityModule(configuration);
 
         services.AddJwtAuthentication(configuration);
+
+        StaticLogger.ModuleInjected(GetType().Name);
     }
 }
