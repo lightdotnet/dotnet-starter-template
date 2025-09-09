@@ -1,0 +1,8 @@
+  <Project>
+    <PropertyGroup>
+        <!-- Remove this to turn on warnings for missing XML Comments -->
+        <!--
+        <NoWarn>NU1803</NoWarn>
+        -->
+    </PropertyGroup>
+  </Project>

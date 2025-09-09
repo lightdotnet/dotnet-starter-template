@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ModuleName.Application</RootNamespace>
+    <AssemblyName>ModuleName.Application</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModuleName.Contracts\ModuleName.Contracts.csproj" />
+    <ProjectReference Include="..\ModuleName.Domain\ModuleName.Domain.csproj" />
+	<ProjectReference Include="..\Monolith.Contracts\Monolith.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

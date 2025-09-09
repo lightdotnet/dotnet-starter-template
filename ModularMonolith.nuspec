@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>ModularMonolith.Solution.Template</id>
+    <title>ASP.NET Core Modular Monolith Solution Template</title>
+    <version>1.0.0.4</version>
+    <authors>minhvu</authors>
+    <description>
+      Modular Monolith Solution Template popularized by minhvu.
+    </description>
+    <language>en-US</language>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/lightdotnet/dotnet-starter-template</projectUrl>
+    <releaseNotes>
+      * Add new structure projects
+    </releaseNotes>
+    <packageTypes>
+      <packageType name="Template" />
+    </packageTypes>
+    <tags>Modular Monolith Architecture ddd domain-driven-design modular-monolith-architecture modular monolith architecture minhvu SOLID</tags>
+    <icon>icon.png</icon>
+    <readme>README.md</readme>
+  </metadata>
+  <files>
+    <file src="README.md" />
+    <file src=".template.config\icon.png" />
+    <file src=".\**" target="content" exclude="**\bin\**;**\obj\**;**\.git\**;**\.github\**;**\*.user;**\.vs\**;**\.vscode\**;**\.gitignore;**\sample\**;**\logs\**;" />
+  </files>
+</package>
