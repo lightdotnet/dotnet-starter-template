@@ -1,2 +1,2 @@
-# Identity.BlazorServer
-AspNetCore Identity with Blazor Server
+# .NET Starter Template
+AspNetCore Template
