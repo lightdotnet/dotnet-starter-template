@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
-using Monolith.WebAdmin.Core.Auth;
 using Monolith.HttpApi.Common.Interfaces;
+using Monolith.WebAdmin.Core.Auth;
 using System.Security.Claims;
 
 namespace Monolith.WebAdmin.Services;
@@ -14,7 +14,12 @@ public class JwtAuthStateProvider(
 
     public ClaimsPrincipal? CurrentUser { get; private set; }
 
-    public Task<string?> GetAccessTokenAsync() => tokenStorage.GetAccessTokenAsync();
+    public async Task<string?> GetAccessTokenAsync()
+    {
+        var tokenData = await tokenStorage.GetAsync();
+
+        return tokenData?.AccessToken;
+    }
 
     public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {

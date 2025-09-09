@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Monolith.WebAdmin.Core.Auth;
 using Monolith.HttpApi.Identity;
+using Monolith.WebAdmin.Core.Auth;
 using System.Security.Claims;
 
 namespace Monolith.WebAdmin.Services;
@@ -13,13 +13,17 @@ public interface IAuthService
 }
 
 public class AuthService(
-    TokenHttpService tokenHttpService,
     TokenStorage tokenStorage,
     IHttpContextAccessor httpContextAccessor) : IAuthService
 {
+    private readonly HttpContext _httpContext = httpContextAccessor.HttpContext
+        ?? throw new ArgumentNullException("HttpContext is null");
+
     public async Task<Result> LoginAsync(string username, string password, bool remember)
     {
-        var getToken = await tokenHttpService.GetTokenAsync(username, password);
+        var tokenService = _httpContext.RequestServices.GetRequiredService<TokenHttpService>();
+
+        var getToken = await tokenService.GetTokenAsync(username, password);
 
         if (getToken.Succeeded is false)
         {
@@ -28,8 +32,7 @@ public class AuthService(
 
         var accessToken = getToken.Data.AccessToken;
 
-        // Store the token securely (e.g., in session or secure storage)
-        await tokenStorage.SetAccessTokenAsync(accessToken);
+        var tokenData = new UserTokenData(accessToken, getToken.Data.ExpiresIn);
 
         var userClaims = JwtReader.ReadClaims(accessToken);
 
@@ -42,12 +45,14 @@ public class AuthService(
         var authProperties = new AuthenticationProperties
         {
             IsPersistent = remember,  // "Remember me"
-            //ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+            ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(tokenData.ExpiresIn)
         };
 
         // Sign in using Identity's scheme
-        await httpContextAccessor.HttpContext!
-            .SignInAsync(claimsPrincipal, authProperties);
+        await _httpContext.SignInAsync(claimsPrincipal, authProperties);
+
+        // Store the token securely (e.g., in session or secure storage)
+        await tokenStorage.SaveAsync(tokenData);
 
         return Result.Success();
     }
@@ -55,7 +60,7 @@ public class AuthService(
     public Task LogoutAsync()
     {
         return Task.WhenAll(
-            httpContextAccessor.HttpContext!.SignOutAsync(),
+            _httpContext.SignOutAsync(),
             tokenStorage.ClearAsync()
         );
     }

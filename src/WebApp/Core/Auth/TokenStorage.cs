@@ -2,9 +2,9 @@
 
 public abstract class TokenStorage
 {
-    public abstract Task<string?> GetAccessTokenAsync();
+    public abstract Task<UserTokenData?> GetAsync();
 
-    public abstract Task SetAccessTokenAsync(string accessToken);
+    public abstract Task SaveAsync(UserTokenData token);
 
     public abstract Task ClearAsync();
 }

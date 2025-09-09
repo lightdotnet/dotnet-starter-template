@@ -1,6 +1,4 @@
-﻿using Monolith.WebAdmin.Core.Auth;
-
-namespace Monolith.WebAdmin.Services.Storage;
+﻿namespace Monolith.WebAdmin.Services.Storage;
 
 /// <remarks>
 /// Please make sure:
@@ -8,13 +6,14 @@ namespace Monolith.WebAdmin.Services.Storage;
 ///     UseSession() to IApplicationBuilder
 /// before application start.
 /// </remarks>
+/*
 public class TokenSessionStorage(IHttpContextAccessor httpContextAccessor)
     : TokenStorage
 {
     // Using a fixed key for simplicity, consider using a more complex key management strategy for production scenarios.
     private const string Key = "client";
 
-    public override Task<string?> GetAccessTokenAsync()
+    public override Task<string?> GetAsync()
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
@@ -45,3 +44,4 @@ public class TokenSessionStorage(IHttpContextAccessor httpContextAccessor)
         return Task.CompletedTask;
     }
 }
+*/

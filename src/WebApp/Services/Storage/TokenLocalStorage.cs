@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Monolith.WebAdmin.Core.Auth;
+﻿namespace Monolith.WebAdmin.Services.Storage;
 
-namespace Monolith.WebAdmin.Services.Storage;
-
-public class TokenLocalStorage(ProtectedLocalStorage storage) : TokenStorage
+/*
+public class TokenLocalStorage(ProtectedLocalStorage storage)
 {
     private const string Key = "client";
 
@@ -32,3 +30,4 @@ public class TokenLocalStorage(ProtectedLocalStorage storage) : TokenStorage
         await storage.DeleteAsync(Key);
     }
 }
+*/

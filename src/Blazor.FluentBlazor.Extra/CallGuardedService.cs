@@ -34,7 +34,7 @@ public class CallGuardedService(
 
         if (isConfirm == true)
         {
-            var result  = await runFunc();
+            var result = await runFunc();
 
             if (result.Succeeded)
             {

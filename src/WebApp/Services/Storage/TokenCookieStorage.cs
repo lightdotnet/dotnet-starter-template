@@ -12,7 +12,7 @@ public class TokenCookieStorage(
 
     private const string Key = "client";
 
-    public override Task<string?> GetAccessTokenAsync()
+    public override Task<UserTokenData?> GetAsync()
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
@@ -20,29 +20,25 @@ public class TokenCookieStorage(
 
             if (!string.IsNullOrEmpty(protectedValue))
             {
-                return Task.FromResult<string?>(_protector.Unprotect(protectedValue));
+                var data = UserTokenData.Read(_protector.Unprotect(protectedValue));
+
+                return Task.FromResult(data);
             }
         }
 
-        return Task.FromResult<string?>(default);
+        return Task.FromResult<UserTokenData?>(default);
     }
 
-    public override Task SetAccessTokenAsync(string accessToken)
+    public override Task SaveAsync(UserTokenData token)
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
-            var protectedValue = _protector.Protect(accessToken);
+            var protectedValue = _protector.Protect(token.ToString());
 
-            httpContext.Response.Cookies.Append(
-                Key,
-                protectedValue,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7),
-                });
+            httpContext.Response.Cookies.Append(Key, protectedValue, new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddSeconds(token.ExpiresIn),
+            });
         }
 
         return Task.CompletedTask;

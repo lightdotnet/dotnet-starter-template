@@ -12,7 +12,6 @@ public static class NavigationManagerExtensions
         return absoluteUri.PathAndQuery[1..];
     }
 
-
     public static void RedirectToLogin(this NavigationManager navigationManager)
     {
         var loginPath = "account/login";
