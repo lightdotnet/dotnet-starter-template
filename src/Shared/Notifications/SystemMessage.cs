@@ -8,5 +8,5 @@ public record SystemMessage : INotificationMessage
 
     public string? Url { get; set; }
 
-    public bool ByMessage { get; set; } = false;
+    public bool ByMessage { get; set; }
 }

@@ -1,10 +1,12 @@
-﻿using Monolith.Notifications;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Monolith.HttpApi.Common.Interfaces;
+using Monolith.Notifications;
 
 namespace Monolith.Core;
 
-public class SignalRClient(ITokenProvider tokenService, IWebSettings webSettings) : IAsyncDisposable
+public class SignalRClient(
+    ITokenProvider tokenService,
+    IWebSettings webSettings) : IAsyncDisposable
 {
     private HubConnection? _hubConnection;
 
@@ -35,6 +37,8 @@ public class SignalRClient(ITokenProvider tokenService, IWebSettings webSettings
         try
         {
             await _hubConnection.StartAsync();
+
+            Console.WriteLine($"SignalR connected");
         }
         catch (Exception ex)
         {

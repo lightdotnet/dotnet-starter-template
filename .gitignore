@@ -419,3 +419,8 @@ FodyWeavers.xsd
 
 # Mac OS
 *.DS_Store
+
+# Sqlite
+*.db
+*.db-shm
+*.db-wal

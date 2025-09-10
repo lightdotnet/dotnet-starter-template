@@ -62,16 +62,9 @@ public class NotificationController(
     {
         await notificationService.SaveAsync(fromUserId, fromName, toUserId, request);
 
-        if (request.ByMessage)
-        {
-            // send notify after save record for load notification entries from API when receive
-            await hub.SendAsync(request, toUserId);
-        }
-        else
-        {
-            // send notify to user by SignalR
-            await hub.NotifyAsync(toUserId);
-        }
+        // send notify after save record for load notification entries from API when receive
+        // *** note: must send message include to WebClient for client consume
+        await hub.SendAsync(request, toUserId);
 
         return Ok();
     }
