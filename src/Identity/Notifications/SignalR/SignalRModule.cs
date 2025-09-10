@@ -17,7 +17,7 @@ public class SignalRModule : AppModule
 
         services.AddScoped<SignalRHub>();
 
-        services.AddScoped<IHubContext, NotificationHubContext>();
+        services.AddScoped<IHubService, HubService>();
 
         // UseCases
         services.AddScoped<INotificationService, NotificationService>();

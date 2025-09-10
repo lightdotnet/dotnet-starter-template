@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+	<RootNamespace>Monolith</RootNamespace>
+	<AssemblyName>Monolith.WebAssemblyApp</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Blazored.LocalStorage" />
+	<PackageReference Include="Lightsoft.MudBlazor" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+	<PackageReference Include="MudBlazor" />
+	<PackageReference Include="MudBlazor.ThemeManager" />
+	<PackageReference Include="QRCoder" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Authorization\Authorization.csproj" />
+    <ProjectReference Include="..\..\HttpApi.Client\HttpApi.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\sounds\noti.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

@@ -10,7 +10,7 @@ namespace Monolith.Features.PushMechanism;
 public class NotificationController(
     ICurrentUser currentUser,
     IUserService userService,
-    IHubContext hub,
+    IHubService hub,
     INotificationService notificationService) : VersionedApiController
 {
     [HttpGet]
@@ -46,7 +46,14 @@ public class NotificationController(
     [HttpGet("read/{id}")]
     public async Task<IActionResult> ReadAsync(string id)
     {
-        await notificationService.ReadAsync(id);
+        await notificationService.MarkAsReadAsync(id);
+        return Ok();
+    }
+
+    [HttpPut("read_all")]
+    public async Task<IActionResult> ReadAllAsync([FromBody] string userId)
+    {
+        await notificationService.ReadAllAsync(userId);
         return Ok();
     }
 
@@ -55,8 +62,16 @@ public class NotificationController(
     {
         await notificationService.SaveAsync(fromUserId, fromName, toUserId, request);
 
-        // send notify after save record for load notification entries from API when receive
-        await hub.SendAsync(toUserId, request);
+        if (request.ByMessage)
+        {
+            // send notify after save record for load notification entries from API when receive
+            await hub.SendAsync(request, toUserId);
+        }
+        else
+        {
+            // send notify to user by SignalR
+            await hub.NotifyAsync(toUserId);
+        }
 
         return Ok();
     }
@@ -73,10 +88,10 @@ public class NotificationController(
 
         foreach (var user in getUsers)
         {
-            await notificationService.SaveAsync("System", null, user.Id, request);
+            await notificationService.SaveAsync("", null, user.Id, request);
 
             // send notify after save record for load notification entries from API when receive
-            await hub.SendAsync(user.Id, request);
+            await hub.SendAsync(request, user.Id);
         }
 
         return Ok();
@@ -85,7 +100,7 @@ public class NotificationController(
     [HttpPost("force_logout")]
     public async Task<IActionResult> ForceLogout([FromBody] ForceLogoutMessage request)
     {
-        await hub.SendAsync(request.UserId, request);
+        await hub.SendAsync(request, request.UserId);
 
         return Ok();
     }

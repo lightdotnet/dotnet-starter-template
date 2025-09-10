@@ -1,0 +1,107 @@
+﻿<MudDialog Style="position: relative">
+    <DialogContent>
+
+        <EditForm Model="@newUser" method="post" OnValidSubmit="OnSubmitAsync" FormName="createForm">
+
+            <DataAnnotationsValidator />
+
+            <div class="row mb-3">
+                <div class="col">
+                    <FormLabel Title="Username" Required />
+                    <Input T="string" Value=newUser.UserName Required ValueChanged=SearchUserDomain />
+                </div>
+                <div class="col">
+                    <FormLabel Title="Password" Required />
+                    <Input_Password @bind-Value=newUser.Password />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <FormLabel Title="FirstName" />
+                    <Input @bind-Value=newUser.FirstName />
+                </div>
+                <div class="col">
+                    <FormLabel Title="LastName" />
+                    <Input @bind-Value=newUser.LastName />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <FormLabel Title="Email" />
+                    <Input @bind-Value=newUser.Email />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <FormLabel Title="PhoneNumber" />
+                    <Input @bind-Value=newUser.PhoneNumber />
+                </div>
+                <div class="col">
+                    <FormLabel Title="ExternalLogin" />
+                    <Input @bind-Value=newUser.AuthProvider />
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <IconActionButtons IconAction="IconActionButtons.Action.Save" Submit />
+            </div>
+
+        </EditForm>
+
+    </DialogContent>
+
+    <DialogActions>
+        <MudOverlay Visible="searching" DarkBackground="true" Absolute="true">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </MudOverlay>
+    </DialogActions>
+
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    public IMudDialogInstance dialog { get; set; } = default!;
+
+    private bool searching = false;
+
+    private CreateUserRequest newUser = new();
+
+    private async Task SearchUserDomain(string? username)
+    {
+        ToggleSearchStatus();
+
+        newUser.UserName = username;
+
+        if (string.IsNullOrEmpty(username))
+            return;
+
+        var getDomainUser = await UserService.GetDomainUserAsync(username);
+
+        if (getDomainUser.Succeeded)
+        {
+            newUser.FirstName = getDomainUser.Data.FirstName;
+            newUser.LastName = getDomainUser.Data.LastName;
+            newUser.Email = getDomainUser.Data.Email;
+            newUser.PhoneNumber = getDomainUser.Data.PhoneNumber;
+            newUser.AuthProvider = "AD";
+        }
+
+        ToggleSearchStatus();
+    }
+
+    private void ToggleSearchStatus()
+    {
+        searching = !searching;
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        var result = await CallGuarded.ExecuteAsync(
+            () => UserService.CreateAsync(newUser),
+            $"New user {newUser.UserName} created",
+            dialog);
+    }
+}

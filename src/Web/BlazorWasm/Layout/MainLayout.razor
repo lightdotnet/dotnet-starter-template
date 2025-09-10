@@ -1,0 +1,48 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+
+<MudThemeProvider Theme="mudTheme" IsDarkMode="@LayoutService.IsDarkMode" IsDarkModeChanged="@LayoutService.SetDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<Spinner />
+
+<audio id="notiPlayer" controls="controls" class="d-none">
+    <source src="sounds/noti.mp3" />
+</audio>
+
+@*<SpringFlowers />*@
+
+@Body
+
+@inject LayoutService LayoutService
+
+@code {
+    MudTheme mudTheme = Core.Themes.Theme.ApplicationTheme();
+
+    public void Dispose()
+    {
+        LayoutService.MajorUpdateOccured -= LayoutServiceOnMajorUpdateOccured;
+        GC.SuppressFinalize(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            StateHasChanged();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        LayoutService.MajorUpdateOccured += LayoutServiceOnMajorUpdateOccured;
+    }
+
+    private void LayoutServiceOnMajorUpdateOccured(object? sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+}

@@ -52,10 +52,17 @@ internal class NotificationService(AppIdentityDbContext context) : INotification
         await context.SaveChangesAsync();
     }
 
-    public Task ReadAsync(string id)
+    public Task MarkAsReadAsync(string id)
     {
         return context.Notifications
             .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(u => u.SetProperty(p => p.ReadStatus, true));
+    }
+
+    public Task ReadAllAsync(string userId)
+    {
+        return context.Notifications
+            .Where(x => x.ToUserId == userId)
             .ExecuteUpdateAsync(u => u.SetProperty(p => p.ReadStatus, true));
     }
 }

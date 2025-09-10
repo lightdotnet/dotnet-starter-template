@@ -1,0 +1,152 @@
+﻿@using Monolith.Core.Auth
+
+<MudDialog Style="position: relative">
+    <DialogContent>
+
+        @if (Role != null)
+        {
+            <EditForm Model="@Role" method="post" OnValidSubmit=OnSubmit FormName="editForm" class="d-grid gap-3">
+
+                <DataAnnotationsValidator />
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <FormLabel Title="Name" Required />
+                        <Input @bind-Value=Role.Name />
+                    </div>
+                    <div class="col-sm-8">
+                        <FormLabel Title="Description" />
+                        <Input @bind-Value=Role.Description AutoGrow="true" />
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h4>Permissions</h4>
+
+                    @foreach (var group in appClaims.Groups)
+                    {
+                        var groupClaims = appClaims.Claims.Where(x => x.GroupName == group.Name);
+
+                        var isChecked = groupClaims.All(x => x.IsOwned == true);
+
+                        <Input_Check
+                            Label="@group.ToString()"
+                            @bind-Value:get="isChecked"
+                            @bind-Value:set="c => OnResourceTypeVisibilityChanged(group.Name, c)" />
+
+                        @foreach (var claim in groupClaims)
+                        {
+                            <Input_Check Label="@claim.Name" Style="margin-left: 25px" @bind-Value="claim.IsOwned" />
+                        }
+                    }
+
+                </div>
+
+            </EditForm>
+        }
+        else
+        {
+            <EditForm Model="@newRole" method="post" OnValidSubmit=OnSubmit FormName="createForm" class="d-grid gap-3">
+
+                <DataAnnotationsValidator />
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <FormLabel Title="Name" Required />
+                        <Input @bind-Value=newRole.Name />
+                    </div>
+                    <div class="col-sm-8">
+                        <FormLabel Title="Description" Required />
+                        <Input @bind-Value=newRole.Description AutoGrow="true" />
+                    </div>
+                </div>
+
+            </EditForm>
+        }
+
+    </DialogContent>
+
+    <DialogActions>
+        <IconActionButtons IconAction="IconActionButtons.Action.Save" OnClick="OnSubmit" />
+
+        <MudOverlay Visible="processing" DarkBackground="true" Absolute="true">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </MudOverlay>
+    </DialogActions>
+
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance dialog { get; set; } = default!;
+
+    [Parameter]
+    public RoleDto? Role { get; set; }
+
+    private bool processing = false;
+
+    private CreateRoleRequest newRole = new();
+
+    private AppClaimsVm appClaims = ClientClaimsExtensions.GetAll();
+
+    protected override async Task OnInitializedAsync()
+    {
+        processing = true;
+
+        if (Role != null)
+        {
+            var roleDetails = await RoleService.GetByIdAsync(Role.Id);
+
+            Role = roleDetails.Data;
+
+            foreach (var claim in Role.Claims)
+            {
+                var appClaim = appClaims.Claims.Where(x => x.Value == claim.Value).FirstOrDefault();
+
+                if (appClaim != null)
+                {
+                    appClaim.IsOwned = true;
+                }
+            }
+        }
+
+        processing = false;
+    }
+
+    private async Task OnSubmit()
+    {
+        if (Role != null)
+        {
+            Role.Claims = appClaims.Claims
+                .Where(x => x.IsOwned == true)
+                .Select(s => new ClaimDto
+                {
+                    Type = ClaimTypes.Permission,
+                    Value = s.Value
+                })
+                .ToList();
+            
+            await CallGuarded.ExecuteAsync(
+                () => RoleService.UpdateAsync(Role),
+                $"Role {newRole.Name} updated",
+                dialog);
+        }
+        else
+        {
+            await CallGuarded.ExecuteAsync(
+                () => RoleService.CreateAsync(newRole),
+                $"New role {newRole.Name} created",
+                dialog);
+        }
+    }
+
+    private void OnResourceTypeVisibilityChanged(string resourceType, bool isVisible)
+    {
+        var groupClaims = appClaims.Claims.Where(x => x.GroupName == resourceType);
+
+        foreach (var groupClaim in groupClaims)
+        {
+            groupClaim.IsOwned = isVisible;
+        }
+    }
+}

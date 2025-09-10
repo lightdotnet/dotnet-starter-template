@@ -12,5 +12,7 @@ public interface INotificationService
 
     Task SaveAsync(string fromUserId, string? fromName, string toUserId, SystemMessage message);
 
-    Task ReadAsync(string id);
+    Task MarkAsReadAsync(string id);
+
+    Task ReadAllAsync(string userId);
 }
