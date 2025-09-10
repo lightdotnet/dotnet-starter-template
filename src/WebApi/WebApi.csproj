@@ -11,16 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Seed.db" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Seed.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
 	<PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
 	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
 	<PackageReference Include="Lightsoft.AspNetCore.Swagger" />
