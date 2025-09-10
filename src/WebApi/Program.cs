@@ -4,8 +4,6 @@ using Spectre.Console;
 
 AnsiConsole.Write(new FigletText("Starter API").Color(Color.Blue));
 
-StaticLogger.EnsureInitialized();
-
 try
 {
     var builder = WebApplication.CreateBuilder(args);
@@ -38,8 +36,7 @@ try
 }
 catch (Exception ex) when (!ex.GetType().Name.Equals("StopTheHostException", StringComparison.Ordinal))
 {
-    StaticLogger.EnsureInitialized();
-    Log.Fatal(ex, "Unhandled exception");
+    AppLogging.Logger.Fatal(ex, "Unhandled exception");
 }
 finally
 {

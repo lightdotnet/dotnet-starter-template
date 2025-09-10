@@ -9,6 +9,6 @@ public class CatalogModule : AppModule
     {
         services.AddDbContext<CatalogContext>(configuration, DbConnectionNames.CATALOG);
 
-        StaticLogger.ModuleInjected(GetType().Name);
+        AppLogging.ModuleInjected(GetType().Name);
     }
 }
