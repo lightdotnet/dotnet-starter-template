@@ -17,7 +17,7 @@ namespace PostgreSQL.Identity
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -31,6 +31,12 @@ namespace PostgreSQL.Identity
                         .HasColumnType("text");
 
                     b.Property<string>("DeviceName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MacAddress")
                         .HasColumnType("text");
 
                     b.Property<string>("RefreshToken")

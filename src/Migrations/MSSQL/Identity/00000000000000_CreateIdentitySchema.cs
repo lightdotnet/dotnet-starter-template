@@ -76,6 +76,8 @@ namespace MSSQL.Identity
                     Revoked = table.Column<bool>(nullable: false),
                     DeviceId = table.Column<string>(maxLength: 450, nullable: true),
                     DeviceName = table.Column<string>(maxLength: 250, nullable: true),
+                    IpAddress = table.Column<string>(maxLength: 100, nullable: true),
+                    MacAddress = table.Column<string>(maxLength: 100, nullable: true),
                 },
                 constraints: table =>
                 {

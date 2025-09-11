@@ -5,102 +5,106 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Monolith.Catalog.Infrastructure.Data;
-
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Sqlite.Catalog
+namespace PostgreSQL.Catalog
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20250805131709_CreateCatalogSchema")]
+    [Migration("20250911224704_CreateCatalogSchema")]
     partial class CreateCatalogSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("Monolith.Domain.Categories.Category", b =>
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Monolith.Catalog.Domain.Categories.Category", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<long>("Created")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Disable")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
-                    b.Property<long?>("LastModified")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("SubOfId")
                         .HasMaxLength(450)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(450)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.Product", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("CategoryId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(450)");
 
                     b.Property<string>("Code")
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<long>("Created")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(1000)");
 
-                    b.Property<long?>("LastModified")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<string>("ShopId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(450)");
 
                     b.Property<string>("Tags")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -109,32 +113,32 @@ namespace Sqlite.Catalog
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.ProductImage", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.ProductImage", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<long>("Created")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(1000)");
 
-                    b.Property<long?>("LastModified")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProductId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(450)");
 
                     b.HasKey("Id");
 
@@ -143,76 +147,76 @@ namespace Sqlite.Catalog
                     b.ToTable("ProductImages");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.ProductPrice", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.ProductPrice", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<long>("Created")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("EndingDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<long?>("LastModified")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("numeric");
 
                     b.Property<string>("ProductId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(450)");
 
                     b.Property<DateTime>("StartingDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("ProductPrices");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Shops.Shop", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Shops.Shop", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("LastModified")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(250)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Shop");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.Product", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.Product", b =>
                 {
-                    b.HasOne("Monolith.Domain.Categories.Category", "Category")
+                    b.HasOne("Monolith.Catalog.Domain.Categories.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -221,9 +225,9 @@ namespace Sqlite.Catalog
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.ProductImage", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.ProductImage", b =>
                 {
-                    b.HasOne("Monolith.Domain.Products.Product", "Product")
+                    b.HasOne("Monolith.Catalog.Domain.Products.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -232,15 +236,15 @@ namespace Sqlite.Catalog
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Shops.Shop", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Shops.Shop", b =>
                 {
                     b.OwnsOne("Monolith.Status", "Status", b1 =>
                         {
                             b1.Property<string>("ShopId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("text");
 
                             b1.Property<int>("Value")
-                                .HasColumnType("INTEGER")
+                                .HasColumnType("integer")
                                 .HasColumnName("Status");
 
                             b1.HasKey("ShopId");
@@ -255,12 +259,12 @@ namespace Sqlite.Catalog
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Categories.Category", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Categories.Category", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.Product", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.Product", b =>
                 {
                     b.Navigation("Images");
                 });
