@@ -1,6 +1,4 @@
-﻿using Monolith.Core;
-using Blazored.LocalStorage;
-using Light.Blazor;
+﻿using Blazored.LocalStorage;
 
 namespace Monolith.Infrastructure;
 

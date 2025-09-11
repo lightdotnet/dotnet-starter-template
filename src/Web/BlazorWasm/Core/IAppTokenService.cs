@@ -1,5 +1,5 @@
-﻿using Monolith.Core.Auth;
-using Light.Contracts;
+﻿using Light.Contracts;
+using Monolith.Core.Auth;
 using System.Security.Claims;
 
 namespace Monolith.Core;

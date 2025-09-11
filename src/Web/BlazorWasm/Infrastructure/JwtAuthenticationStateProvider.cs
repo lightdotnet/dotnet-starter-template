@@ -1,10 +1,10 @@
-﻿using Monolith.Core;
-using Monolith.Core.Extensions;
-using Light.Contracts;
+﻿using Light.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Security.Claims;
+using Monolith.Core;
+using Monolith.Core.Extensions;
 using Monolith.HttpApi.Common.Interfaces;
+using System.Security.Claims;
 
 namespace Monolith.Infrastructure;
 

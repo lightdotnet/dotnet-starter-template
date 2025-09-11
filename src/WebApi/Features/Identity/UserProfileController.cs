@@ -61,7 +61,7 @@ public class UserProfileController(
         {
             await notificationService.MarkAsReadAsync(_userId, id);
         }
-  
+
         return Ok();
     }
 }
