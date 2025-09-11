@@ -5,11 +5,11 @@ namespace Monolith.HttpApi.Identity;
 public class TokenHttpService(IHttpClientFactory httpClientFactory)
     : TryHttpClient(httpClientFactory)
 {
-    private const string BaseUrl = "oauth/token";
+    private const string BasePath = "oauth/token";
 
     public Task<Result<TokenDto>> GetTokenAsync(string username, string password)
     {
-        var url = $"{BaseUrl}/get";
+        var url = $"{BasePath}/get";
 
         var request = new { username, password };
 
@@ -18,10 +18,16 @@ public class TokenHttpService(IHttpClientFactory httpClientFactory)
 
     public Task<Result<TokenDto>> RefreshTokenAsync(string accessToken, string refreshToken)
     {
-        var url = $"{BaseUrl}/refresh";
+        var url = $"{BasePath}/refresh";
 
         var request = new { accessToken, refreshToken };
 
         return TryPostAsync<TokenDto>(url, request);
+    }
+
+    public Task<Result> CheckTokenAsync()
+    {
+        var url = $"{BasePath}/check";
+        return TryGetAsync(url);
     }
 }

@@ -6,7 +6,7 @@ public record NotificationLookup : IPage
 
     public int PageSize { get; set; } = 20;
 
-    public string? ToUser { get; set; }
+    public string? ToUserId { get; set; }
 
     public bool OnlyUnread { get; set; } = false;
 }

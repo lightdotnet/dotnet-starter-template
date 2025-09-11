@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using Monolith.HttpApi.Identity
+@inherits LayoutComponentBase
 
 @layout MainLayout
 
@@ -10,7 +11,7 @@
                 <a href="/"><img src="/images/ASP-NET-Core-Logo.png" class="logo-image" style="height: 30px" /></a>
                 <MudSpacer />
                 <MudIconButton Icon="@darkModeIcon" Size="Size.Small" Color="Color.Inherit" Class="mr-1" OnClick="@((e) => DarkModeToggle())" />
-                <UserNotification />
+                <UserNotificationPopup />
                 <UserMenu />
             </MudAppBar>
             <MudDrawer @bind-Open="drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0">
@@ -26,6 +27,8 @@
 </AuthorizeView>
 
 @inject LayoutService LayoutService
+@inject TokenHttpService TokenService
+@inject IIdentityManager IdentityManager
 
 @code {
     bool drawerOpen = true;
@@ -40,5 +43,17 @@
     {
         darkMode = !darkMode;
         LayoutService.SetDarkMode(darkMode);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var checkTokenValid = await TokenService.CheckTokenAsync();
+
+        if (checkTokenValid.Succeeded is false)
+        {
+            await IdentityManager.LogoutAsync();
+
+            ToastService.ShowError("Your session has expired, please login again.");
+        }
     }
 }

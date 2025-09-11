@@ -1,21 +1,47 @@
 ﻿using Light.Identity;
+using Monolith.Notifications;
 
 namespace Monolith.HttpApi.Identity;
 
 public class UserProfileHttpService(IHttpClientFactory httpClientFactory) :
     TryHttpClient(httpClientFactory)
 {
-    private const string _path = "user_profile";
+    private const string BasePath = "user_profile";
 
     public Task<Result<IEnumerable<UserTokenDto>>> GetTokensAsync()
     {
-        var url = $"{_path}/token/list";
+        var url = $"{BasePath}/token/list";
         return TryGetAsync<IEnumerable<UserTokenDto>>(url);
     }
 
     public Task<Result> RevokeTokenAsync(string tokenId)
     {
-        var url = $"{_path}/token/revoke";
+        var url = $"{BasePath}/token/revoke";
         return TryPutAsync(url, tokenId);
+    }
+
+    public Task<PagedResult<NotificationDto>> GetNotificationsAsync(NotificationLookup request)
+    {
+        var url = $"{BasePath}/notification";
+        url += "?" + UriQueryBuilder.ToQueryString(request);
+        return TryGetPagedAsync<NotificationDto>(url);
+    }
+
+    public Task<Result<NotificationDto>> GetByIdAsync(string id)
+    {
+        var url = $"{BasePath}/notification/{id}";
+        return TryGetAsync<NotificationDto>(url);
+    }
+
+    public Task<Result<int>> CountUnreadAsync()
+    {
+        var url = $"{BasePath}/notification/count_unread";
+        return TryGetAsync<int>(url);
+    }
+
+    public Task<Result> ReadAsync(string id)
+    {
+        var url = $"{BasePath}/notification/read";
+        return TryPutAsync(url, id);
     }
 }

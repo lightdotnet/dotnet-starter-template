@@ -29,11 +29,11 @@
                 <div class="col-6">
                     @if (unreadFilter)
                     {
-                        <u><b><i style="cursor: pointer" @onclick="() => LoadNotificationEntries(false)">All</i></b></u>
+                        <u><i style="cursor: pointer" @onclick="() => LoadNotificationEntries(false)">View all</i></u>
                     }
                     else
                     {
-                        <u><b><i style="cursor: pointer" @onclick="() => LoadNotificationEntries(true)">Unread</i></b></u>
+                        <u><i style="cursor: pointer" @onclick="() => LoadNotificationEntries(true)">View Unread</i></u>
                     }
                 </div>
                 <div class="col-6 text-end">
@@ -64,7 +64,7 @@
 </MudMenu>
 
 @inject SignalRClient SignalR
-@inject NotificationHttpService NotificationService
+@inject UserProfileHttpService UserProfileService
 @inject IIdentityManager IdentityManager
 
 @code {
@@ -112,12 +112,7 @@
 
     private async Task CountUnreadAsync()
     {
-        var currentUserId = CurrentUser.UserId;
-
-        if (string.IsNullOrEmpty(currentUserId))
-            return;
-
-        var countUnread = await NotificationService.CountUnreadAsync(currentUserId);
+        var countUnread = await UserProfileService.CountUnreadAsync();
 
         if (countUnread.Succeeded)
         {
@@ -131,12 +126,12 @@
         
         var notificationLookup = new NotificationLookup
         {
-            ToUser = CurrentUser.UserId,
+            ToUserId = CurrentUser.UserId,
             OnlyUnread = onlyUnread,
             PageSize = 10,
         };
 
-        var getEntries = await NotificationService.GetAsync(notificationLookup);
+        var getEntries = await UserProfileService.GetNotificationsAsync(notificationLookup);
 
         if (getEntries.Succeeded)
         {
@@ -148,7 +143,7 @@
     {
         if (notification.ReadStatus is false)
         {
-            await NotificationService.ReadAsync(notification.Id);
+            await UserProfileService.ReadAsync(notification.Id);
         }
 
         await LoadUserNotificationsAsync();
@@ -161,14 +156,9 @@
 
     private async Task ReadAllAsync()
     {
-        var currentUserId = CurrentUser.UserId;
+        await UserProfileService.ReadAsync("all");
 
-        if (!string.IsNullOrEmpty(currentUserId))
-        {
-            await NotificationService.ReadAllAsync(currentUserId);
-
-            await LoadUserNotificationsAsync();
-        }
+        await LoadUserNotificationsAsync();
     }
 
     public async ValueTask DisposeAsync()

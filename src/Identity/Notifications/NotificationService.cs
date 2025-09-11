@@ -12,7 +12,7 @@ internal class NotificationService(AppIdentityDbContext context) : INotification
     public Task<PagedResult<NotificationDto>> GetAsync(NotificationLookup request)
     {
         return context.Notifications
-            .WhereIf(!string.IsNullOrEmpty(request.ToUser), x => x.ToUserId == request.ToUser)
+            .WhereIf(!string.IsNullOrEmpty(request.ToUserId), x => x.ToUserId == request.ToUserId)
             .WhereIf(request.OnlyUnread == true, x => x.ReadStatus == false)
             .AsNoTracking()
             .OrderByDescending(o => o.Created)
@@ -20,10 +20,10 @@ internal class NotificationService(AppIdentityDbContext context) : INotification
             .ToPagedResultAsync(request);
     }
 
-    public Task<NotificationDto?> GetByIdAsync(string id)
+    public Task<NotificationDto?> GetByIdAsync(string userId, string id)
     {
         return context.Notifications
-            .Where(x => x.Id == id)
+            .Where(x => x.Id == id && x.ToUserId == userId)
             .AsNoTracking()
             .ProjectToType<NotificationDto>()
             .SingleOrDefaultAsync();
@@ -52,10 +52,10 @@ internal class NotificationService(AppIdentityDbContext context) : INotification
         await context.SaveChangesAsync();
     }
 
-    public Task MarkAsReadAsync(string id)
+    public Task MarkAsReadAsync(string userId, string id)
     {
         return context.Notifications
-            .Where(x => x.Id == id)
+            .Where(x => x.Id == id && x.ToUserId == userId)
             .ExecuteUpdateAsync(u => u.SetProperty(p => p.ReadStatus, true));
     }
 

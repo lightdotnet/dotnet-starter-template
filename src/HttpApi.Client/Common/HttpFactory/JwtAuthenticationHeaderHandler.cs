@@ -16,7 +16,8 @@ public class JwtAuthenticationHeaderHandler(ITokenProvider tokenProvider)
         var path = request.RequestUri?.AbsolutePath;
 
         // skip token endpoints
-        if (path?.Contains("oauth/token") is not true)
+        if (path?.Contains("oauth/token/get") is not true
+            && path?.Contains("oauth/token/refresh") is not true)
         {
             var token = await tokenProvider.GetAccessTokenAsync();
             if (!string.IsNullOrEmpty(token))

@@ -7,8 +7,8 @@ using Monolith.Notifications;
 namespace Monolith.Features.PushMechanism;
 
 [ApiExplorerSettings(GroupName = "Push")]
+[MustHavePermission(Permissions.System.Notification)]
 public class NotificationController(
-    ICurrentUser currentUser,
     IUserService userService,
     IHubService hub,
     INotificationService notificationService) : VersionedApiController
@@ -16,49 +16,16 @@ public class NotificationController(
     [HttpGet]
     public async Task<IActionResult> GetAsync([FromQuery] NotificationLookup request)
     {
-        var canViewAll = currentUser.HasPermission(Permissions.System.Notification);
-
-        if (!canViewAll) // view all when uses can send notify
-        {
-            request.ToUser = currentUser.UserId;
-        }
-
         var res = await notificationService.GetAsync(request);
-
         return Ok(res);
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetAsync(string id)
-    {
-        var res = await notificationService.GetByIdAsync(id);
-
-        return Ok(res);
-    }
-
-    [HttpGet("{userId}/unread/count")]
-    public async Task<IActionResult> CountUnreadAsync(string userId)
-    {
-        var res = await notificationService.CountUnreadAsync(userId);
-        return Ok(res);
-    }
-
-    [HttpGet("read/{id}")]
-    public async Task<IActionResult> ReadAsync(string id)
-    {
-        await notificationService.MarkAsReadAsync(id);
-        return Ok();
-    }
-
-    [HttpPut("read_all")]
-    public async Task<IActionResult> ReadAllAsync([FromBody] string userId)
-    {
-        await notificationService.ReadAllAsync(userId);
-        return Ok();
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendToUserId(string fromUserId, string? fromName, string toUserId, [FromBody] SystemMessage request)
+    public async Task<IActionResult> SendToUserId(
+        string fromUserId,
+        string? fromName,
+        string toUserId,
+        [FromBody] SystemMessage request)
     {
         await notificationService.SaveAsync(fromUserId, fromName, toUserId, request);
 

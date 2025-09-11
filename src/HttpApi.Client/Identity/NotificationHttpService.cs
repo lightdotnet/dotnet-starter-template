@@ -17,27 +17,6 @@ public class NotificationHttpService(IHttpClientFactory httpClientFactory) :
         return TryGetPagedAsync<NotificationDto>(url);
     }
 
-    public Task<Result<NotificationDto>> GetByIdAsync(string id)
-    {
-        var url = $"{_path}/{id}";
-
-        return TryGetAsync<NotificationDto>(url);
-    }
-
-    public Task<Result<int>> CountUnreadAsync(string userId)
-    {
-        var url = $"{_path}/{userId}/unread/count";
-
-        return TryGetAsync<int>(url);
-    }
-
-    public Task<Result<NotificationDto>> ReadAsync(string id)
-    {
-        var url = $"{_path}/read/{id}";
-
-        return TryGetAsync<NotificationDto>(url);
-    }
-
     public Task<Result> CreateAsync(string fromUserId, string? fromName, string toUserId, SystemMessage request)
     {
         var url = $"{_path}";
@@ -50,12 +29,5 @@ public class NotificationHttpService(IHttpClientFactory httpClientFactory) :
         });
 
         return TryPostAsync(url, request);
-    }
-
-    public Task<Result> ReadAllAsync(string userId)
-    {
-        var url = $"{_path}/read_all";
-
-        return TryPutAsync(url, userId);
     }
 }
