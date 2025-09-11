@@ -13,14 +13,14 @@
                             </td>
                             <td>
                                 <IconActionButtons IconAction="IconActionButtons.Action.Update" OnClick="() => UpdateAsync()" />
-                                <IconActionButtons IconAction="IconActionButtons.Action.Delete" OnClick="() => DeleteAsync(record.Type)" />
+                                <IconActionButtons IconAction="IconActionButtons.Action.Delete" OnClick="() => DeleteAsync(record)" />
                             </td>
                         </tr>
                     }
 
                     <tr>
                         <td>
-                            <Input Label="Type" Variant="Variant.Filled" @bind-Value=newClaim.Key />
+                            <Input Label="Type" Variant="Variant.Filled" @bind-Value=newClaim.Type />
                         </td>
                         <td>
                             <Input Label="Value" Variant="Variant.Filled" @bind-Value=newClaim.Value />
@@ -46,9 +46,9 @@
 
     private UserDto userProfile { get; set; } = null!;
 
-    private List<ClaimDto> userClaims = [];
+    private IList<ClaimDto> userClaims => userProfile.Claims;
 
-    private NewClaim newClaim { get; set; } = new();
+    private ClaimDto newClaim { get; set; } = new();
 
     private bool processing = false;
 
@@ -62,7 +62,6 @@
         processing = true;
 
         userProfile = await UserService.GetByIdAsync(Id);
-        userClaims = userProfile.Claims.ToList();
 
         newClaim = new(); // Reset the new claim input
 
@@ -71,19 +70,13 @@
 
     private async Task AddAsync()
     {
-        if (string.IsNullOrEmpty(newClaim.Key) || string.IsNullOrEmpty(newClaim.Value))
+        if (string.IsNullOrEmpty(newClaim.Type) || string.IsNullOrEmpty(newClaim.Value))
         {
             ToastService.ShowWarning("Key and Value are required");
             return;
         }
 
-        userClaims.Add(new ClaimDto
-        {
-            Type = newClaim.Key,
-            Value = newClaim.Value
-        });
-
-        userProfile.Claims = userClaims;
+        userClaims.Add(newClaim);
 
         await CallGuarded.ExecuteAsync(
             () => UserService.UpdateAsync(userProfile),
@@ -94,8 +87,6 @@
 
     private async Task UpdateAsync()
     {
-        userProfile.Claims = userClaims;
-
         await CallGuarded.ExecuteAsync(
             () => UserService.UpdateAsync(userProfile),
             "Claims updated successfully",
@@ -103,23 +94,14 @@
         );
     }
 
-    private async Task DeleteAsync(string key)
+    private async Task DeleteAsync(ClaimDto dto)
     {
-        userClaims.Remove(userClaims.First(x => x.Type == key));
-
-        userProfile.Claims = userClaims;
+        userClaims.Remove(dto);
 
         await CallGuarded.ExecuteAsync(
             () => UserService.UpdateAsync(userProfile),
             "Claim deleted successfully",
             () => LoadAsync()
         );
-    }
-
-    public class NewClaim
-    {
-        public string Key { get; set; } = "";
-
-        public string Value { get; set; } = "";
     }
 }
