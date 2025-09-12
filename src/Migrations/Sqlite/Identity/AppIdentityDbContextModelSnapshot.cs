@@ -30,7 +30,7 @@ namespace Sqlite.Identity
                     b.Property<string>("IpAddress")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MacAddress")
+                    b.Property<string>("PhysicalAddress")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RefreshToken")
@@ -43,7 +43,6 @@ namespace Sqlite.Identity
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<long>("TokenExpiresAt")

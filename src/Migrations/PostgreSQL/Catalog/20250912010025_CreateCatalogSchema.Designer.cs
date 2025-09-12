@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PostgreSQL.Catalog
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20250911224704_CreateCatalogSchema")]
+    [Migration("20250912010025_CreateCatalogSchema")]
     partial class CreateCatalogSchema
     {
         /// <inheritdoc />

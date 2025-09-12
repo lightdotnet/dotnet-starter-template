@@ -36,7 +36,7 @@ namespace PostgreSQL.Identity
                     b.Property<string>("IpAddress")
                         .HasColumnType("text");
 
-                    b.Property<string>("MacAddress")
+                    b.Property<string>("PhysicalAddress")
                         .HasColumnType("text");
 
                     b.Property<string>("RefreshToken")
@@ -49,7 +49,6 @@ namespace PostgreSQL.Identity
                         .HasColumnType("boolean");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("TokenExpiresAt")

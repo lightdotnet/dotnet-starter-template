@@ -25,7 +25,7 @@ namespace PostgreSQL.Identity
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false),
-                    Token = table.Column<string>(type: "text", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: true),
                     TokenExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     RefreshToken = table.Column<string>(type: "text", nullable: true),
                     RefreshTokenExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
@@ -33,7 +33,7 @@ namespace PostgreSQL.Identity
                     DeviceId = table.Column<string>(type: "text", nullable: true),
                     DeviceName = table.Column<string>(type: "text", nullable: true),
                     IpAddress = table.Column<string>(type: "text", nullable: true),
-                    MacAddress = table.Column<string>(type: "text", nullable: true)
+                    PhysicalAddress = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

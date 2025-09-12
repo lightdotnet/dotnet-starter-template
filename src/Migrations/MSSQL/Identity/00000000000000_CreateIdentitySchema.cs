@@ -69,7 +69,7 @@ namespace MSSQL.Identity
                 {
                     Id = table.Column<string>(maxLength: 450, nullable: false),
                     UserId = table.Column<string>(maxLength: 450, nullable: false),
-                    Token = table.Column<string>(nullable: false),
+                    Token = table.Column<string>(nullable: true),
                     TokenExpiresAt = table.Column<DateTimeOffset>(nullable: true),
                     RefreshToken = table.Column<string>(nullable: true),
                     RefreshTokenExpiresAt = table.Column<DateTimeOffset>(nullable: true),
@@ -77,7 +77,7 @@ namespace MSSQL.Identity
                     DeviceId = table.Column<string>(maxLength: 450, nullable: true),
                     DeviceName = table.Column<string>(maxLength: 250, nullable: true),
                     IpAddress = table.Column<string>(maxLength: 100, nullable: true),
-                    MacAddress = table.Column<string>(maxLength: 100, nullable: true),
+                    PhysicalAddress = table.Column<string>(maxLength: 100, nullable: true),
                 },
                 constraints: table =>
                 {

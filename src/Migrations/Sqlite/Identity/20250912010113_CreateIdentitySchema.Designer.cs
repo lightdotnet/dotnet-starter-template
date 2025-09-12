@@ -10,7 +10,7 @@ using Monolith.Identity.Data;
 namespace Sqlite.Identity
 {
     [DbContext(typeof(AppIdentityDbContext))]
-    [Migration("20250911224605_CreateIdentitySchema")]
+    [Migration("20250912010113_CreateIdentitySchema")]
     partial class CreateIdentitySchema
     {
         /// <inheritdoc />
@@ -33,7 +33,7 @@ namespace Sqlite.Identity
                     b.Property<string>("IpAddress")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MacAddress")
+                    b.Property<string>("PhysicalAddress")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RefreshToken")
@@ -46,7 +46,6 @@ namespace Sqlite.Identity
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<long>("TokenExpiresAt")

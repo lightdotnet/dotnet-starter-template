@@ -11,7 +11,7 @@ using Monolith.Catalog.Infrastructure.Data;
 namespace Sqlite.Catalog
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20250911224617_CreateCatalogSchema")]
+    [Migration("20250912010057_CreateCatalogSchema")]
     partial class CreateCatalogSchema
     {
         /// <inheritdoc />

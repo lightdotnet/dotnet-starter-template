@@ -23,7 +23,7 @@ namespace Sqlite.Identity
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    Token = table.Column<string>(type: "TEXT", nullable: false),
+                    Token = table.Column<string>(type: "TEXT", nullable: true),
                     TokenExpiresAt = table.Column<long>(type: "INTEGER", nullable: false),
                     RefreshToken = table.Column<string>(type: "TEXT", nullable: true),
                     RefreshTokenExpiresAt = table.Column<long>(type: "INTEGER", nullable: true),
@@ -31,7 +31,7 @@ namespace Sqlite.Identity
                     DeviceId = table.Column<string>(type: "TEXT", nullable: true),
                     DeviceName = table.Column<string>(type: "TEXT", nullable: true),
                     IpAddress = table.Column<string>(type: "TEXT", nullable: true),
-                    MacAddress = table.Column<string>(type: "TEXT", nullable: true)
+                    PhysicalAddress = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

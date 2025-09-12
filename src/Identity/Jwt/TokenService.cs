@@ -20,7 +20,7 @@ internal class TokenService(
 
     public async Task<IResult<TokenDto>> GetTokenAsync(
         string username, string password,
-        string? deviceId = null, string? deviceName = null)
+        DeviceDto? device = null)
     {
         var user = await _userManager.FindByNameAsync(username);
 
@@ -49,17 +49,20 @@ internal class TokenService(
         var tokenExpiresAt = DateTime.Now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
         var refreshTokenExpiresAt = DateTime.Today.AddDays(_jwt.RefreshTokenExpirationDays);
 
-        return await jwtTokenMananger.GenerateTokenByAsync(
+        var token = await jwtTokenMananger.GenerateTokenByAsync(
             user,
             _jwt.Issuer,
             _jwt.SecretKey,
             tokenExpiresAt,
             refreshTokenExpiresAt,
-            deviceId,
-            deviceName);
+            device);
+
+        return Result<TokenDto>.Success(token);
     }
 
-    public async Task<IResult<TokenDto>> RefreshTokenAsync(string accessToken, string refreshToken)
+    public async Task<IResult<TokenDto>> RefreshTokenAsync(
+        string accessToken, string refreshToken,
+        DeviceDto? device = null)
     {
         // get UserPrincipal from expired token
         var userPrincipal = JwtHelper.GetPrincipalFromExpiredToken(
@@ -82,14 +85,17 @@ internal class TokenService(
         var tokenExpiresAt = DateTime.Now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
         var refreshTokenExpiresAt = DateTime.Today.AddDays(_jwt.RefreshTokenExpirationDays);
 
-        return await jwtTokenMananger.RefreshTokenAsync(
+        var token = await jwtTokenMananger.RefreshTokenAsync(
             user,
             refreshToken,
             _jwt.Issuer,
             _jwt.SecretKey,
             tokenExpiresAt,
             refreshTokenExpiresAt,
-            ClaimTypes.Role, ClaimTypes.UserId);
+            ClaimTypes.Role, ClaimTypes.UserId,
+            device);
+
+        return Result<TokenDto>.Success(token);
     }
 
     public virtual Task<bool> CheckInvalidUser(User user)

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PostgreSQL.Identity
 {
     [DbContext(typeof(AppIdentityDbContext))]
-    [Migration("20250911224713_CreateIdentitySchema")]
+    [Migration("20250912010015_CreateIdentitySchema")]
     partial class CreateIdentitySchema
     {
         /// <inheritdoc />
@@ -39,7 +39,7 @@ namespace PostgreSQL.Identity
                     b.Property<string>("IpAddress")
                         .HasColumnType("text");
 
-                    b.Property<string>("MacAddress")
+                    b.Property<string>("PhysicalAddress")
                         .HasColumnType("text");
 
                     b.Property<string>("RefreshToken")
@@ -52,7 +52,6 @@ namespace PostgreSQL.Identity
                         .HasColumnType("boolean");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("TokenExpiresAt")
