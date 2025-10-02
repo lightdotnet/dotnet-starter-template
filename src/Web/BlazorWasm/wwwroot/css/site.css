@@ -1,35 +1,10 @@
-#jump-to-page {
-    background-color: #FFFFFF;
-    background-image: none;
-    border: 1px solid #e5e6e7;
-    border-radius: 1px;
-    color: inherit;
-    width: 50px;
-    font-weight: bold;
-    background: transparent;
-}
-
-    #jump-to-page::-webkit-inner-spin-button,
-    #jump-to-page::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
 .page-link {
     color: var(--mud-palette-secondary) !important;
-    box-shadow: unset !important;
-    background: transparent;
-    border: unset !important;
 }
-
-    .page-link:focus {
-        background-color: unset !important;
-    }
 
     .active > .page-link, .page-link.active {
         color: var(--mud-palette-primary) !important;
         background-color: var(--mud-palette-primary-hover) !important;
-        border-color: unset;
     }
 
 .noti-list {
