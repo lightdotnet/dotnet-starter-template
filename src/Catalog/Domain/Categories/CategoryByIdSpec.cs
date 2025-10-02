@@ -7,14 +7,14 @@ internal class CategoryByIdSpec : Specification<Category>
         Where(x => x.Id == id);
     }
 
-    // Only main categories that are not disabled
+    // Only main categories
     public CategoryByIdSpec IsMainCategory()
     {
         Where(x => string.IsNullOrEmpty(x.SubOfId));
         return this;
     }
 
-    // Only main categories that are not disabled
+    // Only categories that are not disabled
     public CategoryByIdSpec MustActive()
     {
         Where(x => !x.Disable);
