@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="$(AspnetVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="$(AspnetVersion)" PrivateAssets="all" />
 	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="$(AspnetVersion)" />
-	<PackageReference Include="MudBlazor" Version="8.12.0" />
+	<PackageReference Include="MudBlazor" Version="8.13.0" />
 	<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
 	<PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
