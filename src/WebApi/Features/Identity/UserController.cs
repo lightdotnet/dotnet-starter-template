@@ -37,7 +37,7 @@ public class UserController(
 
     [HttpPut("{id}")]
     [MustHavePermission(Permissions.Users.Update)]
-    public async Task<IActionResult> PutAsync(string id, UserDto request)
+    public async Task<IActionResult> PutAsync(string id, [FromBody] UserDto request)
     {
         if (id != request.Id)
         {
@@ -67,7 +67,7 @@ public class UserController(
         return Ok(await activeDirectoryService.GetByUserNameAsync(userName));
     }
 
-    [HttpPatch("sync_domain_users")]
+    [HttpPut("sync_domain_users")]
     public async Task<IActionResult> SyncDomainUsersAsync()
     {
         var users = await userService.GetAllAsync();
