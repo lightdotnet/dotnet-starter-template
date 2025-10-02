@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using Monolith.Auth;
 
 namespace Monolith;
 

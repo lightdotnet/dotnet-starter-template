@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<RootNamespace>Monolith</RootNamespace>
-	<AssemblyName>Monolith.Contracts.Client</AssemblyName>
+	<AssemblyName>Monolith.Contracts</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

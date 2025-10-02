@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Security.Claims;
 
-namespace Monolith.Auth;
+namespace Monolith;
 
 public abstract class PermissionList
 {

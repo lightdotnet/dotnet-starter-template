@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Monolith.Auth;
+namespace Monolith;
 
 public class Permissions
 {

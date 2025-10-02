@@ -1,6 +1,6 @@
 global using Light.Blazor;
 global using Monolith;
-global using Monolith.Auth;
+
 using Blazored.LocalStorage;
 using Light.Extensions.DependencyInjection;
 using Light.MudBlazor;

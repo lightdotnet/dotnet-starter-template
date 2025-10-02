@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Monolith.Extensions;
+using Monolith.Identity;
 using Monolith.Identity.Jwt;
 
 namespace Monolith.Features.Identity;
