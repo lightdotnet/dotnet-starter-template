@@ -3,6 +3,20 @@
 public record CreateCategoryCommand(CreateCategoryRequest Category)
     : ICommand<Result<string>>;
 
+public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCommand>
+{
+    public CreateCategoryCommandValidator()
+    {
+        RuleFor(x => x.Category).SetValidator(new CreateCategoryRequestValidator());
+
+        /*
+        RuleFor(x => x.Category.Name)
+            .NotEmpty()
+            .MaximumLength(10);
+        */
+    }
+}
+
 internal class CreateCategoryCommandHandler(CatalogContext context)
     : ICommandHandler<CreateCategoryCommand, Result<string>>
 {

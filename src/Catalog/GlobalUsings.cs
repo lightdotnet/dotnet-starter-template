@@ -2,6 +2,7 @@
 global using Light.EntityFrameworkCore.Extensions;
 global using Light.Mediator;
 global using Light.Specification;
+global using FluentValidation;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
