@@ -30,7 +30,7 @@
     <PackageVersion Include="Lightsoft.Identity" Version="9.0.9-beta7" />
     <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.9-beta7" />
     <PackageVersion Include="Lightsoft.Mail.Contracts" Version="1.0.0" />
-    <PackageVersion Include="Lightsoft.Result" Version="1.0.0" />
+    <PackageVersion Include="Lightsoft.Result" Version="1.0.0.1" />
     <PackageVersion Include="Lightsoft.Serilog" Version="1.0.0.1" />
     <PackageVersion Include="Lightsoft.SharedKernel" Version="1.0.0.4" />
     <!-- Miscellaneous -->

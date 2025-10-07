@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -75,7 +76,7 @@ namespace PostgreSQL.Catalog
                     Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     CategoryId = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false),
-                    ImageUrl = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    MainImage = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     Tags = table.Column<string>(type: "text", nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),

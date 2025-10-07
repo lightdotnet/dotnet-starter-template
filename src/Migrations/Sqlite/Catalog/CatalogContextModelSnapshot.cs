@@ -74,14 +74,14 @@ namespace Sqlite.Catalog
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
                     b.Property<long?>("LastModified")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MainImage")
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")

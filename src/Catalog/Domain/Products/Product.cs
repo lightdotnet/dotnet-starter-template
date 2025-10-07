@@ -12,7 +12,7 @@ public class Product : AuditableEntity
 
     public string CategoryId { get; set; } = null!;
 
-    public string? ImageUrl { get; set; }
+    public string? MainImage { get; set; }
 
     public string Tags { get; set; } = null!;
 

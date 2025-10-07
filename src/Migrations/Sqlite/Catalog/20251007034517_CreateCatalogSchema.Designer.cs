@@ -11,7 +11,7 @@ using Monolith.Catalog.Infrastructure.Data;
 namespace Sqlite.Catalog
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20250912010057_CreateCatalogSchema")]
+    [Migration("20251007034517_CreateCatalogSchema")]
     partial class CreateCatalogSchema
     {
         /// <inheritdoc />
@@ -77,14 +77,14 @@ namespace Sqlite.Catalog
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
                     b.Property<long?>("LastModified")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MainImage")
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")

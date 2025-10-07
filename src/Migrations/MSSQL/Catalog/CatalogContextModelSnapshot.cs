@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Monolith.Catalog.Infrastructure.Data;
 
-
 #nullable disable
 
 namespace MSSQL.Catalog
@@ -18,12 +17,12 @@ namespace MSSQL.Catalog
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Monolith.Domain.Categories.Category", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Categories.Category", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -56,7 +55,7 @@ namespace MSSQL.Catalog
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.Product", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.Product", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -80,15 +79,15 @@ namespace MSSQL.Catalog
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
                     b.Property<DateTimeOffset?>("LastModified")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MainImage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -111,7 +110,7 @@ namespace MSSQL.Catalog
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.ProductImage", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.ProductImage", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -145,7 +144,7 @@ namespace MSSQL.Catalog
                     b.ToTable("ProductImages");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.ProductPrice", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.ProductPrice", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -185,7 +184,7 @@ namespace MSSQL.Catalog
                     b.ToTable("ProductPrices");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Shops.Shop", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Shops.Shop", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -212,9 +211,9 @@ namespace MSSQL.Catalog
                     b.ToTable("Shop");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.Product", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.Product", b =>
                 {
-                    b.HasOne("Monolith.Domain.Categories.Category", "Category")
+                    b.HasOne("Monolith.Catalog.Domain.Categories.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -223,9 +222,9 @@ namespace MSSQL.Catalog
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.ProductImage", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.ProductImage", b =>
                 {
-                    b.HasOne("Monolith.Domain.Products.Product", "Product")
+                    b.HasOne("Monolith.Catalog.Domain.Products.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -234,7 +233,7 @@ namespace MSSQL.Catalog
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Shops.Shop", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Shops.Shop", b =>
                 {
                     b.OwnsOne("Monolith.Status", "Status", b1 =>
                         {
@@ -257,12 +256,12 @@ namespace MSSQL.Catalog
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Categories.Category", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Categories.Category", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("Monolith.Domain.Products.Product", b =>
+            modelBuilder.Entity("Monolith.Catalog.Domain.Products.Product", b =>
                 {
                     b.Navigation("Images");
                 });

@@ -17,7 +17,7 @@ internal class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         entity.Property(p => p.ShopId).HasMaxLength(450);
 
-        entity.Property(p => p.ImageUrl).HasMaxLength(1000);
+        entity.Property(p => p.MainImage).HasMaxLength(1000);
 
         entity.HasOne(d => d.Category)
             .WithMany(p => p.Products)

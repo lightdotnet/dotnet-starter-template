@@ -1,4 +1,5 @@
 ﻿global using Light.Contracts;
+global using Light.EntityFrameworkCore.Extensions;
 global using Light.Mediator;
 global using Light.Specification;
 global using Microsoft.EntityFrameworkCore;

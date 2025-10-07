@@ -77,7 +77,7 @@ public class CatalogContextInitialiser(
             var random = new Random();
 
             var product = Product.Create(shops[random.Next(0, 2)].Id, categories[random.Next(2, 5)].Id, $"Product Name {i}", $"Product Description {i}");
-            product.ImageUrl = productImages.First();
+            product.MainImage = productImages.First();
             product.UpdateCode($"{100000 + i}");
             product.UpdateImages(productImages);
 

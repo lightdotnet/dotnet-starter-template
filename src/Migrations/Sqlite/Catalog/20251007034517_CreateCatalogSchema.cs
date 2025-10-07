@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -75,7 +76,7 @@ namespace Sqlite.Catalog
                     Name = table.Column<string>(type: "TEXT", maxLength: 250, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
                     CategoryId = table.Column<string>(type: "TEXT", maxLength: 450, nullable: false),
-                    ImageUrl = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    MainImage = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
                     Tags = table.Column<string>(type: "TEXT", nullable: false),
                     Created = table.Column<long>(type: "INTEGER", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: true),

@@ -12,9 +12,9 @@ internal class NotificationService(AppIdentityDbContext context) : INotification
     public Task<PagedResult<NotificationDto>> GetAsync(NotificationLookup request)
     {
         return context.Notifications
+            .AsNoTracking()
             .WhereIf(!string.IsNullOrEmpty(request.ToUserId), x => x.ToUserId == request.ToUserId)
             .WhereIf(request.OnlyUnread == true, x => x.ReadStatus == false)
-            .AsNoTracking()
             .OrderByDescending(o => o.Created)
             .ProjectToType<NotificationDto>()
             .ToPagedResultAsync(request);
@@ -23,8 +23,8 @@ internal class NotificationService(AppIdentityDbContext context) : INotification
     public Task<NotificationDto?> GetByIdAsync(string userId, string id)
     {
         return context.Notifications
-            .Where(x => x.Id == id && x.ToUserId == userId)
             .AsNoTracking()
+            .Where(x => x.Id == id && x.ToUserId == userId)
             .ProjectToType<NotificationDto>()
             .SingleOrDefaultAsync();
     }
