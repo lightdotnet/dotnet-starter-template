@@ -11,7 +11,7 @@
 
     <ObjectViewer Model="identityData" />
 
-    if (CurrentUser.IsMasterUser)
+    if (CurrentUser.IsSuperUser)
     {
         <button @onclick="JSRuntime.PlayNoti">Play</button>
         <button @onclick="JSRuntime.PauseNoti">Pause</button>
@@ -34,7 +34,7 @@ else
 
         if (get is not null)
         {
-            if (CurrentUser.IsMasterUser)
+            if (CurrentUser.IsSuperUser)
             {
                 identityData = get;
             }

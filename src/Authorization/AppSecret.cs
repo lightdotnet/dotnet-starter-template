@@ -3,24 +3,15 @@
 /// <summary>
 /// Default user with full permissions.
 /// </summary>
-public abstract class DefaultUser
+public sealed class AppSecret
 {
-    public const string USER_NAME = "super";
+    public const string SUPER_USER_NAME = "super";
 
-    public static List<string> MASTER_USERS =>
+    private static List<string> SuperUsers =>
     [
-        USER_NAME,
+        SUPER_USER_NAME,
         "minhvd"
     ];
-}
 
-public abstract class DefaultRole
-{
-    public const string NAME = "super";
-
-    public static List<string> MASTER_ROLES =>
-    [
-        NAME,
-        "minhvd"
-    ];
+    public static bool IsSuper(string? userName) => SuperUsers.Any(x => x == userName);
 }

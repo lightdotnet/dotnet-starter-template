@@ -19,21 +19,21 @@ public class RoleController(IRoleService roleService) : ApiControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = Permissions.Roles.Create)]
+    [Authorize(Policy = Permissions.Roles.Manage)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateRoleRequest request)
     {
         return Ok(await roleService.CreateAsync(request));
     }
 
     [HttpPut]
-    [Authorize(Policy = Permissions.Roles.Update)]
+    [Authorize(Policy = Permissions.Roles.Manage)]
     public async Task<IActionResult> UpdateAsync([FromBody] RoleDto request)
     {
         return Ok(await roleService.UpdateAsync(request));
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Policy = Permissions.Roles.Delete)]
+    [Authorize(Policy = Permissions.Roles.Manage)]
     public async Task<IActionResult> DeleteAsync([FromRoute] string id)
     {
         return Ok(await roleService.DeleteAsync(id));

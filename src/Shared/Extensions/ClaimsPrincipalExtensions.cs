@@ -38,6 +38,9 @@ public static class ClaimsPrincipalExtensions
     public static bool IsAuthenticated(this ClaimsPrincipal principal) =>
         principal.Identity?.IsAuthenticated is true;
 
-    public static bool HasPermission(this ClaimsPrincipal principal, string claimType, string claimValue) =>
+    public static bool HasClaim(this ClaimsPrincipal principal, string claimType, string claimValue) =>
         principal.HasClaim(claimType, claimValue) is true;
+
+    public static bool HasPermission(this ClaimsPrincipal principal, string permission) =>
+        principal.HasClaim(ClaimTypes.Permission, permission) is true;
 }

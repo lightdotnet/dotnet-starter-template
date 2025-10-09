@@ -18,11 +18,8 @@
         <td>@context.Name</td>
         <td>@context.Description</td>
         <td>
-            <PermissionView Permission="@Permissions.Roles.Update">
+            <PermissionView Permission="@Permissions.Roles.Manage">
                 <IconActionButtons IconAction="IconActionButtons.Action.Update" OnClick="() => OpenUpsertDialogAsync(context)" />
-            </PermissionView>
-
-            <PermissionView Permission="@Permissions.Roles.Delete">
                 <IconActionButtons IconAction="IconActionButtons.Action.Delete" OnClick="() => DeleteAsync(context.Id, context.Name)" />
             </PermissionView>
         </td>

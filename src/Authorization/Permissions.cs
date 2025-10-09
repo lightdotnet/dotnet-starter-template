@@ -39,10 +39,6 @@ public class Permissions
         [Display(Description = "use this to view roles list")]
         public const string View = $"{_role}.{nameof(View)}";
 
-        public const string Create = $"{_role}.{nameof(Create)}";
-
-        public const string Update = $"{_role}.{nameof(Update)}";
-
-        public const string Delete = $"{_role}.{nameof(Delete)}";
+        public const string Manage = $"{_role}.{nameof(Manage)}";
     }
 }

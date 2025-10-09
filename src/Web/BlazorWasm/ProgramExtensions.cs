@@ -43,14 +43,16 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddAuth(this IServiceCollection services)
     {
-        services.AddAuthorizationCore(RegisterPermissions);
-        services.AddCascadingAuthenticationState();
         // register the custom state provider
         services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
         services.AddScoped(sp => (IIdentityManager)sp.GetRequiredService<AuthenticationStateProvider>());
         services.AddScoped(sp => (ITokenProvider)sp.GetRequiredService<AuthenticationStateProvider>());
         services.AddScoped<ICurrentUser, ClientCurrentUser>();
         services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+        // register authorization policies for all permissions
+        services.AddAuthorizationCore(RegisterPermissions);
+        services.AddCascadingAuthenticationState();
 
         return services;
     }

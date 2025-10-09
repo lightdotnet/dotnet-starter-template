@@ -18,7 +18,7 @@ internal class MigratorCurrentUser : ICurrentUser
 
     public bool IsAuthenticated => false;
 
-    public bool IsMasterUser => false;
+    public bool IsSuperUser => false;
 
     public bool HasPermission(string permission)
     {

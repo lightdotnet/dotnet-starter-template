@@ -1,5 +1,4 @@
-﻿using Light.Identity;
-using Monolith.Extensions;
+﻿using Monolith.Extensions;
 
 namespace Monolith;
 
@@ -23,11 +22,10 @@ public abstract class CurrentUserBase : ICurrentUser
 
     public bool IsAuthenticated => User?.IsAuthenticated() is true;
 
-    public bool IsMasterUser => DefaultUser.MASTER_USERS.Any(x => x == Username);
+    public bool IsSuperUser => AppSecret.IsSuper(Username);
 
     public bool IsInRole(string role) => User?.IsInRole(role) is true;
 
     public bool HasPermission(string permission) =>
-        User?.HasPermission(ClaimTypes.Permission, permission) is true
-        || IsMasterUser;
+        User?.HasPermission(permission) is true || IsSuperUser;
 }

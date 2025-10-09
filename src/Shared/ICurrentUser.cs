@@ -18,7 +18,7 @@ public interface ICurrentUser
 
     bool IsAuthenticated { get; }
 
-    bool IsMasterUser { get; }
+    bool IsSuperUser { get; }
 
     bool IsInRole(string role);
 

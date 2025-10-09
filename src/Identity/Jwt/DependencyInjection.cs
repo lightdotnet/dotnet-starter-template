@@ -14,9 +14,10 @@ public static class DependencyInjection
         var jwtSettings = configuration.GetSection(sectionName).Get<JwtOptions>();
         ArgumentNullException.ThrowIfNull(jwtSettings, nameof(JwtOptions));
 
-        services.AddScoped<ITokenService, TokenService>();
-
         // add JWT Auth
         services.AddJwtAuth(jwtSettings.Issuer, jwtSettings.SecretKey, ClaimTypes.Role); // inject this for use jwt auth
+
+        // services
+        services.AddScoped<ITokenService, TokenService>();
     }
 }

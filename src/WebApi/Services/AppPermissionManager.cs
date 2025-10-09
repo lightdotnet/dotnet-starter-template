@@ -1,15 +1,17 @@
 ﻿using System.Reflection;
 using System.Security.Claims;
 
-namespace Monolith;
+namespace Monolith.Services;
 
-public abstract class PermissionList
+public class AppPermissionManager(ILogger<AppPermissionManager> logger) : PermissionManager
 {
-    private const string _permissionClaimType = Light.Identity.ClaimTypes.Permission;
+    private readonly string _permissionClaimType = Light.Identity.ClaimTypes.Permission;
 
-    public static IEnumerable<Claim> All
+    private IEnumerable<Claim>? Claims { get; set; }
+
+    private IEnumerable<Claim> GetClaims()
     {
-        get
+        if (Claims is null)
         {
             var fromClass = typeof(Permissions);
 
@@ -35,10 +37,18 @@ public abstract class PermissionList
                 }
             }
 
-            return claims;
+            logger.LogWarning("AppPermissionManager initialized with {count} claims.", claims.Count);
+
+            Claims = claims;
         }
+
+        return Claims;
     }
 
-    public static bool IsPermissionValid(string permission) =>
-        All.Any(x => x.Type == _permissionClaimType && x.Value == permission);
+    public override Task<bool> IsValidAsync(string permission)
+    {
+        var result = GetClaims()?.Any(x => x.Type == _permissionClaimType && x.Value == permission);
+
+        return Task.FromResult(result is true);
+    }
 }

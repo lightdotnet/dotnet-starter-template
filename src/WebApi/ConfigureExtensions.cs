@@ -51,7 +51,11 @@ public static class ConfigureExtensions
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, ServerCurrentUser>();
-        services.AddPermissions();
+
+        //services.AddDefaultPermissionManager();
+        services.AddPermissionStores<AppPermissionManager>();
+        services.AddPermissionPolicy();
+        services.AddPermissionAuthorization();
 
         return services;
     }
@@ -97,7 +101,7 @@ public static class ConfigureExtensions
         var isDebug = false;
 
 #if DEBUG
-        isDebug = true;
+        //isDebug = true;
 #endif
 
         if (isDebug)
