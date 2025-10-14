@@ -12,6 +12,6 @@ public class CatalogModule : AppModule
 
         MapsterSettings.Configure();
 
-        AppLogging.ModuleInjected(GetType().Name);
+        ShowModuleInfo();
     }
 }

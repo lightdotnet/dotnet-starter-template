@@ -19,7 +19,7 @@
 	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="$(AspnetVersion)" />
 	<PackageReference Include="MudBlazor" Version="8.13.0" />
 	<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
-	<PackageReference Include="QRCoder" Version="1.6.0" />
+	<PackageReference Include="QRCoder" Version="1.7.0" />
   </ItemGroup>
 
   <ItemGroup>

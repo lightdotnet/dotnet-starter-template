@@ -21,7 +21,7 @@ public static class ConfigureExtensions
 
     private static readonly Assembly[] assemblies =
         [
-            typeof(Program).Assembly,
+            typeof(Program).Assembly, // inject this to import Identity Module
             typeof(SignalRModule).Assembly,
             typeof(CatalogModule).Assembly,
         ];
@@ -68,7 +68,7 @@ public static class ConfigureExtensions
             .UseLightExceptionHandler()
             .UseRouting()
             .UseCors(CORS_POLICY_NAME) // must add before Auth
-            .UseAuthentication()
+                                       //.UseAuthentication()
             .UseAuthorization()
             .UseSwagger();
 

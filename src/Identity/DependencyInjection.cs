@@ -1,4 +1,5 @@
 using Light.ActiveDirectory;
+using Light.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ namespace Monolith.Identity;
 
 public static class DependencyInjection
 {
-    public static IdentityBuilder AddIdentityModule(this IServiceCollection services, IConfiguration configuration)
+    public static IdentityBuilder AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
     {
         AddActiveDirectory(services, configuration);
 
@@ -37,7 +38,7 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         services.AddDefaultUserManager();
-        services.AddDefaultRoleManager();
+        services.AddTransient<IRoleService, RoleService>();
         services.AddJwtTokenProvider();
 
         return identityBuilder;

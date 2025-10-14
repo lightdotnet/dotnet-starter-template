@@ -8,10 +8,10 @@ public class IdentityModule : AppModule
 {
     public override void Add(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddIdentityModule(configuration);
+        services.AddIdentityServices(configuration);
 
         services.AddJwtAuthentication(configuration);
 
-        AppLogging.ModuleInjected(GetType().Name);
+        ShowModuleInfo();
     }
 }

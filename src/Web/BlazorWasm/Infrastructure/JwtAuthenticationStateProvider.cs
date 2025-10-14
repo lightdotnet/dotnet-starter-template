@@ -15,7 +15,7 @@ public class JwtAuthenticationStateProvider(
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    public ClaimsPrincipal? CurrentUser { get; set; }
+    public ClaimsPrincipal? CurrentUser { get; private set; }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
