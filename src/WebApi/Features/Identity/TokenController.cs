@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Monolith.Extensions;
 using Monolith.Identity;
 using Monolith.Identity.Jwt;
 
@@ -17,7 +16,6 @@ public class TokenController(ITokenService tokenService) : ApiControllerBase
         [FromBody] GetTokenRequest request)
     {
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        var macAddress = HttpRemoteExtensions.GetMacAddress(ipAddress);
 
         var res = await tokenService.GetTokenAsync(
             request.Username,
@@ -27,7 +25,6 @@ public class TokenController(ITokenService tokenService) : ApiControllerBase
                 Id = deviceId,
                 Name = deviceName,
                 IpAddress = ipAddress,
-                PhysicalAddress = macAddress,
             });
 
         return Ok(res);
@@ -38,7 +35,6 @@ public class TokenController(ITokenService tokenService) : ApiControllerBase
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        var macAddress = HttpRemoteExtensions.GetMacAddress(ipAddress);
 
         var res = await tokenService.RefreshTokenAsync(
             request.AccessToken,
@@ -46,7 +42,6 @@ public class TokenController(ITokenService tokenService) : ApiControllerBase
             new DeviceDto
             {
                 IpAddress = ipAddress,
-                PhysicalAddress = macAddress,
             });
 
         return Ok(res);
