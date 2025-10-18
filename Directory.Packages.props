@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
-    <AspnetVersion>9.0.9</AspnetVersion>
+    <AspnetVersion>9.0.10</AspnetVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Core -->
@@ -18,7 +18,7 @@
     <PackageVersion Include="System.Text.Encodings.Web" Version="$(AspnetVersion)" />
     <!-- Light framework -->
     <PackageVersion Include="Lightsoft.ActiveDirectory" Version="1.0.0.1" />
-    <PackageVersion Include="Lightsoft.AspNetCore.Extensions" Version="9.0.9" />
+    <PackageVersion Include="Lightsoft.AspNetCore.Extensions" Version="9.0.10" />
     <PackageVersion Include="Lightsoft.AspNetCore.Modularity" Version="0.0.0.7" />
     <PackageVersion Include="Lightsoft.AspNetCore.Swagger" Version="9.0.9" />
     <PackageVersion Include="Lightsoft.Caching" Version="9.0.7.2" />
@@ -28,8 +28,8 @@
     <PackageVersion Include="Lightsoft.EventBus.MassTransit.RabbitMQ" Version="0.0.1" />
     <PackageVersion Include="Lightsoft.FluentBlazor" Version="0.0.0.1-beta2" />
     <PackageVersion Include="Lightsoft.FileGenerator" Version="1.0.0.3" />
-    <PackageVersion Include="Lightsoft.Identity" Version="9.0.9-beta7" />
-    <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.9-beta7" />
+    <PackageVersion Include="Lightsoft.Identity" Version="9.0.10" />
+    <PackageVersion Include="Lightsoft.Identity.EntityFrameworkCore" Version="9.0.10" />
     <PackageVersion Include="Lightsoft.Mail.Contracts" Version="1.0.0" />
     <PackageVersion Include="Lightsoft.Result" Version="1.0.0.1" />
     <PackageVersion Include="Lightsoft.Serilog" Version="1.0.0.1" />

@@ -25,9 +25,9 @@ public class TokenHttpService(IHttpClientFactory httpClientFactory)
         return TryPostAsync<TokenDto>(url, request);
     }
 
-    public Task<Result> CheckTokenAsync()
+    public Task<Result<bool>> CheckTokenAsync()
     {
         var url = $"{BasePath}/check";
-        return TryGetAsync(url);
+        return TryGetAsync<bool>(url);
     }
 }
