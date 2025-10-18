@@ -44,7 +44,7 @@ public class NotificationController(
         [FromQuery] string claimValue,
         [FromBody] SystemMessage request)
     {
-        var getUsers = await userService.GetUsersHasClaim(claimType, claimValue);
+        var getUsers = await userService.GetUsersHasClaimAsync(claimType, claimValue);
 
         foreach (var user in getUsers)
         {

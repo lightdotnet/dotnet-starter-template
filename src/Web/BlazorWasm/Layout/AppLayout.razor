@@ -49,7 +49,7 @@
     {
         var checkTokenValid = await TokenService.CheckTokenAsync();
 
-        if (checkTokenValid.Succeeded is false)
+        if (checkTokenValid.Data is false)
         {
             await IdentityManager.LogoutAsync();
 

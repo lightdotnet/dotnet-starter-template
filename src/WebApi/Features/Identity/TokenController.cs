@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Light.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Monolith.Identity;
 using Monolith.Identity.Jwt;
 
 namespace Monolith.Features.Identity;
 
 [Route("api/v{version:apiVersion}/oauth")]
-public class TokenController(ITokenService tokenService) : ApiControllerBase
+public class TokenController(
+    ITokenService tokenService,
+    JwtTokenMananger jwtTokenMananger) : ApiControllerBase
 {
     [AllowAnonymous]
     [HttpPost("token/get")]
@@ -48,8 +52,10 @@ public class TokenController(ITokenService tokenService) : ApiControllerBase
     }
 
     [HttpGet("token/check")]
-    public IActionResult CheckToken()
+    public async Task<IActionResult> CheckToken()
     {
-        return Ok();
+        var accessToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+        var res = await jwtTokenMananger.IsTokenValidAsync(accessToken);
+        return Ok(res);
     }
 }
