@@ -41,6 +41,8 @@
 
 </FluentDialogBody>
 
+@inject IServiceScopeFactory ServiceScopeFactory
+
 @code {
 
     [CascadingParameter]
@@ -95,14 +97,20 @@
         await CallGuarded.ExecuteAsync(
             async () =>
             {
-                var update = await RoleService.UpdateAsync(role);
+                /*
+                 * Must dispose service for handle scope data change after error at last time
+                 */
+                
+                using var scope = ServiceScopeFactory.CreateAsyncScope();
+
+                var service = scope.ServiceProvider.GetRequiredService<IRoleService>();
+
+                var update = await service.UpdateAsync(role);
                 if (update.Succeeded)
                 {
                     return Result.Success();
                 }
 
-                await LoadRolesAsync();
-     
                 return Result.Error(update.Message);
             },
             $"Update role {role.Name} success",
