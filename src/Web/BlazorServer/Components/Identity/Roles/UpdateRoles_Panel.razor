@@ -101,11 +101,11 @@
                  * Must dispose service for handle scope data change after error at last time
                  */
                 
-                using var scope = ServiceScopeFactory.CreateAsyncScope();
+                //using var scope = ServiceScopeFactory.CreateAsyncScope();
 
-                var service = scope.ServiceProvider.GetRequiredService<IRoleService>();
+                //var service = scope.ServiceProvider.GetRequiredService<IRoleService>();
 
-                var update = await service.UpdateAsync(role);
+                var update = await RoleService.UpdateAsync(role);
                 if (update.Succeeded)
                 {
                     return Result.Success();
