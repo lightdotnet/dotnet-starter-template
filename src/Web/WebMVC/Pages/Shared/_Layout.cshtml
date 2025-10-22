@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebMVC</title>
+    <script type="importmap"></script>
+
+    <!-- Add local styles, mostly for plugins css file -->
+    @if (IsSectionDefined("Styles"))
+    {
+        @await RenderSectionAsync("Styles", required: false)
+    }
+
+    <!-- CSS Libs -->
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css">
+
+    <link rel="stylesheet" href="~/theme/styles.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Monolith.WebApp.styles.css" asp-append-version="true" />
+</head>
+<body class="sb-nav-fixed">
+
+    <partial name="_Navbar" />
+
+    <div id="layoutSidenav">
+
+        <partial name="_Sidebar" />
+
+        <div id="layoutSidenav_content">
+
+            <main>
+                <div class="container-fluid px-4">
+                    @RenderBody()
+                </div>
+            </main>
+
+            <partial name="_Footer" />
+
+        </div>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/theme/scripts.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
