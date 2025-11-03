@@ -10,7 +10,7 @@ public class SavedToken
     public SavedToken(string accessToken, long expireInSeconds, string? refreshToken)
     {
         Token = accessToken;
-        ExpireOn = DateTimeOffset.Now.AddSeconds(expireInSeconds).AddMinutes(-5);
+        ExpireOn = DateTimeOffset.Now.AddSeconds(expireInSeconds);
 
         if (refreshToken != null)
         {
@@ -32,7 +32,7 @@ public class SavedToken
 
     public List<SavedClaim> Claims { get; set; } = [];
 
-    public bool IsExpired() => ExpireOn <= DateTime.UtcNow;
+    public bool IsNearlyExpired() => ExpireOn.AddMinutes(-5) <= DateTime.UtcNow;
 
     public bool IsRefreshTokenExpired() => RefreshTokenExpireOn <= DateTime.UtcNow;
 

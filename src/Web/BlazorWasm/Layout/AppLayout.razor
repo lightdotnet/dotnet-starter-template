@@ -1,4 +1,5 @@
-﻿@using Monolith.HttpApi.Identity
+﻿@using Monolith.HttpApi.Common.Interfaces
+@using Monolith.HttpApi.Identity
 @inherits LayoutComponentBase
 
 @layout MainLayout
@@ -29,6 +30,7 @@
 @inject LayoutService LayoutService
 @inject TokenHttpService TokenService
 @inject IIdentityManager IdentityManager
+@inject ITokenProvider TokenProvider
 
 @code {
     bool drawerOpen = true;
@@ -47,13 +49,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var checkTokenValid = await TokenService.CheckTokenAsync();
+        var accessToken = await TokenProvider.GetAccessTokenAsync();
 
-        if (checkTokenValid.Data is false)
+        if (!string.IsNullOrEmpty(accessToken))
         {
-            await IdentityManager.LogoutAsync();
+            var checkTokenValid = await TokenService.CheckTokenAsync();
 
-            ToastService.ShowError("Your session has expired, please login again.");
+            if (checkTokenValid.Data)
+            {
+                ToastService.ShowSuccess("Welcome");
+                
+                return;
+            }
         }
+
+        await IdentityManager.LogoutAsync();
+
+        ToastService.ShowError("Your session has expired, please login again.");
     }
 }

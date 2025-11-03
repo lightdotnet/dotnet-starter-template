@@ -17,7 +17,7 @@ public class AppTokenService(
         var savedToken = await TryGetTokenCachedAsync();
 
         if (savedToken is not null
-            && savedToken.IsExpired()
+            && savedToken.IsNearlyExpired()
             && savedToken.RefreshToken is not null)
         {
             if (savedToken.IsRefreshTokenExpired() is false)
