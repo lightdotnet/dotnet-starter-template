@@ -1,0 +1,11 @@
+﻿.snow-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    pointer-events: none;
+    text-shadow: 0 0 1px #000;
+    z-index: 9999;
+}

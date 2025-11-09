@@ -53,7 +53,7 @@ public static class ConfigureExtensions
         services.AddScoped<ICurrentUser, ServerCurrentUser>();
 
         //services.AddDefaultPermissionManager();
-        services.AddPermissionStores<AppPermissionManager>();
+        services.AddPermissionManager<AppPermissionManager>();
         services.AddPermissionPolicy();
         services.AddPermissionAuthorization();
 

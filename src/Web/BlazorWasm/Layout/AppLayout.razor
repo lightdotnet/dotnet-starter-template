@@ -58,12 +58,14 @@
             if (checkTokenValid.Data)
             {
                 ToastService.ShowSuccess("Welcome");
-                
+
                 return;
             }
+            else
+            {
+                await IdentityManager.LogoutAsync();
+            }
         }
-
-        await IdentityManager.LogoutAsync();
 
         ToastService.ShowError("Your session has expired, please login again.");
     }

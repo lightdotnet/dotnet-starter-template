@@ -8,7 +8,7 @@ public static class DependencyInjection
     public static IServiceCollection AddDefaultPermissionManager(this IServiceCollection services) =>
         services.AddSingleton<PermissionManager>();
 
-    public static IServiceCollection AddPermissionStores<T>(this IServiceCollection services)
+    public static IServiceCollection AddPermissionManager<T>(this IServiceCollection services)
         where T : PermissionManager
     {
         return services.AddSingleton<PermissionManager, T>();
