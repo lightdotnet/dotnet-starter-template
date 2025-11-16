@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Authorization\Authorization.csproj" />
+    <ProjectReference Include="..\..\BlazorComponents\BlazorComponents.csproj" />
     <ProjectReference Include="..\..\HttpApi.Client\HttpApi.Client.csproj" />
   </ItemGroup>
 
@@ -32,6 +33,10 @@
     <Content Update="wwwroot\sounds\noti.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Core\Themes\" />
   </ItemGroup>
 
 </Project>

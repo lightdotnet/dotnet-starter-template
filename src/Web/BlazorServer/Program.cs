@@ -1,5 +1,6 @@
 using Monolith;
 using Monolith.Components;
+using Monolith.Components.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,5 +29,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapRazorComponents<BlazorComponents>();
+
+app.MapAdditionalIdentityEndpoints();
 
 app.Run();

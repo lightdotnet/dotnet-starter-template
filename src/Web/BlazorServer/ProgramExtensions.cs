@@ -3,7 +3,9 @@ using Light.MudBlazor;
 using Monolith.HttpApi;
 using Monolith.HttpApi.Common.HttpFactory;
 using Monolith.HttpApi.Common.Interfaces;
+using Monolith.Infrastructure;
 using Monolith.Infrastructure.Services;
+using Monolith.Infrastructure.Storage;
 using Monolith.Services;
 using MudBlazor.Services;
 
@@ -30,6 +32,28 @@ public static class ProgramExtensions
         services.AddPermissionAuthorization();
 
         services.AddTransient<ITokenProvider, TokenProvider>();
+
+        // store token in session
+        //services.AddSession();
+        //services.AddDistributedMemoryCache();
+        //services.AddScoped<TokenStorage, TokenSessionStorage>();
+        services.AddScoped<TokenStorage, TokenCookieStorage>();
+
+        services.AddScoped<IAuthService, AuthService>();
+
+        services
+            .AddAuthentication("__identity")
+            .AddCookie("__identity", options =>
+            {
+                options.Cookie.Name = "mini-session";
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(6);
+                options.SlidingExpiration = true;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.LoginPath = "/account/login";
+                options.LogoutPath = "/account/logout";
+                options.AccessDeniedPath = "/access-denied";
+            });
 
         return services;
     }

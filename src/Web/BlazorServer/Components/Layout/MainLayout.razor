@@ -1,13 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
-@* Required *@
-<MudThemeProvider />
+<MudThemeProvider Theme="@mudTheme" />
 <MudPopoverProvider />
-
-@* Needed for dialogs *@
 <MudDialogProvider />
-
-@* Needed for snackbars *@
 <MudSnackbarProvider />
 
 <MudLayout>
@@ -20,7 +15,7 @@
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
+        <Monolith.Layout.NavMenu />
     </MudDrawer>
 
     <MudMainContent>
@@ -32,6 +27,8 @@
 </MudLayout>
 
 @code {
+    MudTheme mudTheme = Monolith.Shared.Theme.ApplicationTheme();
+
     bool _drawerOpen = true;
 
     void DrawerToggle()

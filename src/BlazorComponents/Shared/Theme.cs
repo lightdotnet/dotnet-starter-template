@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 
-namespace Monolith.Core.Themes;
+namespace Monolith.Shared;
 
 /// <summary>
 /// Represents the theme configuration for the application.

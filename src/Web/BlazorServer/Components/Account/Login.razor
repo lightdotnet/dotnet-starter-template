@@ -1,0 +1,109 @@
+﻿@page "/account/login"
+@using Monolith.HttpApi.Common.HttpFactory
+
+@attribute [AllowAnonymous]
+
+@inject ILogger<Login> Logger
+@inject IAuthService AuthProvider
+
+<PageTitle>Log in</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex align-center" Style="height: 100vh;">
+    <div class="d-flex flex-column mud-width-full">
+        <div style="max-width:400px">
+
+            <MudPaper Elevation="0" Class="pa-8" Width="100%" Style="position: relative;">
+
+                <EditForm Model="@Input" OnSubmit="LoginHandle" autocomplete="off">
+
+                    @if (!string.IsNullOrEmpty(error))
+                    {
+                        <div class="alert alert-danger" role="alert">@error</div>
+                    }
+
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-5">
+                        <Input PlaceHolder="Username" @bind-Value="@Input.Username" Required />
+                    </div>
+
+                    <div class="mb-5">
+                        <Input_Password PlaceHolder="Password" @bind-Value="@Input.Password" Required />
+                    </div>
+
+                    <Button Label="Login" Color="AppColor.Primary" FullWidth Submit />
+
+                    <Overlay IsProcessing="processing" />
+
+                </EditForm>
+            </MudPaper>
+            <div class="text-center text-secondary">
+                Demo version
+            </div>
+        </div>
+    </div>
+</MudContainer>
+
+
+@code {
+
+
+
+    private string? errorMessage;
+
+    //[CascadingParameter]
+    //private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private bool processing;
+
+    private string? error;
+
+    protected override void OnInitialized()
+    {
+        if (CurrentUser.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    public async Task LoginHandle()
+    {
+        var client = new HttpClient() { BaseAddress = new Uri(NavigationManager.BaseUri) };
+
+        var login = await client.PostAsJsonAsync("/account/login", Input);
+
+        var loginResult = await login.ReadResultAsync();
+
+        if (loginResult.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
+        }
+
+        errorMessage = "Error: Invalid login attempt.";
+    }
+
+    private void ToggleState()
+    {
+        processing = !processing;
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string Username { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+}

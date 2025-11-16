@@ -2,10 +2,13 @@
 using System.Text.Json;
 using ClaimTypes = Light.Identity.ClaimTypes;
 
-namespace Monolith.Infrastructure;
+namespace Monolith.Extensions;
 
 public class JwtExtensions
 {
+    /// <summary>
+    /// return Claim to use ClaimsIdentity
+    /// </summary>
     public static List<Claim> ReadClaims(string jwt)
     {
         var claims = new List<Claim>();

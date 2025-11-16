@@ -1,6 +1,7 @@
 ﻿using Light.Contracts;
 using Monolith.Core;
 using Monolith.Core.Auth;
+using Monolith.Extensions;
 using Monolith.HttpApi.Identity;
 using System.Security.Claims;
 
