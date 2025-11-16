@@ -1,15 +1,16 @@
-﻿namespace Monolith.Infrastructure.Storage;
+﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-/*
-public class TokenLocalStorage(ProtectedLocalStorage storage)
+namespace Monolith.Infrastructure.Storage;
+
+public class TokenLocalStorage(ProtectedLocalStorage storage) : TokenStorage
 {
     private const string Key = "client";
 
-    public override async Task<string?> GetAccessTokenAsync()
+    public override async Task<UserTokenData?> GetAsync()
     {
         try
         {
-            var token = await storage.GetAsync<string>(Key);
+            var token = await storage.GetAsync<UserTokenData>(Key);
 
             return token.Value;
         }
@@ -20,9 +21,9 @@ public class TokenLocalStorage(ProtectedLocalStorage storage)
         }
     }
 
-    public override async Task SetAccessTokenAsync(string accessToken)
+    public override async Task SaveAsync(UserTokenData token)
     {
-        await storage.SetAsync(Key, accessToken);
+        await storage.SetAsync(Key, token);
     }
 
     public override async Task ClearAsync()
@@ -30,4 +31,3 @@ public class TokenLocalStorage(ProtectedLocalStorage storage)
         await storage.DeleteAsync(Key);
     }
 }
-*/

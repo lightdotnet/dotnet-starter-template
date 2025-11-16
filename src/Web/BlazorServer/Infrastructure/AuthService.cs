@@ -50,7 +50,7 @@ public class AuthService(
         };
 
         // Sign in using Identity's scheme
-        await _httpContext.SignInAsync(claimsPrincipal, authProperties);
+        await _httpContext.SignInAsync("jwt", claimsPrincipal, authProperties);
 
         // Store the token securely (e.g., in session or secure storage)
         await tokenStorage.SaveAsync(tokenData);

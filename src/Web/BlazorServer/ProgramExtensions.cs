@@ -37,15 +37,16 @@ public static class ProgramExtensions
         //services.AddSession();
         //services.AddDistributedMemoryCache();
         //services.AddScoped<TokenStorage, TokenSessionStorage>();
+        //services.AddScoped<TokenStorage, TokenLocalStorage>();
         services.AddScoped<TokenStorage, TokenCookieStorage>();
 
         services.AddScoped<IAuthService, AuthService>();
 
         services
-            .AddAuthentication("__identity")
-            .AddCookie("__identity", options =>
+            .AddAuthentication("jwt")
+            .AddCookie("jwt", options =>
             {
-                options.Cookie.Name = "mini-session";
+                //options.Cookie.Name = "mini-session";
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromDays(6);
                 options.SlidingExpiration = true;

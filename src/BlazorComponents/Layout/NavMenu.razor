@@ -58,11 +58,8 @@
 </MudPaper>
 
 @code {
-    private string[] userPermissions = [];
-
     private bool hasPermission(string permission)
     {
-        //return userPermissions.Any(x => x == permission);
         return CurrentUser.HasPermission(permission);
     }
 

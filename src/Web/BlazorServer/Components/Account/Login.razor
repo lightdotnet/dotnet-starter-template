@@ -14,30 +14,34 @@
 
             <MudPaper Elevation="0" Class="pa-8" Width="100%" Style="position: relative;">
 
-                <EditForm Model="@Input" OnValidSubmit="LoginHandle" FormName="loginForm" autocomplete="off">
+                @if (Input != null)
+                {
+                    <EditForm Model="@Input" OnValidSubmit="LoginHandle" FormName="loginForm" autocomplete="off">
 
-                    @if (!string.IsNullOrEmpty(error))
-                    {
-                        <div class="alert alert-danger" role="alert">@error</div>
-                    }
+                        @if (!string.IsNullOrEmpty(error))
+                        {
+                            <div class="alert alert-danger" role="alert">@error</div>
+                        }
 
-                    <DataAnnotationsValidator />
-                    @*
+                        <DataAnnotationsValidator />
+                        @*
                         Must set name for input matching with @bind for pass require FormModel error
                     *@
-                    <div class="mb-5">
-                        <input class="form-control" name="Input.Username" placeHolder="Username" @bind="@Input.Username" required />
-                    </div>
+                        <div class="mb-5">
+                            <input class="form-control" name="Input.Username" placeHolder="Username" @bind="@Input.Username" required />
+                        </div>
 
-                    <div class="mb-5">
-                        <input class="form-control" name="Input.Password" placeHolder="Password" @bind="@Input.Password" required />
-                    </div>
+                        <div class="mb-5">
+                            <input class="form-control" name="Input.Password" placeHolder="Password" @bind="@Input.Password" required />
+                        </div>
 
-                    <Button Label="Login" Color="AppColor.Primary" FullWidth Submit />
+                        <Button Label="Login" Color="AppColor.Primary" FullWidth Submit />
 
-                    <Overlay IsProcessing="processing" />
+                        <Overlay IsProcessing="processing" />
 
-                </EditForm>
+                    </EditForm>
+                }
+                
             </MudPaper>
             <div class="text-center text-secondary">
                 Demo version
@@ -54,7 +58,7 @@
     //private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel? Input { get; set; }
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
@@ -69,16 +73,27 @@
         {
             NavigationManager.NavigateTo("/");
         }
+
+        Input = new();
+
+#if DEBUG
+        Input.Username = "super";
+        Input.Password = "123";
+        Input.RememberMe = true;
+#endif
     }
 
     public async Task LoginHandle()
     {
-        var login = await AuthProvider.LoginAsync(Input.Username, Input.Password, Input.RememberMe);
-
-        if (login.Succeeded)
+        if (Input != null)
         {
-            Logger.LogInformation("User logged in.");
-            NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
+            var login = await AuthProvider.LoginAsync(Input.Username, Input.Password, Input.RememberMe);
+
+            if (login.Succeeded)
+            {
+                Logger.LogInformation("User logged in.");
+                NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
+            }
         }
 
         errorMessage = "Error: Invalid login attempt.";
