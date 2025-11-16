@@ -2,9 +2,9 @@
 
 ## Technologies
 
-* .NET 9
+* .NET 10
+* Entity Framework Core 10
 * Light Framework
-* Entity Framework Core 9
 * Mapster
 * FluentValidation
 * SignalR
