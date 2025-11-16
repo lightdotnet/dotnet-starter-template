@@ -12,16 +12,6 @@ namespace Monolith.Components.Account
 
             var accountGroup = endpoints.MapGroup("/account");
 
-            accountGroup.MapPost("/login", async (
-                [FromServices] IAuthService authService,
-                [FromBody] object model,
-                [FromQuery] string? returnUrl) =>
-            {
-                var res = await authService.LoginAsync("super", "123", true);
-
-                return res;
-            });
-
             accountGroup.MapGet("/logout", async (
                 [FromServices] IAuthService authService,
                 [FromQuery] string? returnUrl) =>

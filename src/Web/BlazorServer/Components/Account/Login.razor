@@ -1,7 +1,7 @@
 ﻿@page "/account/login"
 @using Monolith.HttpApi.Common.HttpFactory
 
-@attribute [AllowAnonymous]
+@attribute [AllowAnonymous, ExcludeFromInteractiveRouting]
 
 @inject ILogger<Login> Logger
 @inject IAuthService AuthProvider
@@ -14,7 +14,7 @@
 
             <MudPaper Elevation="0" Class="pa-8" Width="100%" Style="position: relative;">
 
-                <EditForm Model="@Input" OnSubmit="LoginHandle" autocomplete="off">
+                <EditForm Model="@Input" OnValidSubmit="LoginHandle" FormName="loginForm" autocomplete="off">
 
                     @if (!string.IsNullOrEmpty(error))
                     {
@@ -22,13 +22,15 @@
                     }
 
                     <DataAnnotationsValidator />
-
+                    @*
+                        Must set name for input matching with @bind for pass require FormModel error
+                    *@
                     <div class="mb-5">
-                        <Input PlaceHolder="Username" @bind-Value="@Input.Username" Required />
+                        <input class="form-control" name="Input.Username" placeHolder="Username" @bind="@Input.Username" required />
                     </div>
 
                     <div class="mb-5">
-                        <Input_Password PlaceHolder="Password" @bind-Value="@Input.Password" Required />
+                        <input class="form-control" name="Input.Password" placeHolder="Password" @bind="@Input.Password" required />
                     </div>
 
                     <Button Label="Login" Color="AppColor.Primary" FullWidth Submit />
@@ -46,9 +48,6 @@
 
 
 @code {
-
-
-
     private string? errorMessage;
 
     //[CascadingParameter]
@@ -74,13 +73,9 @@
 
     public async Task LoginHandle()
     {
-        var client = new HttpClient() { BaseAddress = new Uri(NavigationManager.BaseUri) };
+        var login = await AuthProvider.LoginAsync(Input.Username, Input.Password, Input.RememberMe);
 
-        var login = await client.PostAsJsonAsync("/account/login", Input);
-
-        var loginResult = await login.ReadResultAsync();
-
-        if (loginResult.Succeeded)
+        if (login.Succeeded)
         {
             Logger.LogInformation("User logged in.");
             NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
