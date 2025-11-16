@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+	<RootNamespace>Monolith</RootNamespace>
+	<AssemblyName>Monolith.BlazorComponents</AssemblyName>
+	<ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Lightsoft.MudBlazor" Version="0.0.0.2-beta1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
+	<PackageReference Include="MudBlazor" Version="8.14.0" />
+	<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
+	<PackageReference Include="QRCoder" Version="1.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Authorization\Authorization.csproj" />
+    <ProjectReference Include="..\HttpApi.Client\HttpApi.Client.csproj" />
+  </ItemGroup>
+
+</Project>

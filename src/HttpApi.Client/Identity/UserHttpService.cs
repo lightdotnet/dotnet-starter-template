@@ -9,11 +9,13 @@ public class UserHttpService(IHttpClientFactory httpClientFactory) :
 
     private const string _path = "user";
 
-    public Task<Result<IEnumerable<UserDto>>> GetAsync()
+    public async Task<Result<IEnumerable<UserDto>>> GetAsync()
     {
         var url = _path;
 
-        return TryGetAsync<IEnumerable<UserDto>>(url);
+        await Task.Delay(5000);
+
+        return await TryGetAsync<IEnumerable<UserDto>>(url);
     }
 
     public Task<Result<UserDto>> GetByIdAsync(string id)

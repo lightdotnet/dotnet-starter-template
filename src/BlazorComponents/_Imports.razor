@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+@using MudBlazor
+@inject IDialogService DialogService
+
+@using Light.Blazor
+@using Light.MudBlazor
+@inject IToastDisplay ToastService
+@inject ICallGuardedService CallGuarded
+
+@using Light.Identity
+@using Monolith
+@using Monolith.HttpApi.Identity
+@using Monolith.Notifications
+@inject ICurrentUser CurrentUser
+@inject UserHttpService UserService
+@inject UserProfileHttpService UserProfileService
+@inject RoleHttpService RoleService
+@inject NotificationHttpService NotificationService
+
+@using Monolith.Shared

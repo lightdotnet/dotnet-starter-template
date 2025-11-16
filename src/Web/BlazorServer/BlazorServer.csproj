@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	<RootNamespace>Monolith</RootNamespace>
+	<AssemblyName>Monolith.BlazorServer</AssemblyName>
+	<ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BlazorComponents\BlazorComponents.csproj" />
+    <ProjectReference Include="..\..\WebComponents\WebComponents.csproj" />
+  </ItemGroup>
+
+</Project>
