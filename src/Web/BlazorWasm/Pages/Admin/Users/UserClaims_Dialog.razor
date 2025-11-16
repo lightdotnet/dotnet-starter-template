@@ -1,0 +1,107 @@
+﻿<MudDialog Style="position: relative;">
+    <DialogContent>
+        @if (userProfile is not null)
+        {
+            <table class="table table-hover table-bordered">
+                <tbody>
+                    @foreach (var record in userClaims)
+                    {
+                        <tr>
+                            <td>@record.Type</td>
+                            <td>
+                                <Input @bind-Value="record.Value" />
+                            </td>
+                            <td>
+                                <IconActionButtons IconAction="IconActionButtons.Action.Update" OnClick="() => UpdateAsync()" />
+                                <IconActionButtons IconAction="IconActionButtons.Action.Delete" OnClick="() => DeleteAsync(record)" />
+                            </td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td>
+                            <Input Label="Type" Variant="Variant.Filled" @bind-Value=newClaim.Type />
+                        </td>
+                        <td>
+                            <Input Label="Value" Variant="Variant.Filled" @bind-Value=newClaim.Value />
+                        </td>
+                        <td>
+                            <IconActionButtons IconAction="IconActionButtons.Action.Create" OnClick="AddAsync" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+    </DialogContent>
+</MudDialog>
+
+<Overlay IsProcessing="processing" />
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance dialog { get; set; } = default!;
+
+    [Parameter]
+    public string Id { get; set; } = null!;
+
+    private UserDto userProfile { get; set; } = null!;
+
+    private IList<ClaimDto> userClaims => userProfile.Claims;
+
+    private ClaimDto newClaim { get; set; } = new();
+
+    private bool processing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        processing = true;
+
+        userProfile = await UserService.GetByIdAsync(Id);
+
+        newClaim = new(); // Reset the new claim input
+
+        processing = false;
+    }
+
+    private async Task AddAsync()
+    {
+        if (string.IsNullOrEmpty(newClaim.Type) || string.IsNullOrEmpty(newClaim.Value))
+        {
+            ToastService.ShowWarning("Key and Value are required");
+            return;
+        }
+
+        userClaims.Add(newClaim);
+
+        await CallGuarded.ExecuteAsync(
+            () => UserService.UpdateAsync(userProfile),
+            "Claims added successfully",
+            () => LoadAsync()
+        );
+    }
+
+    private async Task UpdateAsync()
+    {
+        await CallGuarded.ExecuteAsync(
+            () => UserService.UpdateAsync(userProfile),
+            "Claims updated successfully",
+            () => LoadAsync()
+        );
+    }
+
+    private async Task DeleteAsync(ClaimDto dto)
+    {
+        userClaims.Remove(dto);
+
+        await CallGuarded.ExecuteAsync(
+            () => UserService.UpdateAsync(userProfile),
+            "Claim deleted successfully",
+            () => LoadAsync()
+        );
+    }
+}

@@ -1,0 +1,56 @@
+﻿<MudAutocomplete T="UserDto"
+    Variant="@Mud.Variant"
+    Margin="@Mud.Margin"
+    Placeholder="@PlaceHolder"
+    MaxItems="20"
+    Clearable="true"
+    ResetValueOnEmptyText="true"
+    ValueChanged="OnSelectedChanged"
+    SearchFunc="Search"
+    ToStringFunc="@(e=> e==null?null : $"{e.FirstName} {e.LastName} ({e.UserName})")" />
+
+@code {
+    [Parameter]
+    public EventCallback<UserDto> OnChanged { get; set; }
+
+    [Parameter]
+    public Variant Variant { get; set; } = Variant.Text;
+
+    [Parameter]
+    public string PlaceHolder { get; set; } = "search user...";
+
+    private IEnumerable<UserDto> users = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var getUsers = await UserService.GetAsync();
+        if (getUsers.Succeeded)
+        {
+            users = getUsers.Data;
+        }
+    }
+
+    private Task<IEnumerable<UserDto>> Search(string? value, CancellationToken token)
+    {
+        var result = users;
+
+        if (!string.IsNullOrEmpty(value))
+        {
+            result = users
+                .Where(x =>
+                    x.UserName.Contains(value, StringComparison.InvariantCultureIgnoreCase)
+                    || x.FirstName.Contains(value, StringComparison.InvariantCultureIgnoreCase)
+                    || x.LastName.Contains(value, StringComparison.InvariantCultureIgnoreCase)
+                    || x.Email.Contains(value, StringComparison.InvariantCultureIgnoreCase)
+                    || x.PhoneNumber.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .OrderBy(o => o.UserName);
+        }
+
+        return Task.FromResult(result);
+    }
+
+    private async Task OnSelectedChanged(UserDto user)
+    {
+        await OnChanged.InvokeAsync(user);
+    }
+}

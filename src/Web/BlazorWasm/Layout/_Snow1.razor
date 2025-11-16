@@ -1,0 +1,67 @@
+﻿@if (useSimple)
+{
+    <div id="snowflakeContainer">
+        <p class="snowflake">❄</p>
+    </div>
+}
+else
+{
+    <div class="snowflakes" aria-hidden="true">
+        <div class="snowflake">
+            ❅
+        </div>
+        <div class="snowflake">
+            ❅
+        </div>
+        <div class="snowflake">
+            ❆
+        </div>
+        <div class="snowflake">
+            ❄
+        </div>
+        <div class="snowflake">
+            ❅
+        </div>
+        <div class="snowflake">
+            ❆
+        </div>
+        <div class="snowflake">
+            ❄
+        </div>
+        <div class="snowflake">
+            ❅
+        </div>
+        <div class="snowflake">
+            ❆
+        </div>
+        <div class="snowflake">
+            ❄
+        </div>
+    </div>
+
+    <canvas class="snow-canvas" speed="1" interaction="false" size="2" count="80" opacity="0.00001" start-color="rgba(253,252,251,1)" end-color="rgba(251,252,253,0.3)" wind-power="0" image="false" width="1366" height="667"></canvas>
+    <canvas class="snow-canvas" speed="2" interaction="true" size="6" count="30" start-color="rgba(253,252,251,1)" end-color="rgba(251,252,253,0.3)" opacity="0.00001" wind-power="2" image="false" width="1366" height="667"></canvas>
+    <canvas class="snow-canvas" speed="3" interaction="true" size="12" count="20" wind-power="-5" image="/lib/snow/snow.png" width="1366" height="667"></canvas>
+}
+@*
+** Simple
+    <link rel="stylesheet" href="~/lib/events/snow/simple/snow.css">
+        
+    <script src="~/lib/events/snow/simple/snow.js"></script>
+---------------
+** Full
+    <link rel="stylesheet" href="lib/events/snow/snowflake.css">
+    <link rel="stylesheet" href="lib/events/snow/snow.css">
+
+    <script src="lib/events/snow/snow-plugin.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".snow-canvas").snow();
+        });
+    </script>
+*@
+
+@code {
+    bool useSimple = true;
+}

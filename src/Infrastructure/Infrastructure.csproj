@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<RootNamespace>Monolith</RootNamespace>
+	<AssemblyName>Monolith.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
+    <PackageReference Include="Lightsoft.AspNetCore.Extensions" />
+    <PackageReference Include="Lightsoft.AspNetCore.Modularity" />
+	<PackageReference Include="Lightsoft.EntityFrameworkCore" />
+	<PackageReference Include="Lightsoft.FileGenerator" />
+	<PackageReference Include="Lightsoft.Serilog" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+</Project>

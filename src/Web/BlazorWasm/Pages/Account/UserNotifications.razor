@@ -1,0 +1,43 @@
+﻿@page "/notifications"
+
+<PageHeader Title="User Notifications" />
+
+<Remote_Table State="state">
+    <HeadContent>
+        <th Style="width:35%;">Title</th>
+        <th Style="width:50%;">Message</th>
+        <th>Status</th>
+    </HeadContent>
+    <RowTemplate>
+        <td>@context.Title</td>
+        <td class="text-break">
+            @context.Message
+            <div class="text-end">
+                <i>
+                    @if (!string.IsNullOrEmpty(context.FromName))
+                    {
+                        <b>@context.FromName</b>
+                        <br />
+                    }
+                    <small>@context.Created.ToLocalTime()</small>
+                </i>
+            </div>
+        </td>
+        <td>
+            <StatusCheckInput Label="Read" Value="@context.ReadStatus" />
+        </td>
+    </RowTemplate>
+</Remote_Table>
+
+@code {
+    private RemoteTable<NotificationDto, NotificationLookup> state = null!;
+
+    private NotificationLookup lookup => state.Lookup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(UserProfileService.GetNotificationsAsync);
+
+        await state.ReloadAsync();
+    }
+}

@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<RootNamespace>Monolith.Identity</RootNamespace>
+	<AssemblyName>Monolith.Identity</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lightsoft.ActiveDirectory" />
+    <PackageReference Include="Lightsoft.Identity.EntityFrameworkCore" />   
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Authorization\Authorization.csproj" />
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

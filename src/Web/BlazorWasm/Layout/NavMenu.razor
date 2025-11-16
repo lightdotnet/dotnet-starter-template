@@ -1,0 +1,161 @@
+﻿<MudPaper Class="bg-transparent" Elevation="0" Style="height:auto 100%">
+    <MudNavMenu Rounded="true" Margin="Margin.Dense" Class="pa-2">
+
+        <MudText Typo="Typo.h6" Class="px-4">@WebSettings.Version</MudText>
+        <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">@WebConstants.COMPANY_NAME</MudText>
+        <MudDivider Class="my-2" />
+
+        @foreach (var groupLv0 in menu.Groups)
+        {
+            if (!string.IsNullOrEmpty(groupLv0.Permission) && !hasPermission(groupLv0.Permission))
+            {
+                continue;
+            }
+
+            var hrefs = new List<string>();
+
+            <MudNavGroup Title="@groupLv0.Title" Icon="@groupLv0.Icon" Expanded="@isActive(groupLv0.Hrefs)">
+                @if (groupLv0.Links != null)
+                {
+                    foreach (var navLink in groupLv0.Links)
+                    {
+                        if (!string.IsNullOrEmpty(navLink.Permission) && !hasPermission(navLink.Permission))
+                        {
+                            continue;
+                        }
+
+                        <MudNavLink Href="@navLink.Href">@navLink.Name</MudNavLink>
+                    }
+                }
+
+                @if (groupLv0.Level1 != null)
+                {
+                    foreach (var groupLv1 in groupLv0.Level1)
+                    {
+                        if (!string.IsNullOrEmpty(groupLv1.Permission) && !hasPermission(groupLv1.Permission))
+                        {
+                            continue;
+                        }
+
+                        <MudNavGroup Title="@groupLv1.Title" Icon="@groupLv1.Icon" Expanded="@isActive(groupLv1.Hrefs)">
+                            @foreach (var navLink in groupLv1.Links)
+                            {
+                                if (!string.IsNullOrEmpty(navLink.Permission) && !hasPermission(navLink.Permission))
+                                {
+                                    continue;
+                                }
+
+                                <MudNavLink Href="@navLink.Href">@navLink.Name</MudNavLink>
+                            }
+                        </MudNavGroup>
+                    }
+                }
+            </MudNavGroup>
+        }
+
+    </MudNavMenu>
+    
+</MudPaper>
+
+@code {
+    private string[] userPermissions = [];
+
+    private bool hasPermission(string permission)
+    {
+        //return userPermissions.Any(x => x == permission);
+        return CurrentUser.HasPermission(permission);
+    }
+
+    private MainNavMenu menu = new()
+    {
+        Groups = new List<NavGroupLv0>()
+        {
+            new()
+            {
+                Title = "Administration",
+                Icon = Icons.Material.Filled.Settings,
+                Permission = Permissions.System.View,
+                Links = new List<NavLink>()
+                {
+                    new NavLink("Users", "/users", Permissions.Users.View),
+                    new NavLink("Roles", "/roles", Permissions.Roles.View),
+                    new NavLink("Notifications", "/system-notifications", Permissions.System.Notification),
+
+                }
+            }
+        }
+    };
+
+    private bool isActive(IEnumerable<string> links)
+    {
+        var url = new Uri(NavigationManager.Uri);
+
+        var path = url.AbsolutePath;
+
+        return links.Any(x => x.Equals(path));
+    }
+
+    public class NavGroup
+    {
+        public string Title { get; init; } = "";
+
+        public string? Icon { get; init; }
+
+        public string? Permission { get; init; }
+
+        public List<NavLink> Links { get; init; } = [];
+    }
+
+    public record NavLink(string Name, string Href, string? Permission = "");
+
+    public class MainNavMenu
+    {
+        public IEnumerable<NavGroupLv0> Groups { get; init; } = [];
+    }
+
+    public class NavGroupLv0 : NavGroup
+    {
+        public IEnumerable<NavGroupLv1> Level1 { get; init; } = [];
+
+        public IEnumerable<string> Hrefs
+        {
+            get
+            {
+                var hrefs = new List<string>();
+
+                if (Links != null)
+                {
+                    hrefs.AddRange(Links.Select(s => s.Href));
+                }
+
+                if (Level1 != null)
+                {
+                    foreach (var groupLv1 in Level1)
+                    {
+                        hrefs.AddRange(groupLv1.Links.Select(s => s.Href));
+                    }
+                }
+
+                return hrefs;
+            }
+        }
+    }
+
+    public class NavGroupLv1 : NavGroup
+    {
+        public IEnumerable<string> Hrefs
+        {
+            get
+            {
+                var hrefs = new List<string>();
+
+                if (Links != null)
+                {
+                    hrefs.AddRange(Links.Select(s => s.Href));
+                }
+
+                return hrefs;
+            }
+        }
+    }
+}

@@ -1,0 +1,11 @@
+  <Project>
+    <PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+        <!-- Remove this to turn on warnings for missing XML Comments -->
+        <!--
+        <NoWarn>NU1803</NoWarn>
+        -->
+    </PropertyGroup>
+  </Project>
