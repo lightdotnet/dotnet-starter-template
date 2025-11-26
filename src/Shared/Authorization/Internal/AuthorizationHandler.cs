@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Monolith.Authorization.Internal;
 
-public class AuthorizationHandler : PermissionAuthorizationHandler
+internal class AuthorizationHandler : PermissionAuthorizationHandler
 {
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {

@@ -18,8 +18,6 @@ public interface ICurrentUser
 
     bool IsAuthenticated { get; }
 
-    bool IsSuperUser { get; }
-
     bool IsInRole(string role);
 
     bool HasPermission(string permission);

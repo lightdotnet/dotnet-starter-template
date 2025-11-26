@@ -7,7 +7,7 @@ using Light.AspNetCore.Middlewares;
 using Light.AspNetCore.Swagger;
 using Light.Mediator;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Monolith.Authorization.Internal;
+using Monolith.Authorization;
 using Monolith.Catalog;
 using Monolith.Identity.Notifications.SignalR;
 using Monolith.Modularity;
@@ -52,6 +52,7 @@ public static class ConfigureExtensions
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, ServerCurrentUser>();
+        services.AddPermissionPolicies();
         services.AddPermissionAuthorization();
 
         return services;

@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<RootNamespace>Monolith.HttpApi</RootNamespace>
+	<AssemblyName>Monolith.HttpApi.Client</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="FluentValidation" />
+	<PackageReference Include="Lightsoft.AspNetCore.Authorization" />
+	<PackageReference Include="Lightsoft.SharedKernel" />
+	<PackageReference Include="Lightsoft.Extensions" />
+	<PackageReference Include="Lightsoft.Identity" />
+	<PackageReference Include="Lightsoft.Result" />
+	<PackageReference Include="Mapster" />
+	<PackageReference Include="Microsoft.Extensions.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<Compile Include="..\..\Shared\**\*.cs"
+			 Exclude="..\..\Shared\obj\**\*.*;..\..\Shared\bin\**\*.*;..\..\Shared\**\*AssemblyInfo.cs"
+			 Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
+	<Compile Include="..\..\Contracts\**\*.cs"
+			 Exclude="..\..\Contracts\obj\**\*.*;..\..\Contracts\bin\**\*.*;..\..\Contracts\**\*AssemblyInfo.cs"
+			 Link="Contracts\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

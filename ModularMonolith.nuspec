@@ -12,9 +12,7 @@
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/lightdotnet/dotnet-starter-template</projectUrl>
     <releaseNotes>
-      * refactor Authorization 
-	  * remove Blazor UIs
-	  * add Aspire support
+      
     </releaseNotes>
     <packageTypes>
       <packageType name="Template" />
