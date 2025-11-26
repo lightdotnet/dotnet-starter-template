@@ -4,7 +4,7 @@
   "classifications": [ "AspNetCore", "Web" ],
   "identity": "Clean.Architecture.Modular.Monolith.Project.CSharp",
   "groupIdentity": "Clean.Architecture.Modular.Monolith.Project",
-  "name": "Clean Architecture Module Projects",
+  "name": "Module Projects with Clean Architecture",
   "shortName": "ca-mm",
   "tags": {
     "language": "C#",
