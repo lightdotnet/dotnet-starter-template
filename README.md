@@ -11,6 +11,7 @@
 * Serilog
 * Redis
 * RabbitMQ
+* Aspire 9.5
 
 ## Getting Started
 The easiest way to get started is to install the [.NET template](https://www.nuget.org/packages/ModularMonolith.Solution.Template):
@@ -57,7 +58,6 @@ Or use In Memory Database, you will need to update WebApi/appsettings.json as fo
 
 This will contain common entities, enums, exceptions, interfaces, types, rules, etc... can dependent from modules
 
-- Authorization
 - Shared
 - Infrastructure
 
@@ -75,4 +75,4 @@ Modules projects cannot call directly, if it need access resource from other mod
 ### Server & Client
 - WebApi
 - ClientApp ([MudBlazor](https://mudblazor.com/))
-- AppHost (Aspire soon)
+- Aspire support

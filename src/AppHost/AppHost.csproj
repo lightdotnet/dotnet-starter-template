@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
+
+  <PropertyGroup>
+	<RootNamespace>Monolith</RootNamespace>
+	<AssemblyName>Monolith.AppHost</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>c2f0fbf8-1f61-436a-9f81-2df446f08158</UserSecretsId>
+	<ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebApi\WebApi.csproj" />
+  </ItemGroup>
+
+</Project>

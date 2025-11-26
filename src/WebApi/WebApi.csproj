@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Catalog\Catalog.csproj" />
     <ProjectReference Include="..\Identity\Identity.csproj" />
+    <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
