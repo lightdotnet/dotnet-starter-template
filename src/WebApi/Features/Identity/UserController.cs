@@ -1,5 +1,6 @@
 ﻿using Light.ActiveDirectory.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Monolith.Authorization;
 using Monolith.Identity;
 
 namespace Monolith.Features.Identity;

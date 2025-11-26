@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Monolith.Authorization;
 using Monolith.Endpoints;
 using Monolith.Identity.Notifications;
 using Monolith.Notifications;
