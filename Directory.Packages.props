@@ -42,7 +42,5 @@
     <PackageVersion Include="Spectre.Console" Version="0.54.0" />
     <!-- WebApi -->
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <!-- WebUI -->
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="$(AspnetVersion)" />
   </ItemGroup>
 </Project>

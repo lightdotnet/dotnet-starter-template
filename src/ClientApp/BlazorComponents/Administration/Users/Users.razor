@@ -1,0 +1,166 @@
+﻿@page "/users"
+
+<PageHeader Title="Users" />
+
+<div class="d-flex justify-content-end mb-3">
+    <Button_Create OnClick="() => OpenCreateDialogAsync()" />
+</div>
+
+<Table State="state">
+    <HeadContent>
+        <th>User</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Status</th>
+        <th>Action</th>
+    </HeadContent>
+    <RowTemplate>
+        <td>@context.UserName</td>
+        <td>@context.FirstName @context.LastName</td>
+        <td>@context.Email</td>
+        <td>@context.PhoneNumber</td>
+        <td class="text-center">
+            <BadgeStatus Value="@context.Status" IsSuccess="@(context.Status == IdentityStatus.active)" />
+        </td>
+        <td>
+            <PermissionView Permission="@Permissions.Users.Update">
+
+                <IconActionButtons
+                    IconAction="IconActionButtons.Action.Update"
+                    OnClick="() => OpenUpdateDialogAsync(context)" />
+
+                <IconActionButtons
+                    IconAction="IconActionButtons.Action.Update"
+                    CustomIcon="@Icons.Material.Filled.DataArray"
+                    OnClick="() => ViewUserClaimsDialogAsync(context)" />
+
+                <IconActionButtons
+                    IconAction="IconActionButtons.Action.Update"
+                    CustomIcon="@Icons.Material.Filled.Key"
+                    OnClick="() => OpenResetPasswordDialogAsync(context)" />
+
+            </PermissionView>
+
+            <PermissionView Permission="@Permissions.Users.Delete">
+                <IconActionButtons
+                    IconAction="IconActionButtons.Action.Delete"
+                    OnClick="() => DeleteAsync(context.Id, context.UserName)" />
+            </PermissionView>
+        </td>
+    </RowTemplate>
+</Table>
+
+@code {
+    private DataTable<UserDto> state = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(UserService.GetAsync)
+        {
+            SearchFunc = (searchValue, e) =>
+                e.UserName.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+                || e.PhoneNumber.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+                || e.Email.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+        };
+
+        await state.ReloadAsync();
+    }
+
+    private async Task OpenCreateDialogAsync()
+    {
+        var options = WebConstants.DEFAULT_DIALOG_OPTIONS;
+
+        var dialog = await DialogService.ShowAsync<AddUser_Dialog>("Create New User", options);
+
+        var result = await CallGuarded.GetDialogResultAsync(dialog);
+
+        if (result.Succeeded)
+        {
+            await state.ReloadAsync();
+        }
+    }
+
+    private async Task OpenUpdateDialogAsync(UserDto user)
+    {
+        var options = new DialogOptions()
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = false,
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var parameters = new DialogParameters<UpdateUser_Dialog>
+        {
+            { x => x.User, user }
+        };
+
+        var dialog = await DialogService.ShowAsync<UpdateUser_Dialog>($"Update user [{user.UserName}]", parameters, options);
+
+        var result = await CallGuarded.GetDialogResultAsync(dialog);
+
+        if (result.Succeeded)
+        {
+            await state.ReloadAsync();
+        }
+    }
+
+    private async Task DeleteAsync(string id, string? userName)
+    {
+        bool? isConfirm = await DialogService.ShowMessageBox("Warning", $"Confirm delete user {userName}?");
+
+        if (isConfirm == true)
+        {
+            await CallGuarded.ExecuteAsync(
+                () => UserService.DeleteAsync(id),
+                $"User {userName} deleted",
+                state.ReloadAsync);
+        }
+    }
+
+    private async Task OpenResetPasswordDialogAsync(UserDto user)
+    {
+        if (string.IsNullOrEmpty(user.AuthProvider) is false)
+        {
+            ToastService.ShowError($"Please contact to Administrator");
+            return;
+        }
+
+        var options = WebConstants.DEFAULT_DIALOG_OPTIONS;
+
+        var parameters = new DialogParameters<ResetUserPassword_Dialog>
+        {
+            { x => x.User, user }
+        };
+
+        var dialog = await DialogService.ShowAsync<ResetUserPassword_Dialog>("Reset password", parameters, options);
+
+        var result = await CallGuarded.GetDialogResultAsync(dialog);
+
+        if (result.Succeeded)
+        {
+            await state.ReloadAsync();
+        }
+    }
+
+    private async Task ViewUserClaimsDialogAsync(UserDto user)
+    {
+        var options = new DialogOptions()
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = false,
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var parameters = new DialogParameters<UserClaims_Dialog>
+        {
+            { x => x.Id, user.Id }
+        };
+
+        await DialogService.ShowAsync<UserClaims_Dialog>($"User {user.UserName} attributes", parameters, options);
+    }
+}

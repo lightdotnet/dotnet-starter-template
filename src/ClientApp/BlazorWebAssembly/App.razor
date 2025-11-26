@@ -1,0 +1,33 @@
+﻿<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly" AdditionalAssemblies="new[] { typeof(BlazorComponents).Assembly }">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
+                <NotAuthorized>
+                    @if (CurrentUser.IsAuthenticated)
+                    {
+                        <AccessDenied />
+                    }
+                    else
+                    {
+                        <RedirectToLogin />
+                    }
+                </NotAuthorized>
+                <Authorizing>
+                    <p>Please wait...</p>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        
+        <NotFound>
+            @*
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p class="text-danger">Sorry, there's nothing at this address.</p>
+            </LayoutView>
+            *@
+            <RedirectToHome />
+        </NotFound>
+        
+    </Router>
+</CascadingAuthenticationState>

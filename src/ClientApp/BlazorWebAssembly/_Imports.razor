@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using System.Net.Http
+@using System.Net.Http.Json
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+@using MudBlazor
+
+@using Light.Blazor
+@using Light.MudBlazor
+
+@inject IClientCurrentUser CurrentUser
+@using Monolith.Blazor
+@using Monolith.Blazor.Layout
+@using Monolith.Blazor.Services
+@using Monolith.Blazor.Shared.Components
+@using Monolith.Blazor.Shared.Pages
+@using Monolith.Blazor.Infrastructure.Services
+@inject LayoutService LayoutService
