@@ -18,7 +18,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Catalog\Catalog.csproj" />
     <ProjectReference Include="..\Identity\Identity.csproj" />
-    <ProjectReference Include="..\WebComponents\WebComponents.csproj" />
   </ItemGroup>
 
 </Project>
