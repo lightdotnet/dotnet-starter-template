@@ -19,7 +19,7 @@
         <td>@context.Description</td>
         <td>
             <PermissionView Permission="@Permissions.Roles.Manage">
-                <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Size="Size.Small">
+                <MudButtonGroup Color="Color.Default" Variant="Variant.Text" Size="Size.Small">
                     <MudMenu Icon="@Icons.Material.Filled.Edit">
                         <MudMenuItem OnClick="() => OpenUpsertDialogAsync(context)">Edit</MudMenuItem>
                         <MudMenuItem OnClick="() => DeleteAsync(context.Id, context.Name)">Delete</MudMenuItem>
