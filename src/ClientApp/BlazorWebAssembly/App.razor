@@ -1,6 +1,7 @@
 ﻿<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly" AdditionalAssemblies="new[] { typeof(BlazorComponents).Assembly }">
         <Found Context="routeData">
+
             <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
                 <NotAuthorized>
                     @if (CurrentUser.IsAuthenticated)
@@ -9,13 +10,14 @@
                     }
                     else
                     {
-                        <RedirectToLogin />
+                        <Monolith.Blazor.Pages.Account.Login />
                     }
                 </NotAuthorized>
                 <Authorizing>
                     <p>Please wait...</p>
                 </Authorizing>
             </AuthorizeRouteView>
+
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         

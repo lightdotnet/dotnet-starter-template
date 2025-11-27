@@ -1,5 +1,4 @@
 ﻿@page "/account/login"
-@using Monolith.Blazor.Extensions
 
 @layout MainLayout
 
@@ -73,9 +72,9 @@
         Input = new();
 
 #if DEBUG
-    Input.Username = "super";
-    Input.Password = "123";
-    Input.RememberMe = true;
+        Input.Username = "super";
+        Input.Password = "123";
+        Input.RememberMe = true;
 #endif
     }
 

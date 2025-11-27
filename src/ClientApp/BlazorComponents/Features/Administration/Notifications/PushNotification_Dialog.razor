@@ -1,0 +1,98 @@
+﻿<MudDialog Style="position: relative">
+    <DialogContent>
+
+        <EditForm Model="@notification" OnValidSubmit="OnSubmitAsync" FormName="userForm">
+
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label>From User</label>
+                <SelectUser List="Users" SelectedUserChanged="OnSendToUserSelected" Variant="Variant.Outlined" />
+            </div>
+
+            <div class="mb-3">
+                <label>To User</label>
+                <SelectUser List="Users" SelectedUserChanged="OnSendToUserSelected" Variant="Variant.Outlined" />
+            </div>
+
+            <div class="mb-3">
+                <MudTextField @bind-Value=notification.Title Variant="Variant.Outlined" Label="Title" Required=true />
+            </div>
+
+            <div class="mb-3">
+                <MudTextField @bind-Value=notification.Message Variant="Variant.Outlined" Label="Content" Lines="5" Required=true />
+            </div>
+            <div class="mb-3">
+                <MudTextField @bind-Value=notification.Url Variant="Variant.Outlined" Label="URL" />
+            </div>
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Send</MudButton>
+
+        </EditForm>
+
+    </DialogContent>
+
+    <DialogActions>
+        <MudOverlay Visible="processing" DarkBackground="true" Absolute="true">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </MudOverlay>
+    </DialogActions>
+
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance dialog { get; set; } = default!;
+
+    [Parameter]
+    public IEnumerable<UserDto> Users { get; set; } = default!;
+
+    private SystemMessage notification = new SystemMessage();
+
+    private bool processing = false;
+
+    private string fromUserId = string.Empty;
+
+    private string fromName = string.Empty;
+
+    private string toUserId = string.Empty;
+
+    private void OnSendFromUserSelected(UserDto userDto)
+    {
+        if (userDto != null)
+        {
+            fromUserId = userDto.Id;
+            fromName = userDto.FirstName + " " + userDto.LastName;
+        }
+    }
+
+    private void OnSendToUserSelected(UserDto userDto)
+    {
+        if (userDto != null)
+        {
+            toUserId = userDto.Id;
+        }
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        if (string.IsNullOrEmpty(toUserId))
+        {
+            ToastService.ShowError("Please choose receive message user");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(fromUserId))
+        {
+            var fromUser = Users.First(x => x.Id == CurrentUser.UserId);
+
+            fromUserId = fromUser.Id;
+            fromName = fromUser.FirstName + " " + fromUser.LastName;
+        }
+
+        await CallGuarded.ExecuteAsync(
+            () => NotificationService.CreateAsync(fromUserId, fromName, toUserId, notification),
+            $"Push message to {toUserId} success",
+            dialog);
+    }
+}

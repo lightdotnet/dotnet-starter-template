@@ -7,17 +7,7 @@ public class TokenManager(
     IStorageService storageService,
     TokenHttpService tokenService) : ITokenManager
 {
-    private const string FIRST_TOKEN_PART = "_fp";
-
-    private const string MIDDLE_TOKEN_PART = "_mp";
-
-    private const string LAST_TOKEN_PART = "_lp";
-
-    private const string TOKEN_LIFETIME = "_exp";
-
-    private const string REFRESH_TOKEN = "refresh_token";
-
-    private const string REFRESH_TOKEN_LIFETIME = "refresh_exp";
+    private const string TOKEN_CACHE_KEY = "_user_session";
 
     public async Task<SavedToken?> GetSavedTokenAsync()
     {
@@ -51,49 +41,18 @@ public class TokenManager(
     {
         try
         {
-            var firstPart = await storageService.GetAsync<string>(FIRST_TOKEN_PART);
-            var middlePart = await storageService.GetAsync<string>(MIDDLE_TOKEN_PART);
-            var lastPart = await storageService.GetAsync<string>(LAST_TOKEN_PART);
-            var tokenExp = await storageService.GetAsync<DateTimeOffset?>(TOKEN_LIFETIME);
+            var dataAsString = await storageService.GetAsync<string>(TOKEN_CACHE_KEY);
 
-            if (firstPart is null || middlePart is null || lastPart is null || tokenExp is null)
-                return default;
-
-            var accessToken = string.Join('.', firstPart, middlePart, lastPart);
-
-            var refreshToken = await storageService.GetAsync<string>(REFRESH_TOKEN);
-            var refreshTokenExp = await storageService.GetAsync<DateTimeOffset?>(REFRESH_TOKEN_LIFETIME);
-
-            return new SavedToken
-            {
-                Token = accessToken,
-                ExpireOn = tokenExp.Value,
-                RefreshToken = refreshToken,
-                RefreshTokenExpireOn = refreshTokenExp
-            };
+            return SavedToken.ReadFrom(dataAsString);
         }
-        catch
-        {
-
-        }
+        catch { }
 
         return null;
     }
 
     private async Task SetTokenAsync(SavedToken data)
     {
-        var tokenParts = data.Token.Split('.');
-
-        await storageService.SetAsync(FIRST_TOKEN_PART, tokenParts[0]);
-        await storageService.SetAsync(MIDDLE_TOKEN_PART, tokenParts[1]);
-        await storageService.SetAsync(LAST_TOKEN_PART, tokenParts[2]);
-        await storageService.SetAsync(TOKEN_LIFETIME, data.ExpireOn);
-
-        if (!string.IsNullOrEmpty(data.RefreshToken))
-        {
-            await storageService.SetAsync(REFRESH_TOKEN, data.RefreshToken);
-            await storageService.SetAsync(REFRESH_TOKEN_LIFETIME, data.RefreshTokenExpireOn);
-        }
+        await storageService.SetAsync(TOKEN_CACHE_KEY, data.ToString());
     }
 
     public async Task<Result<string>> RequestTokenAsync(string username, string password)

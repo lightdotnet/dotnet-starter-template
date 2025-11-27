@@ -12,7 +12,7 @@ public static class NavigationManagerExtensions
         return absoluteUri.PathAndQuery[1..];
     }
 
-    public static void RedirectToLogin(this NavigationManager navigationManager)
+    public static void RedirectToLogin(this NavigationManager navigationManager, bool forceLoad = false)
     {
         var loginPath = "account/login";
 
@@ -30,7 +30,7 @@ public static class NavigationManagerExtensions
             loginPath += $"?returnUrl={returnUrl}";
         }
 
-        navigationManager.NavigateTo(loginPath);
+        navigationManager.NavigateTo(loginPath, forceLoad: forceLoad);
     }
 
     public static void RedirectWhenLoginSuccess(this NavigationManager navigationManager, string? returnUrl)

@@ -5,13 +5,17 @@
 @using Microsoft.Extensions.Logging
 @using Microsoft.JSInterop
 
+@attribute [Authorize]
+
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 
 @using MudBlazor
 @inject IDialogService DialogService
 
+@using Light.AspNetCore.Authorization
 @using Light.Identity
+
 @using Light.Blazor
 @using Light.MudBlazor
 @inject IToastDisplay ToastService
@@ -19,15 +23,18 @@
 
 @using Monolith
 @using Monolith.Authorization
+@using Monolith.Blazor.Components
 @using Monolith.Blazor.Extensions
 @using Monolith.Blazor.Services
 @using Monolith.Blazor.Shared
-@using Monolith.Blazor.Shared.Components
 @using Monolith.HttpApi.Identity
 @using Monolith.Notifications
+@inject LayoutService LayoutService
+@inject ITokenManager TokenManager
 @inject IClientCurrentUser CurrentUser
 @inject UserHttpService UserService
 @inject UserProfileHttpService UserProfileService
 @inject RoleHttpService RoleService
 @inject NotificationHttpService NotificationService
+
 

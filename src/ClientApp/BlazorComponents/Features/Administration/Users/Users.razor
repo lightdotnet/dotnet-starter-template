@@ -1,5 +1,7 @@
 ﻿@page "/users"
 
+@attribute [MustHavePermission(Permissions.Users.View)]
+
 <PageHeader Title="Users" />
 
 <div class="d-flex justify-content-end mb-3">

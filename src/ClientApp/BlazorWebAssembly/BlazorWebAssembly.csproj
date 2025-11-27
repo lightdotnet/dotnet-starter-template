@@ -7,6 +7,25 @@
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
     <UserSecretsId>ee233731-6f90-4bda-8db8-ebdf055f67b1</UserSecretsId>
+
+	<!-- Enables full optimization pipeline for Blazor WebAssembly -->
+	<RunAOTCompilation>false</RunAOTCompilation>
+	<!-- optional -->
+	<InvariantGlobalization>false</InvariantGlobalization>
+
+	<!-- Enable linker + minifier -->
+	<BlazorWebAssemblyEnableLinking>true</BlazorWebAssemblyEnableLinking>
+	<PublishTrimmed>true</PublishTrimmed>
+
+	<!-- *** IMPORTANT: JavaScript / CSS minification *** -->
+	<CssMinifyEnabled>true</CssMinifyEnabled>
+	<JavaScriptMinifyEnabled>true</JavaScriptMinifyEnabled>
+	<JavaScriptMinifier>Closure</JavaScriptMinifier>
+	<!-- or Node-based if installed -->
+
+	<!-- Add compression on publish -->
+	<CompressOnPublish>true</CompressOnPublish>
+	  
   </PropertyGroup>
 
   <ItemGroup>

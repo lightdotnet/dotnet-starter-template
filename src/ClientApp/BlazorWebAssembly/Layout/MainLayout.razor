@@ -14,15 +14,50 @@
 @*<SpringFlowers />*@
 @*<_Snow />*@
 
-@Body
+@if (CurrentUser.IsAuthenticated)
+{
+    <AuthorizeView>
+        <Authorized>
+            <MudLayout>
+                <MudAppBar Elevation="0">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                    <a href="/"><img src="/images/ASP-NET-Core-Logo.png" class="logo-image" style="height: 30px" /></a>
+                    <MudSpacer />
+                    <MudIconButton Icon="@darkModeIcon" Size="Size.Small" Color="Color.Inherit" Class="mr-1" OnClick="@((e) => DarkModeToggle())" />
+                    <UserMenu />
+                </MudAppBar>
+                <MudDrawer @bind-Open="drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0">
+                    <NavMenu />
+                </MudDrawer>
+                <MudMainContent>
+                    <MudContainer MaxWidth="MaxWidth.Large" Style="padding: 1rem 2rem;">
+                        @Body
+                    </MudContainer>
+                </MudMainContent>
+            </MudLayout>
+        </Authorized>
+    </AuthorizeView>
+}
+else
+{
+    @Body
+}
 
 @code {
     MudTheme mudTheme = Monolith.Blazor.Shared.Theme.ApplicationTheme();
 
-    public void Dispose()
+    bool drawerOpen = true;
+
+    bool darkMode = false;
+
+    string darkModeIcon => darkMode == true ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode;
+
+    void DrawerToggle() => drawerOpen = !drawerOpen;
+
+    void DarkModeToggle()
     {
-        LayoutService.MajorUpdateOccured -= LayoutServiceOnMajorUpdateOccured;
-        GC.SuppressFinalize(this);
+        darkMode = !darkMode;
+        LayoutService.SetDarkMode(darkMode);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -42,5 +77,11 @@
     private void LayoutServiceOnMajorUpdateOccured(object? sender, EventArgs e)
     {
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        LayoutService.MajorUpdateOccured -= LayoutServiceOnMajorUpdateOccured;
+        GC.SuppressFinalize(this);
     }
 }
