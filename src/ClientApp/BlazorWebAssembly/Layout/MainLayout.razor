@@ -24,6 +24,7 @@
                     <a href="/"><img src="/images/ASP-NET-Core-Logo.png" class="logo-image" style="height: 30px" /></a>
                     <MudSpacer />
                     <MudIconButton Icon="@darkModeIcon" Size="Size.Small" Color="Color.Inherit" Class="mr-1" OnClick="@((e) => DarkModeToggle())" />
+                    <UserNotificationPopup />
                     <UserMenu />
                 </MudAppBar>
                 <MudDrawer @bind-Open="drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0">

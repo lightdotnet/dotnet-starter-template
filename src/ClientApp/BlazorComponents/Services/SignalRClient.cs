@@ -15,7 +15,7 @@ public class SignalRClient(ITokenProvider tokenService) : IAsyncDisposable
     {
         if (_hubConnection != null) return true;
 
-        var hubUrl = "http://localhost:8080";
+        var hubUrl = "http://localhost:8080/signalr-hub";
 
         Task<string?> AccessTokenProvider() => tokenService.GetAccessTokenAsync();
 
