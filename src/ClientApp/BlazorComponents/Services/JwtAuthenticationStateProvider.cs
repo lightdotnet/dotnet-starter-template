@@ -8,9 +8,8 @@ using System.Security.Claims;
 namespace Monolith.Blazor.Services;
 
 public class JwtAuthenticationStateProvider(
-    IServiceScopeFactory serviceScopeFactory,
-    NavigationManager navigationManager) :
-    AuthenticationStateProvider, ITokenProvider, ISignInManager
+    IServiceScopeFactory serviceScopeFactory, NavigationManager navigationManager)
+    : AuthenticationStateProvider, ITokenProvider, ISignInManager
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
