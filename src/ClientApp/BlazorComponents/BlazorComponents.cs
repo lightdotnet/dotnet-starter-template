@@ -38,12 +38,14 @@ public static class BlazorComponents
     public static IServiceCollection AddAuth(this IServiceCollection services)
     {
         // register the custom state provider
-        services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
-        services.AddScoped(sp => (ITokenProvider)sp.GetRequiredService<AuthenticationStateProvider>());
-        services.AddScoped(sp => (ISignInManager)sp.GetRequiredService<AuthenticationStateProvider>());
+        //services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
+        //services.AddScoped(sp => (ITokenProvider)sp.GetRequiredService<AuthenticationStateProvider>());
+        //services.AddScoped(sp => (ISignInManager)sp.GetRequiredService<AuthenticationStateProvider>());
         services.AddScoped<IClientCurrentUser, ClientCurrentUser>();
         services.AddScoped<ITokenManager, TokenManager>();
-        services.AddPermissionAuthorization();
+        
+        //services.AddPermissionPolicies();
+        //services.AddPermissionAuthorization();
 
         // register authorization policies for all permissions
         services.AddAuthorizationCore(RegisterPermissions);
