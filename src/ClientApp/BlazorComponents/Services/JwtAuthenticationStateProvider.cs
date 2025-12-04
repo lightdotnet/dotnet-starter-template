@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Monolith.Blazor.Extensions;
 using Monolith.HttpApi.Common.Interfaces;
 using System.Security.Claims;
@@ -7,7 +8,7 @@ using System.Security.Claims;
 namespace Monolith.Blazor.Services;
 
 public class JwtAuthenticationStateProvider(
-    ITokenManager tokenService,
+    IServiceScopeFactory serviceScopeFactory,
     NavigationManager navigationManager) :
     AuthenticationStateProvider, ITokenProvider, ISignInManager
 {
@@ -48,6 +49,9 @@ public class JwtAuthenticationStateProvider(
 
         try
         {
+            using var scope = serviceScopeFactory.CreateScope();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITokenManager>();
+
             var getToken = await tokenService.RequestTokenAsync(model.Username, model.Password);
 
             if (getToken.Succeeded)
@@ -69,6 +73,9 @@ public class JwtAuthenticationStateProvider(
 
         try
         {
+            using var scope = serviceScopeFactory.CreateScope();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITokenManager>();
+
             await tokenService.ClearAsync();
 
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
@@ -83,7 +90,13 @@ public class JwtAuthenticationStateProvider(
 
     public async Task<string?> GetAccessTokenAsync()
     {
-        TokenData ??= await tokenService.GetSavedTokenAsync();
+        if (TokenData is null)
+        {
+            using var scope = serviceScopeFactory.CreateScope();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITokenManager>();
+
+            TokenData = await tokenService.GetSavedTokenAsync();
+        }
 
         if (TokenData is null)
         {
