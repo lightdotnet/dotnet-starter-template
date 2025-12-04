@@ -1,7 +1,5 @@
 ﻿@page "/account/login"
 
-@layout MainLayout
-
 @attribute [AllowAnonymous]
 
 @inject ILogger<Login> Logger
@@ -61,7 +59,6 @@
 
     private string? errorMessage;
 
-
     protected override void OnInitialized()
     {
         if (CurrentUser.IsAuthenticated)
@@ -70,7 +67,10 @@
             return;
         }
 
-        Input = new();
+        if (Input is null)
+        {
+            Input = new();
+        }
 
 #if DEBUG
         Input.Username = "super";

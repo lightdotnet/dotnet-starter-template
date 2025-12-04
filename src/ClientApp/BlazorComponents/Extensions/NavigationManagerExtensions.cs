@@ -66,6 +66,6 @@ public static class NavigationManagerExtensions
             logoutPath += $"?returnUrl={returnUrl}";
         }
 
-        navigationManager.NavigateTo(logoutPath, true);
+        navigationManager.NavigateTo(logoutPath);
     }
 }
