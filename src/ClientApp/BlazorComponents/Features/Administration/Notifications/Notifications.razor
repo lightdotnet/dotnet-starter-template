@@ -1,5 +1,7 @@
 ﻿@page "/system-notifications"
 
+@attribute [MustHavePermission(Permissions.System.Notification)]
+
 <Remote_Table State="state" SearchPermission="@Permissions.System.Notification">
     <SearchContent>
         
