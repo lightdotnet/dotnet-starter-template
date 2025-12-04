@@ -20,24 +20,31 @@ public class JwtAuthenticationStateProvider(
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        CurrentUser = await GetUserClaimsPrincipalAsync();
+        CurrentUser ??= await GetUserClaimsPrincipalAsync();
+
+        if (CurrentUser is null)
+        {
+            return new AuthenticationState(new(new ClaimsIdentity()));
+        }
 
         return new AuthenticationState(CurrentUser);
     }
 
-    private async Task<ClaimsPrincipal> GetUserClaimsPrincipalAsync()
+    private async Task<ClaimsPrincipal?> GetUserClaimsPrincipalAsync()
     {
         var accessToken = await GetAccessTokenAsync();
 
         if (string.IsNullOrEmpty(accessToken))
         {
-            return new(new ClaimsIdentity());
+            return default;
         }
 
         var userClaims = JwtExtensions.ReadClaims(accessToken);
 
         // must set authenticationType to mark isAuthentitcated = true
         var identity = new ClaimsIdentity(userClaims, "JWT");
+
+        Console.WriteLine("User loaded");
 
         return new ClaimsPrincipal(identity);
     }
