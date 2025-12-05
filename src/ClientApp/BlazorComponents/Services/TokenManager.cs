@@ -9,7 +9,7 @@ public class TokenManager(
 {
     private const string TOKEN_CACHE_KEY = "_user_session";
 
-    public async Task<SavedToken?> GetSavedTokenAsync()
+    public async Task<TokenModel?> GetSavedTokenAsync()
     {
         var savedToken = await TryGetTokenCachedAsync();
 
@@ -37,20 +37,20 @@ public class TokenManager(
         return savedToken;
     }
 
-    private async Task<SavedToken?> TryGetTokenCachedAsync()
+    private async Task<TokenModel?> TryGetTokenCachedAsync()
     {
         try
         {
             var dataAsString = await storageService.GetAsync<string>(TOKEN_CACHE_KEY);
 
-            return SavedToken.ReadFrom(dataAsString);
+            return TokenModel.ReadFrom(dataAsString);
         }
         catch { }
 
         return null;
     }
 
-    private async Task SetTokenAsync(SavedToken data)
+    private async Task SetTokenAsync(TokenModel data)
     {
         await storageService.SetAsync(TOKEN_CACHE_KEY, data.ToString());
     }
@@ -65,7 +65,7 @@ public class TokenManager(
         }
 
         await SetTokenAsync(
-            new SavedToken(
+            new TokenModel(
                 getToken.Data.AccessToken,
                 getToken.Data.ExpiresIn,
                 getToken.Data.RefreshToken));
@@ -83,7 +83,7 @@ public class TokenManager(
         }
 
         await SetTokenAsync(
-            new SavedToken(
+            new TokenModel(
                 refresh.Data.AccessToken,
                 refresh.Data.ExpiresIn,
                 refresh.Data.RefreshToken));

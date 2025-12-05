@@ -4,7 +4,7 @@ namespace Monolith.Blazor.Services;
 
 public interface ITokenManager
 {
-    Task<SavedToken?> GetSavedTokenAsync();
+    Task<TokenModel?> GetSavedTokenAsync();
 
     Task<Result<string>> RequestTokenAsync(string username, string password);
 
@@ -13,12 +13,12 @@ public interface ITokenManager
     Task ClearAsync();
 }
 
-public class SavedToken
+public class TokenModel
 {
-    public SavedToken()
+    public TokenModel()
     { }
 
-    public SavedToken(string accessToken, long expireInSeconds, string? refreshToken)
+    public TokenModel(string accessToken, long expireInSeconds, string? refreshToken)
     {
         Token = accessToken;
         ExpireOn = DateTimeOffset.Now.AddSeconds(expireInSeconds);
@@ -52,12 +52,12 @@ public class SavedToken
         return Convert.ToBase64String(plainTextBytes);
     }
 
-    public static SavedToken? ReadFrom(string? base64EncodedData)
+    public static TokenModel? ReadFrom(string? base64EncodedData)
     {
         if (string.IsNullOrEmpty(base64EncodedData)) return null;
 
         var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
         var data = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
-        return JsonSerializer.Deserialize<SavedToken>(data);
+        return JsonSerializer.Deserialize<TokenModel>(data);
     }
 }

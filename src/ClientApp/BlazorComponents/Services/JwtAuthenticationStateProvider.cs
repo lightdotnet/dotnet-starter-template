@@ -15,7 +15,7 @@ public class JwtAuthenticationStateProvider(
 
     public ClaimsPrincipal? CurrentUser { get; private set; }
 
-    private SavedToken? TokenData { get; set; }
+    private TokenModel? TokenData { get; set; }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {

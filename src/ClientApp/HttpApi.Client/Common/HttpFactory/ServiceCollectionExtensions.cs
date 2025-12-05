@@ -8,10 +8,8 @@ public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Auto scan and add httpclients
+    ///     Please add backend urls in configuration section "ApiUrls"
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="configuration"></param>
-    /// <returns></returns>
     public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<JwtAuthenticationHeaderHandler>();
@@ -46,8 +44,6 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Auto scan and add httpclient services
     /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
     public static IServiceCollection AddHttpClientServices(this IServiceCollection services, params Assembly[] assemblies)
     {
         var typeOfBase = typeof(HttpClientBase);
