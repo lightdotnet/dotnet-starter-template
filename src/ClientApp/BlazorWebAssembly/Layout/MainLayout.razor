@@ -36,7 +36,14 @@
         </MudLayout>
     </Authorized>
     <NotAuthorized>
-        @Body
+        @if (CurrentUser.IsAuthenticated)
+        {
+            <AccessDenied />
+        }
+        else
+        {
+            <Monolith.Blazor.Pages.Account.Login />
+        }
     </NotAuthorized>
 </AuthorizeView>
 

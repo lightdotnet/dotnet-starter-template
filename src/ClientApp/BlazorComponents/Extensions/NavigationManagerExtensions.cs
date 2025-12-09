@@ -55,7 +55,7 @@ public static class NavigationManagerExtensions
 
     public static void RedirectToLogout(this NavigationManager navigationManager)
     {
-        var logoutPath = "account/logout";
+        var logoutPath = "account/login";
 
         var pathAndQuery = GetPathAndQuery(navigationManager);
 
@@ -66,6 +66,6 @@ public static class NavigationManagerExtensions
             logoutPath += $"?returnUrl={returnUrl}";
         }
 
-        navigationManager.NavigateTo(logoutPath);
+        navigationManager.NavigateTo(logoutPath, true);
     }
 }

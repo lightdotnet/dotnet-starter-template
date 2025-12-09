@@ -29,24 +29,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var get = await TokenManager.GetSavedTokenAsync();
-
-        if (get is not null)
-        {
-            if (isFullControl)
-            {
-                identityData = get;
-            }
-            else
-            {
-                identityData = new
-                {
-                    TokenExpireOn = get.ExpireOn.ToLocalTime(),
-                    RefreshTokenExpireOn = get.RefreshTokenExpireOn?.ToLocalTime(),
-                };
-            }
-            
-        }
+        
     }
 
     private string GenerateQRCode(string? qrText)

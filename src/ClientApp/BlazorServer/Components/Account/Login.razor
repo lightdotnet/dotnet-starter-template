@@ -1,5 +1,106 @@
-﻿<h3>Login</h3>
+﻿@page "/account/login"
+@attribute [AllowAnonymous, ExcludeFromInteractiveRouting]
+
+<PageTitle>Log in</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex align-center" Style="height: 100vh;">
+    <div class="d-flex flex-column mud-width-full">
+        <div style="max-width:400px">
+
+            <MudPaper Elevation="0" Class="pa-8" Width="100%" Style="position: relative;">
+
+                @if (Input != null)
+                {
+                    <EditForm Model="@Input" OnValidSubmit="LoginHandle" FormName="loginForm" autocomplete="off">
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger" role="alert">@errorMessage</div>
+                        }
+
+                        <DataAnnotationsValidator />
+                        @* Must set name for input matching with @bind for pass require FormModel error *@
+                        <div class="mb-5">
+                            <InputText @bind-Value="Input.Username" class="form-control" name="Input.Username" placeHolder="Username" required />
+                        </div>
+
+                        <div class="mb-5">
+                            <InputText @bind-Value="Input.Password" class="form-control" name="Input.Password" placeHolder="Password" required />
+                        </div>
+
+                        <Button Label="Login" Color="AppColor.Primary" FullWidth Submit />
+
+                        <Overlay IsProcessing="processing" />
+
+                    </EditForm>
+                }
+
+            </MudPaper>
+            <div class="text-center text-secondary">
+                Demo version
+            </div>
+        </div>
+    </div>
+</MudContainer>
 
 @code {
+    [Inject]
+    ISignInManager SignInManager { get; set; } = default!;
 
+    [SupplyParameterFromForm]
+    private LoginModel? Input { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private bool processing;
+
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        if (CurrentUser.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        
+        if (Input is null)
+        {
+            Input = new();
+        }
+
+#if DEBUG
+        //Input.Username = "super";
+        //Input.Password = "123";
+        //Input.RememberMe = true;
+#endif
+    }
+
+    private async Task LoginHandle()
+    {
+        processing = true;
+        
+        if (Input is null)
+        {
+            errorMessage = "Please enter your login info.";
+            return;
+        }
+        
+        try
+        {
+            var loginResult = await SignInManager.SignInAsync(Input);
+
+            if (loginResult.Succeeded)
+            {
+                Console.WriteLine("User logged in");
+                NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        processing = false;
+    }
 }

@@ -2,16 +2,6 @@
     <Found Context="routeData">
 
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
-            <NotAuthorized>
-                @if (CurrentUser.IsAuthenticated)
-                {
-                    <AccessDenied />
-                }
-                else
-                {
-                    <Monolith.Blazor.Pages.Account.Login />
-                }
-            </NotAuthorized>
             <Authorizing>
                 <p>Please wait...</p>
             </Authorizing>

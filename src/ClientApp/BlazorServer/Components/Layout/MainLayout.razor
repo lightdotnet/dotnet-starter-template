@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using Monolith.Blazor.Components.Account
+@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="mudTheme" IsDarkMode="@LayoutService.IsDarkMode" IsDarkModeChanged="@LayoutService.SetDarkMode" />
 <MudPopoverProvider />
@@ -7,21 +8,38 @@
 
 <Spinner />
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<AuthorizeView>
+    <Authorized>
+        <MudLayout>
+            <MudAppBar Elevation="0">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <a href="/"><img src="/images/ASP-NET-Core-Logo.png" class="logo-image" style="height: 30px" /></a>
+                <MudSpacer />
+                <MudIconButton Icon="@darkModeIcon" Size="Size.Small" Color="Color.Inherit" Class="mr-1" OnClick="@((e) => DarkModeToggle())" />
+                <UserNotificationPopup />
+                <UserMenu />
+            </MudAppBar>
+            <MudDrawer @bind-Open="drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0">
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.Large" Style="padding: 1rem 2rem;">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+    <NotAuthorized>
+        @if (CurrentUser.IsAuthenticated)
+        {
+            <AccessDenied />
+        }
+        else
+        {
+            <Monolith.Blazor.Components.Account.Login />
+        }
+    </NotAuthorized>
+</AuthorizeView>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
