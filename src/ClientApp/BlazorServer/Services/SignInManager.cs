@@ -1,4 +1,5 @@
 ﻿using Light.Contracts;
+using Light.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Monolith.Blazor.Extensions;
 using Monolith.Blazor.Services.Storage;
@@ -49,6 +50,15 @@ public class SignInManager(
             });
 
         var userClaims = JwtExtensions.ReadClaims(getToken.Data.AccessToken);
+
+        var userProfileService = _httpContext.RequestServices.GetRequiredService<UserProfileHttpService>();
+
+        var getUserProfiles = await userProfileService.GetAsync();
+
+        if (getUserProfiles.Succeeded)
+        {
+            userClaims.AddRange(getUserProfiles.Data.Get());
+        }
 
         var claimsIdentity = new ClaimsIdentity(userClaims, Constants.JwtAuthScheme);
 

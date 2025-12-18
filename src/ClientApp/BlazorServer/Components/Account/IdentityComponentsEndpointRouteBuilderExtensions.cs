@@ -12,14 +12,26 @@ namespace Monolith.Blazor.Components.Account
 
             var accountGroup = endpoints.MapGroup("/account");
 
+            accountGroup.MapGet("/login-post", async (
+                [FromServices] ISignInManager service,
+                [FromQuery] string? returnUrl) =>
+            {
+                await service.SignInAsync(new LoginModel
+                {
+                    Username = "super",
+                    Password = "123"
+                });
+
+                return Results.Ok();
+            });
+
             accountGroup.MapGet("/logout", async (
                 [FromServices] ISignInManager service,
                 [FromQuery] string? returnUrl) =>
             {
                 await service.SignOutAsync();
 
-                return Results.Ok();
-                //return TypedResults.LocalRedirect($"~/{returnUrl}");
+                return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 
             accountGroup.MapPost("/post-logout", async (

@@ -4,7 +4,7 @@ namespace Monolith.Authorization;
 
 public abstract class CurrentUserBase : ICurrentUser
 {
-    protected virtual System.Security.Claims.ClaimsPrincipal? User { get; set; }
+    public virtual System.Security.Claims.ClaimsPrincipal? User { get; set; }
 
     public string? UserId => User?.GetUserId();
 

@@ -1,13 +1,8 @@
-﻿using Light.AspNetCore.Authorization;
-using Light.Extensions.DependencyInjection;
+﻿using Light.Extensions.DependencyInjection;
 using Light.MudBlazor;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.DependencyInjection;
 using Monolith.Authorization;
 using Monolith.Blazor.Components.Account;
 using Monolith.Blazor.Services;
-using Monolith.Blazor.Shared;
 using Monolith.HttpApi;
 using Monolith.HttpApi.Common.HttpFactory;
 using Monolith.HttpApi.Common.Interfaces;
@@ -67,7 +62,7 @@ public static class DependencyInjection
     {
         app.UseAuthentication();
         app.UseAuthorization();
-        
+
         app.MapAdditionalIdentityEndpoints();
 
         return app;

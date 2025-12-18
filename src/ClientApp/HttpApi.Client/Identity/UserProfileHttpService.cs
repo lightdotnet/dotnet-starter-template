@@ -8,6 +8,12 @@ public class UserProfileHttpService(IHttpClientFactory httpClientFactory) :
 {
     private const string BasePath = "user_profile";
 
+    public Task<Result<UserDto>> GetAsync()
+    {
+        var url = $"{BasePath}";
+        return TryGetAsync<UserDto>(url);
+    }
+
     public Task<Result<IEnumerable<UserTokenDto>>> GetTokensAsync()
     {
         var url = $"{BasePath}/token/list";
@@ -27,19 +33,19 @@ public class UserProfileHttpService(IHttpClientFactory httpClientFactory) :
         return TryGetPagedAsync<NotificationDto>(url);
     }
 
-    public Task<Result<NotificationDto>> GetByIdAsync(string id)
+    public Task<Result<NotificationDto>> GetNotificationByIdAsync(string id)
     {
         var url = $"{BasePath}/notification/{id}";
         return TryGetAsync<NotificationDto>(url);
     }
 
-    public Task<Result<int>> CountUnreadAsync()
+    public Task<Result<int>> CountUnreadNotificationsAsync()
     {
         var url = $"{BasePath}/notification/count_unread";
         return TryGetAsync<int>(url);
     }
 
-    public Task<Result> ReadAsync(string id)
+    public Task<Result> ReadNotificationAsync(string id)
     {
         var url = $"{BasePath}/notification/read";
         return TryPutAsync(url, id);

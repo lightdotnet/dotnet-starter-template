@@ -1,4 +1,6 @@
-﻿namespace Monolith.Blazor.Services;
+﻿using System.Security.Claims;
+
+namespace Monolith.Blazor.Services;
 
 public interface IClientCurrentUser : ICurrentUser
 {
@@ -11,4 +13,6 @@ public interface IClientCurrentUser : ICurrentUser
     string? PhoneNumber { get; }
 
     string? Email { get; }
+
+    ClaimsPrincipal? User { get; }
 }

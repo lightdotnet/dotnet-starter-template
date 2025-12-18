@@ -1,18 +1,16 @@
 ﻿global using Light.Contracts;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Light.AspNetCore.Authorization;
-using Light.Blazor;
 using Light.Extensions.DependencyInjection;
+using Light.MudBlazor;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Monolith.Blazor.Shared;
 using Monolith.Authorization;
-using Monolith.HttpApi;
-using Light.MudBlazor;
-using Monolith.HttpApi.Common.HttpFactory;
 using Monolith.Blazor.Services;
+using Monolith.Blazor.Shared;
+using Monolith.HttpApi;
+using Monolith.HttpApi.Common.HttpFactory;
 using Monolith.HttpApi.Common.Interfaces;
 
 namespace Monolith.Blazor;

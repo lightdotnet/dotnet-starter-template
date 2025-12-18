@@ -11,7 +11,7 @@
 
                 @if (Input != null)
                 {
-                    <EditForm Model="@Input" OnValidSubmit="LoginHandle" FormName="loginForm" autocomplete="off">
+                    <EditForm EditContext="editContext" OnValidSubmit="LoginHandle" FormName="loginForm" autocomplete="off">
 
                         @if (!string.IsNullOrEmpty(errorMessage))
                         {
@@ -53,8 +53,8 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
+    private EditContext editContext = default!;
     private bool processing;
-
     private string? errorMessage;
 
     protected override void OnInitialized()
@@ -63,42 +63,47 @@
         {
             NavigationManager.NavigateTo("/");
         }
-        
-        if (Input is null)
-        {
-            Input = new();
-        }
+
+        Input ??= new();
+
+        editContext = new EditContext(Input);
 
 #if DEBUG
-        //Input.Username = "super";
-        //Input.Password = "123";
-        //Input.RememberMe = true;
+    //Input.Username = "super";
+    //Input.Password = "123";
+    //Input.RememberMe = true;
 #endif
     }
 
     private async Task LoginHandle()
     {
         processing = true;
-        
+
         if (Input is null)
         {
             errorMessage = "Please enter your login info.";
             return;
         }
-        
+
         try
         {
             var loginResult = await SignInManager.SignInAsync(Input);
+
+            await Task.Delay(3000);
 
             if (loginResult.Succeeded)
             {
                 Console.WriteLine("User logged in");
                 NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
             }
+            else
+            {
+                errorMessage = loginResult.Message;
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            errorMessage = ex.Message;
         }
 
         processing = false;

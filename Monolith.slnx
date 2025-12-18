@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/docker-cli.md" />
+    <File Path="docs/migrations.md" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="ModularMonolith.nuspec" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AppHost/AppHost.csproj" />
+    <Project Path="src/Catalog/Catalog.csproj" />
+    <Project Path="src/Contracts/Contracts.csproj" />
+    <Project Path="src/Identity/Identity.csproj" />
+    <Project Path="src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
+    <Project Path="src/Shared/Shared.csproj" />
+    <Project Path="src/WebApi/WebApi.csproj" />
+  </Folder>
+  <Folder Name="/src/client/">
+    <Project Path="src/ClientApp/BlazorComponents/BlazorComponents.csproj" />
+    <Project Path="src/ClientApp/BlazorServer/BlazorServer.csproj" />
+    <Project Path="src/ClientApp/BlazorWebAssembly/BlazorWebAssembly.csproj" />
+    <Project Path="src/ClientApp/HttpApi.Client/HttpApi.Client.csproj" />
+  </Folder>
+  <Folder Name="/src/migrations/">
+    <Project Path="src/Migrations/MSSQL/MSSQL.csproj" />
+    <Project Path="src/Migrations/PostgreSQL/PostgreSQL.csproj" />
+    <Project Path="src/Migrations/Sqlite/Sqlite.csproj" />
+  </Folder>
+</Solution>

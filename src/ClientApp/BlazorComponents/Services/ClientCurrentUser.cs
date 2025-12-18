@@ -7,6 +7,6 @@ namespace Monolith.Blazor.Services;
 public class ClientCurrentUser(AuthenticationStateProvider authenticationStateProvider)
     : CurrentUserBase, IClientCurrentUser
 {
-    protected override ClaimsPrincipal? User =>
+    public override ClaimsPrincipal? User =>
         ((JwtAuthenticationStateProvider)authenticationStateProvider).CurrentUser;
 }

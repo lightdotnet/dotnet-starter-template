@@ -23,13 +23,13 @@ else
 }
 
 @code {
-    private object? identityData;
+    private IEnumerable<System.Security.Claims.Claim>? identityData;
 
     private bool isFullControl => CurrentUser.IsFullControl();
 
     protected override async Task OnInitializedAsync()
     {
-        
+        identityData = CurrentUser.User?.Claims;
     }
 
     private string GenerateQRCode(string? qrText)

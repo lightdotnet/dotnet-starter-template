@@ -109,7 +109,7 @@
 
     private async Task CountUnreadAsync()
     {
-        var countUnread = await UserProfileService.CountUnreadAsync();
+        var countUnread = await UserProfileService.CountUnreadNotificationsAsync();
 
         if (countUnread.Succeeded)
         {
@@ -140,7 +140,7 @@
     {
         if (notification.ReadStatus is false)
         {
-            await UserProfileService.ReadAsync(notification.Id);
+            await UserProfileService.ReadNotificationAsync(notification.Id);
         }
 
         await LoadUserNotificationsAsync();
@@ -153,7 +153,7 @@
 
     private async Task ReadAllAsync()
     {
-        await UserProfileService.ReadAsync("all");
+        await UserProfileService.ReadNotificationAsync("all");
 
         await LoadUserNotificationsAsync();
     }
