@@ -88,13 +88,6 @@
     */
     public async Task LogoutAsync()
     {
-        using var httpClient = new HttpClient()
-        {
-            BaseAddress = new Uri(NavigationManager.BaseUri)
-        };
-
-        await httpClient.GetAsync("/account/logout");
-        
         NavigationManager.RedirectToLogout();
     }
 }

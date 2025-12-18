@@ -1,6 +1,6 @@
-﻿@page "/account/login"
-@attribute [AllowAnonymous, ExcludeFromInteractiveRouting]
-
+﻿@*page "/account/login"
+@attribute [AllowAnonymous]
+*@
 <PageTitle>Log in</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex align-center" Style="height: 100vh;">
@@ -87,18 +87,25 @@
 
         try
         {
-            var loginResult = await SignInManager.SignInAsync(Input);
+            //var loginResult1 = await SignInManager.SignInAsync(Input);
+
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(NavigationManager.BaseUri)
+            };
+
+            var loginResult = await httpClient.GetAsync("account/post-login");
 
             await Task.Delay(3000);
 
-            if (loginResult.Succeeded)
+            if (loginResult.IsSuccessStatusCode)
             {
                 Console.WriteLine("User logged in");
                 NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
             }
             else
             {
-                errorMessage = loginResult.Message;
+                //errorMessage = loginResult.Message;
             }
         }
         catch (Exception ex)

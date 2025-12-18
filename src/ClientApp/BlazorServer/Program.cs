@@ -7,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddRazorPages();
+
 builder.Services.AddWebServices(builder.Configuration);
 
 var app = builder.Build();
@@ -29,6 +31,9 @@ app.UseAntiforgery();
 app.AddWebPipelines();
 
 app.MapStaticAssets();
+
+app.MapRazorPages();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

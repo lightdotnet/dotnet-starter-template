@@ -1,0 +1,104 @@
+﻿@page "/account/login"
+@model Monolith.Blazor.Pages.Account.LoginModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <link href="~/lib/animate/animate.css" rel="stylesheet" />
+
+    <link href="~/lib/spinner/sk-spinner.css" rel="stylesheet" />
+
+    <link href="~/app.css" rel="stylesheet" />
+
+    <link href="~/_content/Lightsoft.Blazor/style.css" rel="stylesheet" />
+
+    <style>
+        .validation-summary-errors ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+    </style>
+</head>
+<body class="d-flex justify-content-center align-items-center vh-100">
+
+    <div class="card animated fadeInDown" style="width: 18rem;">
+
+        <div class="card-body">
+
+            <form id="loginForm" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <div class="form-group mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input asp-for="UserName" type="text" class="form-control" placeholder="Username" required>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-key"></i>
+                        </span>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Password" required>
+                    </div>
+                </div>
+                <div class="d-flex mt-1 justify-content-between align-items-center">
+                    <div class="form-check">
+                        <input asp-for="RememberMe" class="form-check-input input-primary" type="checkbox" id="rememberCheck">
+                        <label class="form-check-label text-muted" for="rememberCheck">Remember me?</label>
+                    </div>
+                    <a href="javascript:void(0)" onclick="alert('Please contact administrators.')">
+                        <h6 class="text-secondary f-w-400 mb-0">Forgot Password?</h6>
+                    </a>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-submit">Login</button>
+                </div>
+                <div class="sk-spinner sk-spinner-double-bounce" style="display:none;">
+                    <div class="sk-spinner sk-spinner-cube-grid">
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                        <div class="sk-cube"></div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("loginForm");
+            if (!form) return;
+
+            form.addEventListener("submit", function () {
+                // Use native HTML validation
+                if (form.checkValidity()) {
+                    const btn = document.querySelector(".btn-submit");
+                    const spinner = document.querySelector(".sk-spinner");
+
+                    if (btn) btn.style.display = "none";
+                    if (spinner) spinner.style.display = "";
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

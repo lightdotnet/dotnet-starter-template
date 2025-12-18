@@ -1,5 +1,6 @@
 ﻿using Light.Extensions.DependencyInjection;
 using Light.MudBlazor;
+using Microsoft.AspNetCore.Components.Authorization;
 using Monolith.Authorization;
 using Monolith.Blazor.Components.Account;
 using Monolith.Blazor.Services;
