@@ -25,11 +25,25 @@
             padding: 0;
             list-style: none;
         }
+
+        .btn-login {
+            background-color: black !important;
+        }
+
+        .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+            border-color: unset;
+            box-shadow: 0 0 0 0.1rem black;
+        }
+
+        .sk-spinner-cube-grid .sk-cube {
+            background-color: black;
+        }
+
     </style>
 </head>
 <body class="d-flex justify-content-center align-items-center vh-100">
 
-    <div class="card animated fadeInDown" style="width: 18rem;">
+    <div class="card animated fadeInDown" style="width: 24rem;">
 
         <div class="card-body">
 
@@ -57,14 +71,16 @@
                         <input asp-for="RememberMe" class="form-check-input input-primary" type="checkbox" id="rememberCheck">
                         <label class="form-check-label text-muted" for="rememberCheck">Remember me?</label>
                     </div>
+                    @*
                     <a href="javascript:void(0)" onclick="alert('Please contact administrators.')">
                         <h6 class="text-secondary f-w-400 mb-0">Forgot Password?</h6>
                     </a>
+                    *@
                 </div>
-                <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-primary btn-submit">Login</button>
+                <div class="d-grid mt-3">
+                    <button type="submit" class="btn btn-secondary btn-login">Login</button>
                 </div>
-                <div class="sk-spinner sk-spinner-double-bounce" style="display:none;">
+                <div class="sk-spinner sk-spinner-double-bounce" style="display: none">
                     <div class="sk-spinner sk-spinner-cube-grid">
                         <div class="sk-cube"></div>
                         <div class="sk-cube"></div>
@@ -90,7 +106,7 @@
             form.addEventListener("submit", function () {
                 // Use native HTML validation
                 if (form.checkValidity()) {
-                    const btn = document.querySelector(".btn-submit");
+                    const btn = document.querySelector(".btn-login");
                     const spinner = document.querySelector(".sk-spinner");
 
                     if (btn) btn.style.display = "none";

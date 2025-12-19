@@ -51,7 +51,7 @@ public static class DependencyInjection
         services.AddScoped<IClientCurrentUser, CurrentUser>();
 
         services.AddCascadingAuthenticationState();
-        //services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProviderServer>();
+        services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProviderServer>();
 
         services.AddPermissionPolicies();
         services.AddPermissionAuthorization();

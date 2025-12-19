@@ -12,7 +12,10 @@ using System.Security.Claims;
 namespace Monolith.Blazor.Pages.Account;
 
 [AllowAnonymous]
-public class LoginModel : PageModel
+public class LoginModel(
+    TokenHttpService tokenService,
+    UserProfileHttpService userProfileService,
+    TokenMemoryStorage tokenStorage) : PageModel
 {
     [BindProperty]
     [Required]
@@ -32,8 +35,6 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPost()
     {
-        var tokenService = HttpContext.RequestServices.GetRequiredService<TokenHttpService>();
-
         var getToken = await tokenService.GetTokenAsync(UserName, Password);
 
         if (getToken.Succeeded is false)
@@ -50,9 +51,9 @@ public class LoginModel : PageModel
             getToken.Data.ExpiresIn,
             getToken.Data.RefreshToken);
 
-        var userClaims = JwtExtensions.ReadClaims(getToken.Data.AccessToken);
+        await tokenStorage.SaveAsync(id, tokenData);
 
-        var userProfileService = HttpContext.RequestServices.GetRequiredService<UserProfileHttpService>();
+        var userClaims = JwtExtensions.ReadClaims(getToken.Data.AccessToken);
 
         var getUserProfiles = await userProfileService.GetAsync();
 
@@ -75,6 +76,17 @@ public class LoginModel : PageModel
                 IsPersistent = RememberMe,  // "Remember me"
                 ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(getToken.Data.ExpiresIn),
                 AllowRefresh = true
+            });
+
+        HttpContext.Response.Cookies.Append(
+            Constants.TokenCookieName,
+            tokenData.ToString(),
+            new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddSeconds(getToken.Data.ExpiresIn),
+                SameSite = SameSiteMode.Strict,
+                Secure = HttpContext.Request.IsHttps,
+                HttpOnly = true
             });
 
         return LocalRedirect("/");
