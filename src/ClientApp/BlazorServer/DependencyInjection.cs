@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Monolith.Authorization;
 using Monolith.Blazor.Components.Account;
 using Monolith.Blazor.Services;
+using Monolith.Blazor.Services.Token;
 using Monolith.HttpApi;
 using Monolith.HttpApi.Common.HttpFactory;
 using Monolith.HttpApi.Common.Interfaces;
@@ -29,8 +30,7 @@ public static class DependencyInjection
 
         // WebServer
         services.AddSingleton<TokenMemoryStorage>();
-
-        services.AddScoped<ITokenProvider, TokenProvider>();
+        services.AddScoped<TokenStorage, TokenCookieStorage>();
 
         services
             .AddAuthentication(Constants.JwtAuthScheme)
@@ -48,10 +48,11 @@ public static class DependencyInjection
 
         services.AddScoped<ISignInManager, SignInManager>();
 
-        services.AddScoped<IClientCurrentUser, CurrentUser>();
+        services.AddScoped<IClientCurrentUser, CurrentUser1>();
 
         services.AddCascadingAuthenticationState();
         services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProviderServer>();
+        services.AddScoped(sp => (ITokenProvider)sp.GetRequiredService<AuthenticationStateProvider>());
 
         services.AddPermissionPolicies();
         services.AddPermissionAuthorization();

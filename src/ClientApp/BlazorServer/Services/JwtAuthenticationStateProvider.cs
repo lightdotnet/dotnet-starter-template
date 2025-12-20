@@ -5,9 +5,13 @@ using System.Security.Claims;
 
 namespace Monolith.Blazor.Services;
 
-public class JwtAuthenticationStateProviderServer(ITokenProvider tokenProvider) : AuthenticationStateProvider
+public class JwtAuthenticationStateProviderServer(
+    TokenStorage tokenStorage)
+    : AuthenticationStateProvider, ITokenProvider
 {
     public ClaimsPrincipal? CurrentUser { get; private set; }
+
+    public TokenModel? TokenData {  get; private set; }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
@@ -23,14 +27,14 @@ public class JwtAuthenticationStateProviderServer(ITokenProvider tokenProvider) 
 
     private async Task<ClaimsPrincipal?> GetUserClaimsPrincipalAsync()
     {
-        var accessToken = await tokenProvider.GetAccessTokenAsync();
+        TokenData ??= await tokenStorage.GetAsync();
 
-        if (string.IsNullOrEmpty(accessToken))
+        if (TokenData is null)
         {
             return default;
         }
 
-        var userClaims = JwtExtensions.ReadClaims(accessToken);
+        var userClaims = JwtExtensions.ReadClaims(TokenData.Token);
 
         // must set authenticationType to mark isAuthentitcated = true
         var identity = new ClaimsIdentity(userClaims, "jwt");
@@ -38,5 +42,12 @@ public class JwtAuthenticationStateProviderServer(ITokenProvider tokenProvider) 
         Console.WriteLine("User loaded");
 
         return new ClaimsPrincipal(identity);
+    }
+
+    public async Task<string?> GetAccessTokenAsync()
+    {
+        TokenData ??= await tokenStorage.GetAsync();
+
+        return TokenData?.Token;
     }
 }

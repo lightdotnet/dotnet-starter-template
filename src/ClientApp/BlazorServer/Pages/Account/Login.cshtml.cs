@@ -15,7 +15,8 @@ namespace Monolith.Blazor.Pages.Account;
 public class LoginModel(
     TokenHttpService tokenService,
     UserProfileHttpService userProfileService,
-    TokenMemoryStorage tokenStorage) : PageModel
+    //TokenMemoryStorage tokenStorage,
+    TokenStorage tokenStorage) : PageModel
 {
     [BindProperty]
     [Required]
@@ -29,11 +30,17 @@ public class LoginModel(
     [BindProperty]
     public bool RememberMe { get; set; }
 
-    public void OnGet()
+    public IActionResult OnGet()
     {
+        if (HttpContext.User.Identity?.IsAuthenticated is true)
+        {
+            return LocalRedirect("/");
+        }
+
+        return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPost(string? returnUrl)
     {
         var getToken = await tokenService.GetTokenAsync(UserName, Password);
 
@@ -44,14 +51,13 @@ public class LoginModel(
             return Page();
         }
 
-        var id = Guid.NewGuid().ToString("N");
+        // save token in Server
+        // var id = Guid.NewGuid().ToString("N");
+        // tokenMemory.Save()
 
-        var tokenData = new TokenModel(
-            getToken.Data.AccessToken,
-            getToken.Data.ExpiresIn,
-            getToken.Data.RefreshToken);
+        var tokenData = new TokenModel(getToken.Data.AccessToken, getToken.Data.ExpiresIn, getToken.Data.RefreshToken);
 
-        await tokenStorage.SaveAsync(id, tokenData);
+        await tokenStorage.SaveAsync(tokenData);
 
         var userClaims = JwtExtensions.ReadClaims(getToken.Data.AccessToken);
 
@@ -74,21 +80,15 @@ public class LoginModel(
             new AuthenticationProperties
             {
                 IsPersistent = RememberMe,  // "Remember me"
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(getToken.Data.ExpiresIn),
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(30), //DateTimeOffset.UtcNow.AddSeconds(getToken.Data.ExpiresIn),
                 AllowRefresh = true
             });
 
-        HttpContext.Response.Cookies.Append(
-            Constants.TokenCookieName,
-            tokenData.ToString(),
-            new CookieOptions
-            {
-                Expires = DateTimeOffset.UtcNow.AddSeconds(getToken.Data.ExpiresIn),
-                SameSite = SameSiteMode.Strict,
-                Secure = HttpContext.Request.IsHttps,
-                HttpOnly = true
-            });
+        if (returnUrl != "/")
+        {
+            returnUrl = returnUrl is null ? "/" : $"/{returnUrl}";
+        }
 
-        return LocalRedirect("/");
+        return LocalRedirect(returnUrl);
     }
 }
