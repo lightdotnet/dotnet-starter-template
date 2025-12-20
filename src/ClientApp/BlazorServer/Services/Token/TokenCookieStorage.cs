@@ -1,7 +1,6 @@
 ﻿namespace Monolith.Blazor.Services.Token;
 
-public class TokenCookieStorage(IHttpContextAccessor httpContextAccessor)
-    : TokenStorage
+public class TokenCookieStorage(IHttpContextAccessor httpContextAccessor) : TokenStorage
 {
     public override Task<TokenModel?> GetAsync()
     {
@@ -42,7 +41,7 @@ public class TokenCookieStorage(IHttpContextAccessor httpContextAccessor)
     {
         if (httpContextAccessor.HttpContext is HttpContext httpContext)
         {
-            HttpContextEntensions.ClearCookies(httpContext);
+            httpContext.Response.Cookies.Delete(Constants.TokenCookieName);
         }
 
         return Task.CompletedTask;

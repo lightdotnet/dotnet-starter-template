@@ -146,7 +146,7 @@ public class Theme
             },
             LayoutProperties = new()
             {
-                DefaultBorderRadius = "10px",
+                DefaultBorderRadius = "8px",
                 AppbarHeight = "50px",
             },
             ZIndex = new ZIndex(),

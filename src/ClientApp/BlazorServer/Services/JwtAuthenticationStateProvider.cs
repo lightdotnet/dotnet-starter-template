@@ -17,12 +17,9 @@ public class JwtAuthenticationStateProviderServer(
     {
         CurrentUser ??= await GetUserClaimsPrincipalAsync();
 
-        if (CurrentUser is null)
-        {
-            return new AuthenticationState(new(new ClaimsIdentity()));
-        }
-
-        return new AuthenticationState(CurrentUser);
+        return CurrentUser is null
+            ? new AuthenticationState(new(new ClaimsIdentity()))
+            : new AuthenticationState(CurrentUser);
     }
 
     private async Task<ClaimsPrincipal?> GetUserClaimsPrincipalAsync()

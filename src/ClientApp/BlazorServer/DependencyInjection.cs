@@ -46,7 +46,7 @@ public static class DependencyInjection
                 options.AccessDeniedPath = "/access-denied";
             });
 
-        services.AddScoped<IClientCurrentUser, CurrentUser1>();
+        services.AddScoped<IClientCurrentUser, AuthenticationStateCurrentUser>();
 
         services.AddCascadingAuthenticationState();
         services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProviderServer>();

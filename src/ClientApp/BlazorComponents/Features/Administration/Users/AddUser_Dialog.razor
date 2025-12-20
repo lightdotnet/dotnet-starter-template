@@ -1,7 +1,7 @@
 ﻿<MudDialog Style="position: relative">
     <DialogContent>
 
-        <EditForm Model="@newUser" method="post" OnValidSubmit="OnSubmitAsync" FormName="createForm">
+        <EditForm Model="@newUser" method="post" OnValidSubmit="OnSubmitAsync" FormName="createForm" autocomplete="off">
 
             <DataAnnotationsValidator />
 
@@ -75,18 +75,18 @@
 
         newUser.UserName = username;
 
-        if (string.IsNullOrEmpty(username))
-            return;
-
-        var getDomainUser = await UserService.GetDomainUserAsync(username);
-
-        if (getDomainUser.Succeeded)
+        if (!string.IsNullOrEmpty(username))
         {
-            newUser.FirstName = getDomainUser.Data.FirstName;
-            newUser.LastName = getDomainUser.Data.LastName;
-            newUser.Email = getDomainUser.Data.Email;
-            newUser.PhoneNumber = getDomainUser.Data.PhoneNumber;
-            newUser.AuthProvider = "AD";
+            var getDomainUser = await UserService.GetDomainUserAsync(username);
+
+            if (getDomainUser.Succeeded)
+            {
+                newUser.FirstName = getDomainUser.Data.FirstName;
+                newUser.LastName = getDomainUser.Data.LastName;
+                newUser.Email = getDomainUser.Data.Email;
+                newUser.PhoneNumber = getDomainUser.Data.PhoneNumber;
+                newUser.AuthProvider = "AD";
+            }
         }
 
         ToggleSearchStatus();
