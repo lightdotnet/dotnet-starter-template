@@ -4,8 +4,7 @@
 
 <Remote_Table State="state" SearchPermission="@Permissions.System.Notification">
     <SearchContent>
-        
-        
+        <Select_Users List="users" SelectedUserChanged="OnSelectUserChanged" />
     </SearchContent>
     <ButtonsContent>
         <Button EndIcon="@Icons.Material.Filled.Send" OnClick="OpenPushDialogAsync" Label="Push" />
