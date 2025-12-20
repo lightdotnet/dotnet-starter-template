@@ -16,7 +16,9 @@
         <th>Status</th>
     </HeadContent>
     <RowTemplate>
-        <td>@context.FromUserId</td>
+        <td style="max-width: 300px; overflow-wrap: break-word; word-wrap: break-word;">
+            @context.FromUserId
+        </td>
         <td>@context.Title</td>
         <td class="text-break">
             @context.Message

@@ -24,7 +24,7 @@ public class Theme
                 Secondary = "#9E9E9E", // Dark gray, secondary color
 
                 // **Background and Surface**
-                Background = "#F5F5F5", // Standard light background color
+                Background = "#F2F2F2", // Standard light background color
                 Surface = "#FFFFFF", // Light gray, used for surfaces like cards
 
                 // **Text Colors**
@@ -55,9 +55,9 @@ public class Theme
                 OverlayLight = "rgba(255,255,255,0.5)", // Semi-transparent white, used for overlays
 
                 // **App Bar and Navigation**
-                AppbarBackground = "#FFFFFF", // Light surface
+                AppbarBackground = "#F2F2F2", // Light surface
                 AppbarText = "#424242", // Dark gray, app bar text color
-                DrawerBackground = "#F5F5F5", // Light surface
+                DrawerBackground = "#F2F2F2", // Light surface
                 DrawerText = "#424242", // Dark gray, drawer text color
 
                 // **Contrast Text for Primary Color**
