@@ -1,15 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Monolith.Blazor.Services;
+namespace Monolith.Blazor.Shared;
 
-public interface ISignInManager
-{
-    Task<Result> SignInAsync(LoginModel model);
-
-    Task SignOutAsync();
-}
-
-public sealed class LoginModel
+public sealed class LoginRequest
 {
     [Required]
     public string Username { get; set; } = "";

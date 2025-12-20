@@ -1,7 +1,9 @@
 ﻿using Light.Blazor;
+using Light.Contracts;
+using Monolith.Blazor.Services;
 using Monolith.HttpApi.Identity;
 
-namespace Monolith.Blazor.Services;
+namespace Monolith.Blazor.Infrastructure;
 
 public class TokenManager(
     IStorageService storageService,

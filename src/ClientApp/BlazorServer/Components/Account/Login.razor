@@ -1,4 +1,5 @@
-﻿@*page "/account/login"
+﻿@using Monolith.Blazor.Shared
+@*page "/account/login"
 @attribute [AllowAnonymous]
 *@
 <PageTitle>Log in</PageTitle>
@@ -44,11 +45,8 @@
 </MudContainer>
 
 @code {
-    [Inject]
-    ISignInManager SignInManager { get; set; } = default!;
-
     [SupplyParameterFromForm]
-    private LoginModel? Input { get; set; }
+    private LoginRequest? Input { get; set; }
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }

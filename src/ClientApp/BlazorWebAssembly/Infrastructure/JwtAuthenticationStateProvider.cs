@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.DependencyInjection;
 using Monolith.Blazor.Extensions;
+using Monolith.Blazor.Services;
+using Monolith.Blazor.Shared;
 using Monolith.HttpApi.Common.Interfaces;
 using System.Security.Claims;
 
-namespace Monolith.Blazor.Services;
+namespace Monolith.Blazor.Infrastructure;
 
 public class JwtAuthenticationStateProvider(
     IServiceScopeFactory serviceScopeFactory, NavigationManager navigationManager)
@@ -48,7 +49,7 @@ public class JwtAuthenticationStateProvider(
         return new ClaimsPrincipal(identity);
     }
 
-    public async Task<Result> SignInAsync(LoginModel model)
+    public async Task<Result> SignInAsync(LoginRequest model)
     {
         // We make sure the access token is only refreshed by one thread at a time. The other ones have to wait.
         await _semaphore.WaitAsync();

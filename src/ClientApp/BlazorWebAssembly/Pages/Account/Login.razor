@@ -1,4 +1,6 @@
 ﻿@page "/account/login"
+@using Monolith.Blazor.Infrastructure
+@using Monolith.Blazor.Shared
 
 @attribute [AllowAnonymous]
 
@@ -50,7 +52,7 @@
 
 @code {
     [SupplyParameterFromForm]
-    private LoginModel? Input { get; set; }
+    private LoginRequest? Input { get; set; }
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
