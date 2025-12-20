@@ -80,14 +80,15 @@ public class LoginModel(
             new AuthenticationProperties
             {
                 IsPersistent = RememberMe,  // "Remember me"
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(30), //DateTimeOffset.UtcNow.AddSeconds(getToken.Data.ExpiresIn),
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(getToken.Data.ExpiresIn),
                 AllowRefresh = true
             });
 
-        if (returnUrl != "/")
+        returnUrl = returnUrl switch
         {
-            returnUrl = returnUrl is null ? "/" : $"/{returnUrl}";
-        }
+            "/" or null or "" => "/",
+            _ => $"/{returnUrl}"
+        };
 
         return LocalRedirect(returnUrl);
     }

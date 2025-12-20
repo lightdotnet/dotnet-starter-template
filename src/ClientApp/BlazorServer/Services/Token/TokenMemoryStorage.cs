@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Monolith.Blazor.Services;
+namespace Monolith.Blazor.Services.Token;
 
 public class TokenMemoryStorage
 {

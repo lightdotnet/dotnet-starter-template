@@ -1,7 +1,8 @@
 ﻿using Light.Blazor;
 using Microsoft.AspNetCore.DataProtection;
+using Monolith.Blazor.Services.Token;
 
-namespace Monolith.Blazor.Services.Storage;
+namespace Monolith.Blazor.Services;
 
 public class CookieStorage(
     IHttpContextAccessor httpContextAccessor,
