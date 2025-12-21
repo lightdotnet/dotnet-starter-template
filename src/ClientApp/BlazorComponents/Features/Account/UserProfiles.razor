@@ -1,0 +1,61 @@
+﻿@page "/profiles"
+@using QRCoder
+
+<PageHeader Title="User Profiles" />
+
+@if (identityData is not null)
+{
+    <div class="d-flex justify-content-center mb-5">
+        <img width="300" src="@GenerateQRCode(CurrentUser.UserId)" alt="QR Code" />
+    </div>
+
+    <ObjectViewer Model="identityData" />
+
+    if (isFullControl)
+    {
+        <button @onclick="RequestPermission">Request Permission</button>
+        <button @onclick="ShowNotification">Show Notification</button>
+    }
+}
+else
+{
+    <h1>Not logged in</h1>
+}
+
+@code {
+    private IEnumerable<System.Security.Claims.Claim>? identityData;
+
+    private bool isFullControl => CurrentUser.IsFullControl();
+
+    protected override async Task OnInitializedAsync()
+    {
+        identityData = CurrentUser.User?.Claims;
+    }
+
+    private string GenerateQRCode(string? qrText)
+    {
+        if (string.IsNullOrEmpty(qrText))
+        {
+            return string.Empty;
+        }
+        
+        using (var qrGenerator = new QRCodeGenerator())
+        {
+            var qrCodeData = qrGenerator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+            var qrCode = new PngByteQRCode(qrCodeData);
+            var qrCodeBytes = qrCode.GetGraphic(20);
+            return $"data:image/png;base64,{Convert.ToBase64String(qrCodeBytes)}";
+        }
+    }
+
+    private async Task RequestPermission()
+    {
+        await JSRuntime.InvokeVoidAsync("requestNotificationPermission");
+    }
+
+    private async Task ShowNotification()
+    {
+        var options = new { body = "This is a test notification." };
+        await JSRuntime.InvokeVoidAsync("showNotification", "Test Notification", options);
+    }
+}

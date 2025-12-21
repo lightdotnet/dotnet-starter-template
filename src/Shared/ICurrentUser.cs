@@ -6,19 +6,7 @@ public interface ICurrentUser
 
     string? Username { get; }
 
-    string? FirstName { get; }
-
-    string? LastName { get; }
-
-    string? FullName { get; }
-
-    string? PhoneNumber { get; }
-
-    string? Email { get; }
-
     bool IsAuthenticated { get; }
-
-    bool IsSuperUser { get; }
 
     bool IsInRole(string role);
 

@@ -1,0 +1,91 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="mudTheme" IsDarkMode="@LayoutService.IsDarkMode" IsDarkModeChanged="@LayoutService.SetDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<Spinner />
+
+<audio id="notiPlayer" controls="controls" class="d-none">
+    <source src="sounds/noti.mp3" />
+</audio>
+
+@*<SpringFlowers />*@
+@*<_Snow />*@
+
+<AuthorizeView>
+    <Authorized>
+        <MudLayout>
+            <MudAppBar Elevation="0">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <a href="/"><img src="/images/ASP-NET-Core-Logo.png" class="logo-image" style="height: 30px" /></a>
+                <MudSpacer />
+                <MudIconButton Icon="@darkModeIcon" Size="Size.Small" Color="Color.Inherit" Class="mr-1" OnClick="@((e) => DarkModeToggle())" />
+                <UserNotificationPopup />
+                <UserMenu />
+            </MudAppBar>
+            <MudDrawer @bind-Open="drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0">
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.Large" Style="padding: 1rem 2rem;">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+    <NotAuthorized>
+        @if (CurrentUser.IsAuthenticated)
+        {
+            <AccessDenied />
+        }
+        else
+        {
+            <Monolith.Blazor.Pages.Account.Login />
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    MudTheme mudTheme = Monolith.Blazor.Shared.Theme.ApplicationTheme();
+
+    bool drawerOpen = true;
+
+    bool darkMode = false;
+
+    string darkModeIcon => darkMode == true ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode;
+
+    void DrawerToggle() => drawerOpen = !drawerOpen;
+
+    void DarkModeToggle()
+    {
+        darkMode = !darkMode;
+        LayoutService.SetDarkMode(darkMode);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            StateHasChanged();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        LayoutService.MajorUpdateOccured += LayoutServiceOnMajorUpdateOccured;
+    }
+
+    private void LayoutServiceOnMajorUpdateOccured(object? sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        LayoutService.MajorUpdateOccured -= LayoutServiceOnMajorUpdateOccured;
+        GC.SuppressFinalize(this);
+    }
+}

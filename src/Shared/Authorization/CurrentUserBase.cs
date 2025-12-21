@@ -4,7 +4,7 @@ namespace Monolith.Authorization;
 
 public abstract class CurrentUserBase : ICurrentUser
 {
-    protected virtual System.Security.Claims.ClaimsPrincipal? User { get; set; }
+    public virtual System.Security.Claims.ClaimsPrincipal? User { get; set; }
 
     public string? UserId => User?.GetUserId();
 
@@ -22,10 +22,8 @@ public abstract class CurrentUserBase : ICurrentUser
 
     public bool IsAuthenticated => User?.IsAuthenticated() is true;
 
-    public bool IsSuperUser => AppSecret.IsSuper(Username);
-
     public bool IsInRole(string role) => User?.IsInRole(role) is true;
 
     public bool HasPermission(string permission) =>
-        User?.HasPermission(permission) is true || IsSuperUser;
+        User?.HasPermission(permission) is true || this.IsFullControl();
 }

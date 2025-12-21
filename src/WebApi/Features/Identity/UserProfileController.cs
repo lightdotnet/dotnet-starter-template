@@ -9,10 +9,18 @@ namespace Monolith.Features.Identity;
 [ApiExplorerSettings(GroupName = "")]
 public class UserProfileController(
     ICurrentUser currentUser,
+    IUserService userService,
     JwtTokenMananger jwtTokenMananger,
     INotificationService notificationService) : ApiControllerBase
 {
     private readonly string _userId = currentUser.UserId ?? throw new UnauthorizedException();
+
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        var res = await userService.GetByIdAsync(_userId);
+        return Ok(res);
+    }
 
     [HttpGet("token/list")]
     public async Task<IActionResult> GetTokens()

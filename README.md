@@ -11,7 +11,7 @@
 * Serilog
 * Redis
 * RabbitMQ
-* Aspire 9.5
+* Aspire
 
 ## Getting Started
 The easiest way to get started is to install the [.NET template](https://www.nuget.org/packages/ModularMonolith.Solution.Template):

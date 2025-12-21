@@ -1,0 +1,116 @@
+﻿@using Monolith.Blazor.Shared
+@*page "/account/login"
+@attribute [AllowAnonymous]
+*@
+<PageTitle>Log in</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="d-flex align-center" Style="height: 100vh;">
+    <div class="d-flex flex-column mud-width-full">
+        <div style="max-width:400px">
+
+            <MudPaper Elevation="0" Class="pa-8" Width="100%" Style="position: relative;">
+
+                @if (Input != null)
+                {
+                    <EditForm EditContext="editContext" OnValidSubmit="LoginHandle" FormName="loginForm" autocomplete="off">
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger" role="alert">@errorMessage</div>
+                        }
+
+                        <DataAnnotationsValidator />
+                        @* Must set name for input matching with @bind for pass require FormModel error *@
+                        <div class="mb-5">
+                            <InputText @bind-Value="Input.Username" class="form-control" name="Input.Username" placeHolder="Username" required />
+                        </div>
+
+                        <div class="mb-5">
+                            <InputText @bind-Value="Input.Password" class="form-control" name="Input.Password" placeHolder="Password" required />
+                        </div>
+
+                        <Button Label="Login" Color="AppColor.Primary" FullWidth Submit />
+
+                        <Overlay IsProcessing="processing" />
+
+                    </EditForm>
+                }
+
+            </MudPaper>
+            <div class="text-center text-secondary">
+                Demo version
+            </div>
+        </div>
+    </div>
+</MudContainer>
+
+@code {
+    [SupplyParameterFromForm]
+    private LoginRequest? Input { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private EditContext editContext = default!;
+    private bool processing;
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        if (CurrentUser.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+
+        Input ??= new();
+
+        editContext = new EditContext(Input);
+
+#if DEBUG
+    //Input.Username = "super";
+    //Input.Password = "123";
+    //Input.RememberMe = true;
+#endif
+    }
+
+    private async Task LoginHandle()
+    {
+        processing = true;
+
+        if (Input is null)
+        {
+            errorMessage = "Please enter your login info.";
+            return;
+        }
+
+        try
+        {
+            //var loginResult1 = await SignInManager.SignInAsync(Input);
+
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(NavigationManager.BaseUri)
+            };
+
+            var loginResult = await httpClient.GetAsync("account/post-login");
+
+            await Task.Delay(3000);
+
+            if (loginResult.IsSuccessStatusCode)
+            {
+                Console.WriteLine("User logged in");
+                NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);
+            }
+            else
+            {
+                //errorMessage = loginResult.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+
+        processing = false;
+    }
+}

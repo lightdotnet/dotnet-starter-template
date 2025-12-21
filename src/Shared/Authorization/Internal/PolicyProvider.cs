@@ -4,5 +4,5 @@ using Microsoft.Extensions.Options;
 
 namespace Monolith.Authorization.Internal;
 
-public class PolicyProvider(IOptions<AuthorizationOptions> options) : PermissionPolicyProvider(options)
+internal class PolicyProvider(IOptions<AuthorizationOptions> options) : PermissionPolicyProvider(options)
 { }

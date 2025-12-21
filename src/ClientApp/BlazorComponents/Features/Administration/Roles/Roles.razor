@@ -1,0 +1,90 @@
+﻿@page "/admin/roles"
+
+@attribute [MustHavePermission(Permissions.Roles.View)]
+
+<PageHeader Title="Roles" />
+
+<div class="d-flex justify-content-end mb-3">
+    <Button_Create OnClick="() => OpenUpsertDialogAsync()" />
+</div>
+
+<Table State="state">
+    <HeadContent>
+        <th>Name</th>
+        <th>Description</th>
+        <th></th>
+    </HeadContent>
+    <RowTemplate>
+        <td>@context.Name</td>
+        <td>@context.Description</td>
+        <td>
+            <PermissionView Permission="@Permissions.Roles.Manage">
+                <MudButtonGroup Color="Color.Default" Variant="Variant.Text" Size="Size.Small">
+                    <MudMenu Icon="@Icons.Material.Filled.Edit">
+                        <MudMenuItem OnClick="() => OpenUpsertDialogAsync(context)">Edit</MudMenuItem>
+                        <MudMenuItem OnClick="() => DeleteAsync(context.Id, context.Name)">Delete</MudMenuItem>
+                    </MudMenu>
+                </MudButtonGroup>
+            </PermissionView>
+        </td>
+    </RowTemplate>
+</Table>
+
+@code {
+    private DataTable<RoleDto> state = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        state = new(RoleService.GetAsync)
+        {
+            SearchFunc = (searchValue, e) =>
+                e.Name.Contains(searchValue, StringComparison.OrdinalIgnoreCase)
+                ||
+                    (!string.IsNullOrEmpty(e.Description)
+                        && e.Description.Contains(searchValue, StringComparison.OrdinalIgnoreCase))
+        };
+
+        await state.ReloadAsync();
+    }
+
+    private async Task DeleteAsync(string id, string? name)
+    {
+        bool? isConfirm = await DialogService.ShowMessageBox("Warning", $"Confirm delete role {name}?");
+
+        if (isConfirm == true)
+        {
+            await CallGuarded.ExecuteAsync(
+                () => RoleService.DeleteAsync(id),
+                $"Role {name} deleted",
+                state.ReloadAsync);
+        }
+    }
+
+    private async Task OpenUpsertDialogAsync(RoleDto? role = null)
+    {
+        var options = WebConstants.DEFAULT_DIALOG_OPTIONS;
+
+        IDialogReference dialog;
+
+        if (role == null)
+        {
+            dialog = await DialogService.ShowAsync<UpsertRole_Dialog>("Create New Role", options);
+        }
+        else
+        {
+            var parameters = new DialogParameters<UpsertRole_Dialog>
+            {
+                { x => x.Role, role }
+            };
+            
+            dialog = await DialogService.ShowAsync<UpsertRole_Dialog>($"Update Role [{role.Name}]", parameters, options);
+        }
+
+        var result = await CallGuarded.GetDialogResultAsync(dialog);
+
+        if (result.Succeeded)
+        {
+            await state.ReloadAsync();
+        }
+    }
+}
