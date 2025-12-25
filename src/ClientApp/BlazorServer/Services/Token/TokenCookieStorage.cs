@@ -12,7 +12,7 @@ public class TokenCookieStorage(IHttpContextAccessor httpContextAccessor) : Toke
 
             Console.WriteLine("Token loaded from Cookies");
 
-            return Task.FromResult(tokenData);;
+            return Task.FromResult(tokenData); ;
         }
 
         return Task.FromResult<TokenModel?>(default);
