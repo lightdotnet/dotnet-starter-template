@@ -1,5 +1,4 @@
-﻿@using Monolith.Blazor.Components.Account
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="mudTheme" IsDarkMode="@LayoutService.IsDarkMode" IsDarkModeChanged="@LayoutService.SetDarkMode" />
 <MudPopoverProvider />
@@ -36,7 +35,7 @@
         }
         else
         {
-            <Monolith.Blazor.Components.Account.Login />
+            NavigationManager.RedirectToLogout();
         }
     </NotAuthorized>
 </AuthorizeView>

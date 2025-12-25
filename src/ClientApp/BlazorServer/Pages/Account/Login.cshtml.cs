@@ -12,11 +12,7 @@ using System.Security.Claims;
 namespace Monolith.Blazor.Pages.Account;
 
 [AllowAnonymous]
-public class LoginModel(
-    TokenHttpService tokenService,
-    UserProfileHttpService userProfileService,
-    //TokenMemoryStorage tokenStorage,
-    TokenStorage tokenStorage) : PageModel
+public class LoginModel : PageModel
 {
     [BindProperty]
     [Required]
@@ -36,12 +32,18 @@ public class LoginModel(
         {
             return LocalRedirect("/");
         }
+        else
+        {
+            HttpContext.Response.Cookies.Delete(Constants.TokenCookieName);
+        }
 
         return Page();
     }
 
     public async Task<IActionResult> OnPost(string? returnUrl)
     {
+        var tokenService = HttpContext.RequestServices.GetRequiredService<TokenHttpService>();
+        
         var getToken = await tokenService.GetTokenAsync(UserName, Password);
 
         if (getToken.Succeeded is false)
@@ -55,17 +57,21 @@ public class LoginModel(
         // var id = Guid.NewGuid().ToString("N");
         // tokenMemory.Save()
 
+        var tokenStorage = HttpContext.RequestServices.GetRequiredService<TokenStorage>();
+
         var tokenData = new TokenModel(getToken.Data.AccessToken, getToken.Data.ExpiresIn, getToken.Data.RefreshToken);
 
         await tokenStorage.SaveAsync(tokenData);
 
         var userClaims = JwtExtensions.ReadClaims(getToken.Data.AccessToken);
 
+        var userProfileService = HttpContext.RequestServices.GetRequiredService<UserProfileHttpService>();
+
         var getUserProfiles = await userProfileService.GetAsync();
 
         if (getUserProfiles.Succeeded)
         {
-            userClaims.AddRange(getUserProfiles.Data.Get());
+            userClaims.AddRange(getUserProfiles.Data.BuildClaims());
         }
 
         var claimsIdentity = new ClaimsIdentity(userClaims, Constants.JwtAuthScheme);
