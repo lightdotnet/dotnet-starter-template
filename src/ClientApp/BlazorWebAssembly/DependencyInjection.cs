@@ -35,7 +35,7 @@ public static class DependencyInjection
     {
         // register authorization policies for all permissions
         services.AddAuthorizationCore(RegisterPermissions);
-        //services.AddCascadingAuthenticationState();
+        services.AddCascadingAuthenticationState();
 
         // register the custom state provider
         services.AddSingleton<AuthenticationStateProvider, JwtAuthenticationStateProvider>();

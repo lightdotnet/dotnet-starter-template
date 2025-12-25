@@ -1,5 +1,4 @@
 ﻿using Light.Blazor;
-using Light.Contracts;
 using Monolith.Blazor.Services;
 using Monolith.HttpApi.Identity;
 
