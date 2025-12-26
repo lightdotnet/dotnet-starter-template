@@ -43,7 +43,7 @@ public class LoginModel : PageModel
     public async Task<IActionResult> OnPost(string? returnUrl)
     {
         var tokenService = HttpContext.RequestServices.GetRequiredService<TokenHttpService>();
-        
+
         var getToken = await tokenService.GetTokenAsync(UserName, Password);
 
         if (getToken.Succeeded is false)
