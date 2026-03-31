@@ -2,7 +2,6 @@
 using FluentValidation;
 using HealthChecks.UI.Client;
 using Light.AspNetCore.Builder;
-using Light.AspNetCore.Cors;
 using Light.AspNetCore.Middlewares;
 using Light.AspNetCore.Swagger;
 using Light.Mediator;
@@ -62,7 +61,7 @@ public static class ConfigureExtensions
             .UseLightExceptionHandler()
             .UseRouting()
             .UseCorsPolicy() // must add before Auth
-            //.UseAuthentication()
+                             //.UseAuthentication()
             .UseAuthorization()
             .UseSwagger();
 

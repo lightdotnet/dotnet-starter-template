@@ -1,9 +1,7 @@
 ﻿using Light.Exceptions;
 using Microsoft.AspNetCore.Identity;
-using Monolith.Claims;
 using Monolith.Identity.Data;
 using System.Security.Claims;
-using ClaimTypes = Monolith.Claims.ClaimTypes;
 
 namespace Monolith.Identity.Jwt;
 

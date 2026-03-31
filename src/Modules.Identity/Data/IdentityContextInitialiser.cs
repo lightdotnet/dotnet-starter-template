@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Monolith.Database;
 
 namespace Monolith.Identity.Data;
