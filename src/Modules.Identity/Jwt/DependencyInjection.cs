@@ -1,7 +1,6 @@
 using Light.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Monolith.Claims;
 
 namespace Monolith.Identity.Jwt;
 
