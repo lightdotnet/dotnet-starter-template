@@ -4,11 +4,14 @@
 
 <PageHeader Title="Users" />
 
-<div class="d-flex justify-content-end mb-3">
-    <Button_Create OnClick="() => OpenCreateDialogAsync()" />
-</div>
-
 <Table State="state">
+    <ButtonsContent>
+        <IconActionButtons
+            IconAction="IconActionButtons.Action.Default"
+            CustomIcon="@Icon.AddCircle"
+            Class="ml-3"
+            OnClick="OpenCreateDialogAsync" />
+    </ButtonsContent>
     <HeadContent>
         <th>User</th>
         <th>Name</th>

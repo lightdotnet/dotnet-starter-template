@@ -9,4 +9,4 @@ public abstract class AuditableEntity : AuditableEntity<string>
     protected AuditableEntity() => Id = LightId.NewId();
 }
 
-public record DomainEvent : Light.Domain.Entities.DomainEvent, Light.Mediator.INotification;
+public abstract record DomainEvent : Light.Domain.Entities.DomainEvent, Light.Mediator.INotification;
