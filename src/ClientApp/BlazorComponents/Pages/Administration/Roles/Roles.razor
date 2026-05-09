@@ -1,6 +1,6 @@
 ﻿@page "/admin/roles"
 
-@attribute [MustHavePermission(Permissions.Roles.View)]
+@attribute [MustHavePermission(IdentityPermissions.Roles.View)]
 
 <PageHeader Title="Roles" />
 
@@ -21,7 +21,7 @@
         <td>@context.Name</td>
         <td>@context.Description</td>
         <td>
-            <PermissionView Permission="@Permissions.Roles.Manage">
+            <PermissionView Permission="@IdentityPermissions.Roles.Manage">
                 <MudButtonGroup Color="Color.Default" Variant="Variant.Text" Size="Size.Small">
                     <MudMenu Icon="@Icons.Material.Filled.Edit">
                         <MudMenuItem OnClick="() => OpenUpsertDialogAsync(context)">Edit</MudMenuItem>

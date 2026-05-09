@@ -8,12 +8,6 @@ public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCo
     public CreateCategoryCommandValidator()
     {
         RuleFor(x => x.Category).SetValidator(new CreateCategoryRequestValidator());
-
-        /*
-        RuleFor(x => x.Category.Name)
-            .NotEmpty()
-            .MaximumLength(10);
-        */
     }
 }
 

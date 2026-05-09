@@ -1,6 +1,6 @@
 ﻿@page "/admin/users"
 
-@attribute [MustHavePermission(Permissions.Users.View)]
+@attribute [MustHavePermission(IdentityPermissions.Users.View)]
 
 <PageHeader Title="Users" />
 
@@ -29,7 +29,7 @@
             <BadgeStatus Value="@context.Status" IsSuccess="@(context.Status == IdentityStatus.active)" />
         </td>
         <td>
-            <PermissionView Permission="@Permissions.Users.Update">
+            <PermissionView Permission="@IdentityPermissions.Users.Update">
 
                 <IconActionButtons
                     IconAction="IconActionButtons.Action.Update"
@@ -47,7 +47,7 @@
 
             </PermissionView>
 
-            <PermissionView Permission="@Permissions.Users.Delete">
+            <PermissionView Permission="@IdentityPermissions.Users.Delete">
                 <IconActionButtons
                     IconAction="IconActionButtons.Action.Delete"
                     OnClick="() => DeleteAsync(context.Id, context.UserName)" />

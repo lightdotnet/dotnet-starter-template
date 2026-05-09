@@ -1,8 +1,8 @@
 ﻿@page "/admin/notifications"
 
-@attribute [MustHavePermission(Permissions.System.Notification)]
+@attribute [MustHavePermission(IdentityPermissions.System.Notification)]
 
-<Remote_Table State="state" SearchPermission="@Permissions.System.Notification">
+<Remote_Table State="state" SearchPermission="@IdentityPermissions.System.Notification">
     <SearchContent>
         <Select_Users List="users" SelectedUserChanged="OnSelectUserChanged" />
     </SearchContent>
