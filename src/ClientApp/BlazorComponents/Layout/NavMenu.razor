@@ -78,13 +78,13 @@
             {
                 Title = "Administration",
                 Icon = Icons.Material.Filled.Settings,
-                Permission = Permissions.System.View,
+                Permission = IdentityPermissions.System.View,
                 Links = new List<NavLink>()
                 {
-                    new NavLink("Users", "/admin/users", Permissions.Users.View),
-                    new NavLink("Roles", "/admin/roles", Permissions.Roles.View),
-                    new NavLink("Notifications", "/admin/notifications", Permissions.System.Notification),
-                    new NavLink("Notes", "/user/notes", Permissions.System.Manager)
+                    new NavLink("Users", "/admin/users", IdentityPermissions.Users.View),
+                    new NavLink("Roles", "/admin/roles", IdentityPermissions.Roles.View),
+                    new NavLink("Notifications", "/admin/notifications", IdentityPermissions.System.Notification),
+                    new NavLink("Notes", "/user/notes", IdentityPermissions.System.Manager)
                     {
                         RenderMode = "Server" // only available in Server rendering
                     },

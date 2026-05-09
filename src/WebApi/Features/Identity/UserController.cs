@@ -6,7 +6,7 @@ using Monolith.Identity.Application.Users.Commands;
 
 namespace Monolith.Features.Identity;
 
-[MustHavePermission(Permissions.Users.View)]
+[MustHavePermission(IdentityPermissions.Users.View)]
 public class UserController(
     IUserService userService,
     IActiveDirectoryService activeDirectoryService) : ApiControllerBase
@@ -30,7 +30,7 @@ public class UserController(
     }
 
     [HttpPost]
-    [MustHavePermission(Permissions.Users.Create)]
+    [MustHavePermission(IdentityPermissions.Users.Create)]
     public async Task<IActionResult> PostAsync([FromBody] CreateUserCommand request)
     {
         var res = await Mediator.Send(request);
@@ -38,7 +38,7 @@ public class UserController(
     }
 
     [HttpPut("{id}")]
-    [MustHavePermission(Permissions.Users.Update)]
+    [MustHavePermission(IdentityPermissions.Users.Update)]
     public async Task<IActionResult> PutAsync(string id, [FromBody] UserDto request)
     {
         if (id != request.Id)
@@ -50,14 +50,14 @@ public class UserController(
     }
 
     [HttpDelete("{id}")]
-    [MustHavePermission(Permissions.Users.Delete)]
+    [MustHavePermission(IdentityPermissions.Users.Delete)]
     public async Task<IActionResult> DeleteAsync(string id)
     {
         return Ok(await userService.DeleteAsync(id));
     }
 
     [HttpPut("{id}/password/force")]
-    [MustHavePermission(Permissions.Users.Update)]
+    [MustHavePermission(IdentityPermissions.Users.Update)]
     public async Task<IActionResult> ForcePasswordAsync(string id, [FromBody] string password)
     {
         return Ok(await userService.ForcePasswordAsync(id, password));

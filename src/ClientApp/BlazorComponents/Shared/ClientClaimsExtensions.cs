@@ -8,7 +8,7 @@ public class ClientClaimsExtensions
 {
     public static AppClaimsVm GetAll()
     {
-        var fromClass = typeof(Permissions);
+        var fromClass = typeof(IdentityPermissions);
 
         var result = new AppClaimsVm();
 

@@ -9,20 +9,20 @@ public class PermissionsTests
     public void System_View_ShouldHaveCorrectValue()
     {
         // Assert
-        Assert.Equal("System.View", Permissions.System.View);
+        Assert.Equal("System.View", IdentityPermissions.System.View);
     }
 
     [Fact]
     public void System_Notification_ShouldHaveCorrectValue()
     {
         // Assert
-        Assert.Equal("System.Notification", Permissions.System.Notification);
+        Assert.Equal("System.Notification", IdentityPermissions.System.Notification);
     }
 
     [Fact]
     public void System_Manager_ShouldHaveCorrectValue()
     {
         // Assert
-        Assert.Equal("System.Manager", Permissions.System.Manager);
+        Assert.Equal("System.Manager", IdentityPermissions.System.Manager);
     }
 }

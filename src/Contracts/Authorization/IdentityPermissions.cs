@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Monolith.Authorization;
 
-public class Permissions
+public class IdentityPermissions
 {
     [DisplayName("System permissions")]
     public static class System

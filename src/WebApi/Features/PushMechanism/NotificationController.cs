@@ -10,7 +10,7 @@ using Monolith.SignalR;
 namespace Monolith.Features.PushMechanism;
 
 [ApiExplorerSettings(GroupName = "Push")]
-[MustHavePermission(Permissions.System.Notification)]
+[MustHavePermission(IdentityPermissions.System.Notification)]
 public class NotificationController(
     IUserService userService,
     IHubService hub,
