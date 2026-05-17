@@ -39,9 +39,8 @@ public static class ConfigureExtensions
         services.AddApiVersion(1);
         services.AddSwagger(configuration);
         services.AddFileGenerator();
-        services.AddModules<AppModule>(configuration, assemblies);
 
-        services.AddInfrastructureServices();
+        services.AddSharedInfrastructure();
         services.AddHealthChecks();
         services.AddCorsPolicy(configuration);
 
@@ -49,6 +48,8 @@ public static class ConfigureExtensions
         services.AddScoped<ICurrentUser, ServerCurrentUser>();
         services.AddPermissionPolicies();
         services.AddPermissionAuthorization();
+
+        services.AddModules<AppModule>(configuration, assemblies);
 
         return services;
     }
@@ -61,17 +62,17 @@ public static class ConfigureExtensions
             .UseLightExceptionHandler()
             .UseRouting()
             .UseCorsPolicy() // must add before Auth
-                             //.UseAuthentication()
+            .UseAuthentication()
             .UseAuthorization()
             .UseSwagger();
-
-        app.UseModules<AppModule>(assemblies);
 
         app.MapHealthChecks("/hc", new HealthCheckOptions()
         {
             Predicate = _ => true,
             ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
         });
+
+        app.UseModules<AppModule>(assemblies);
 
         app.MapModuleEndpoints<AppHub>(assemblies);
 

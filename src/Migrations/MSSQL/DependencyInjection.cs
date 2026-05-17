@@ -12,7 +12,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddMigrator(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddInfrastructureServices();
+        services.AddSharedInfrastructure();
 
         services.AddMigrationsServices();
 

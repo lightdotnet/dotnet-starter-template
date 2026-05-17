@@ -8,7 +8,7 @@ namespace Monolith;
 
 public static class InfrastructureModule
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    public static IServiceCollection AddSharedInfrastructure(this IServiceCollection services)
     {
         services.AddSingleton<IDateTime, DateTimeService>();
 
