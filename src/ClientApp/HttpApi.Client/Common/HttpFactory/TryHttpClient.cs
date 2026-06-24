@@ -42,7 +42,7 @@ public class TryHttpClient(IHttpClientFactory httpClientFactory) : HttpClientBas
         {
             return new PagedResult<T>
             {
-                Code = ResultCode.error.ToString(),
+                Code = ResultCode.Error,
                 Message = ex.Message
             };
         }
@@ -60,7 +60,7 @@ public class TryHttpClient(IHttpClientFactory httpClientFactory) : HttpClientBas
         {
             return new PagedResult<T>
             {
-                Code = ResultCode.error.ToString(),
+                Code = ResultCode.Error,
                 Message = ex.Message
             };
         }

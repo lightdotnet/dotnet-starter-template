@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using Light.Extensions;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Monolith.Catalog.Domain.Shops;
 
@@ -13,7 +14,7 @@ public class ShopController : ApiControllerBase
             .WhereIf(!string.IsNullOrEmpty(request.Search), x => x.Name.Contains(request.Search!))
             .AsNoTracking()
             .ProjectToType<ShopDto>()
-            .ToPagedAsync(request);
+            .ToPagedResultAsync(request);
 
         return Ok(res);
     }

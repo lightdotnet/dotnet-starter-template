@@ -56,7 +56,7 @@ public class LoginModel(ILogger<LoginModel> logger) : PageModel
 
                 var refreshToken = await tokenService.RefreshTokenAsync(savedToken.Token, savedToken.RefreshToken);
 
-                if (refreshToken.Succeeded)
+                if (refreshToken.IsSuccess)
                 {
                     var tokenData = new TokenModel(
                         refreshToken.Data.AccessToken,
@@ -73,7 +73,7 @@ public class LoginModel(ILogger<LoginModel> logger) : PageModel
                 RefreshLock.Release();
             }
 
-            if (refreshSessionResult.Succeeded)
+            if (refreshSessionResult.IsSuccess)
             {
                 logger.LogDebug("Token refreshed and user {username} signed in via refresh token.", HttpContext.User?.GetUserName());
 
@@ -89,7 +89,7 @@ public class LoginModel(ILogger<LoginModel> logger) : PageModel
         {
             var getUserProfiles = await HttpContext.GetUserProfilesAsync();
 
-            if (getUserProfiles.Succeeded)
+            if (getUserProfiles.IsSuccess)
             {
                 return LocalRedirect(returnUrl);
             }
@@ -104,7 +104,7 @@ public class LoginModel(ILogger<LoginModel> logger) : PageModel
 
         var getToken = await tokenService.GetTokenAsync(UserName, Password);
 
-        if (getToken.Succeeded is false)
+        if (getToken.IsSuccess is false)
         {
             ModelState.AddModelError("", getToken.Message);
 
@@ -119,7 +119,7 @@ public class LoginModel(ILogger<LoginModel> logger) : PageModel
 
         var login = await HttpContext.SignInAsync(getToken.Data, RememberMe);
 
-        if (login.Succeeded is false)
+        if (login.IsSuccess is false)
         {
             ModelState.AddModelError("", login.Message);
 
