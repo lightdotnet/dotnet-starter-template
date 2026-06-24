@@ -55,7 +55,7 @@
         
         var getUsers = await UserService.GetAsync();
 
-        if (getUsers.Succeeded)
+        if (getUsers.IsSuccess)
         {
             users = getUsers.Data;
         }
@@ -86,7 +86,7 @@
 
         var result = await CallGuarded.GetDialogResultAsync(dialog);
 
-        if (result.Succeeded)
+        if (result.IsSuccess)
         {
             await state.ReloadAsync();
         }

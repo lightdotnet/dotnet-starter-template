@@ -16,7 +16,7 @@ namespace Identity.Tests.Extensions
             var result = identityResult.ToResult();
 
             // Assert
-            Assert.True(result.Succeeded);
+            Assert.True(result.IsSuccess);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Identity.Tests.Extensions
             var result = identityResult.ToResult();
 
             // Assert
-            Assert.False(result.Succeeded);
+            Assert.False(result.IsSuccess);
             Assert.Contains("Error", result.Message);
         }
     }

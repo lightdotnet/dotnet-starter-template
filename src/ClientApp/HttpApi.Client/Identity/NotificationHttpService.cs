@@ -2,8 +2,8 @@
 
 namespace Monolith.HttpApi.Identity;
 
-public class NotificationHttpService(IHttpClientFactory httpClientFactory) :
-    TryHttpClient(httpClientFactory)
+public class NotificationHttpService(IHttpClientFactory httpClientFactory)
+    : HttpClientBase(httpClientFactory)
 {
     protected override string ClientName => HttpClientConstants.IdentityApi;
 
@@ -14,7 +14,7 @@ public class NotificationHttpService(IHttpClientFactory httpClientFactory) :
         var url = $"{_path}";
         url += "?" + UriQueryBuilder.ToQueryString(request);
 
-        return TryGetPagedAsync<NotificationDto>(url);
+        return this.TryPagedAsync<NotificationDto>(url);
     }
 
     public Task<Result> CreateAsync(string fromUserId, string? fromName, string toUserId, SystemMessage request)
@@ -28,6 +28,6 @@ public class NotificationHttpService(IHttpClientFactory httpClientFactory) :
             toUserId
         });
 
-        return TryPostAsync(url, request);
+        return this.TryPostAsync(url, request);
     }
 }

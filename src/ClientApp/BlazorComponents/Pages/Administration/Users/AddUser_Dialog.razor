@@ -79,7 +79,7 @@
         {
             var getDomainUser = await UserService.GetDomainUserAsync(username);
 
-            if (getDomainUser.Succeeded)
+            if (getDomainUser.IsSuccess)
             {
                 newUser.FirstName = getDomainUser.Data.FirstName;
                 newUser.LastName = getDomainUser.Data.LastName;

@@ -4,5 +4,5 @@ public abstract class HttpClientConstants
 {
     public const string BackendApi = "BackendApi";
 
-    public const string IdentityApi = BackendApi;
+    public const string IdentityApi = "IdentityApi";
 }

@@ -43,7 +43,7 @@ public class JwtAuthenticationStateProvider(
 
         var getUserClaims = await userProfileService.GetAsync();
 
-        if (getUserClaims.Succeeded is false)
+        if (getUserClaims.IsSuccess is false)
         {
             Console.WriteLine($"Error when get user profiles");
 
@@ -69,7 +69,7 @@ public class JwtAuthenticationStateProvider(
         {
             var getToken = await tokenService.GetTokenAsync(model.Username, model.Password);
 
-            if (getToken.Succeeded)
+            if (getToken.IsSuccess)
             {
                 var userToken = new TokenModel(
                     getToken.Data.AccessToken,
@@ -129,7 +129,7 @@ public class JwtAuthenticationStateProvider(
                 //var refreshToken = Result.Error();
                 var refreshToken = await tokenService1.RefreshTokenAsync(userToken.Token, userToken.RefreshToken);
 
-                if (refreshToken.Succeeded)
+                if (refreshToken.IsSuccess)
                 {
                     userToken = new TokenModel(
                         refreshToken.Data.AccessToken,

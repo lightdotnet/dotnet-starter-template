@@ -2,7 +2,7 @@
 
 namespace Monolith.Catalog;
 
-public record ShopLookup : Pagination
+public record ShopLookup : PageQuery
 {
     public string? Search { get; set; }
 }

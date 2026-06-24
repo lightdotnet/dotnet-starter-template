@@ -15,7 +15,7 @@ public class EfCoreResultTests
         var result = EfCoreResult.From(rowsAffected);
 
         // Assert
-        Assert.True(result.Succeeded);
+        Assert.True(result.IsSuccess);
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class EfCoreResultTests
         var result = EfCoreResult.From(rowsAffected);
 
         // Assert
-        Assert.False(result.Succeeded);
+        Assert.False(result.IsSuccess);
         Assert.Equal("No rows were affected. Please check the operation.", result.Message);
     }
 }

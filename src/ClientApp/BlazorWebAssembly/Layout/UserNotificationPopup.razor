@@ -97,7 +97,7 @@
     {
         var countUnread = await UserProfileService.CountUnreadNotificationsAsync();
 
-        if (countUnread.Succeeded)
+        if (countUnread.IsSuccess)
         {
             unreadCount = countUnread.Data;
         }
@@ -116,7 +116,7 @@
 
         var getEntries = await UserProfileService.GetNotificationsAsync(notificationLookup);
 
-        if (getEntries.Succeeded)
+        if (getEntries.IsSuccess)
         {
             notifications = getEntries.Data.Records;
         }

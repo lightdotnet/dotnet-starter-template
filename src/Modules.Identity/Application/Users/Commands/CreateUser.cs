@@ -14,7 +14,7 @@ internal class CreateUserCommandHandler(
     {
         var result = await userService.CreateAsync(request).ConfigureAwait(false);
 
-        if (result.Succeeded)
+        if (result.IsSuccess)
         {
             await publisher.Publish(
                 new UserCreatedEvent(result.Data, request.UserName, request.Email),

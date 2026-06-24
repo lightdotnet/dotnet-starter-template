@@ -85,7 +85,7 @@
 
         var result = await CallGuarded.GetDialogResultAsync(dialog);
 
-        if (result.Succeeded)
+        if (result.IsSuccess)
         {
             await state.ReloadAsync();
         }

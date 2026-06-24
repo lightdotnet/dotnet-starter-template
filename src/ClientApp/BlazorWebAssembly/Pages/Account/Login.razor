@@ -89,7 +89,7 @@
         {
             var login = await _signInManager.SignInAsync(Input);
 
-            if (login.Succeeded)
+            if (login.IsSuccess)
             {
                 Logger.LogInformation("User logged in.");
                 NavigationManager.RedirectWhenLoginSuccess(ReturnUrl);

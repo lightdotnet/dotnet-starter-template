@@ -18,7 +18,7 @@ public static class DependencyInjection
         services.AddFileGenerator();
         services.AddMudBlazorExtraComponents();
 
-        services.AddHttpClients(configuration);
+        services.AddHttpClientsWithJwtMessageHandler(configuration);
         services.AddHttpClientServices(typeof(HttpApiClientModule).Assembly);
 
         services.AddScoped<LayoutService>();

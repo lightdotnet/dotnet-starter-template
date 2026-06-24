@@ -15,13 +15,13 @@ public static class HttpContextExtensions
 
         var getUserProfiles = await httpContext.GetUserProfilesAsync();
 
-        if (getUserProfiles.Succeeded is false)
+        if (getUserProfiles.IsSuccess)
         {
-            return Result.Error("Cannot get user profiles");
+            userClaims.AddRange(getUserProfiles.Data.BuildClaims());
         }
         else
         {
-            userClaims.AddRange(getUserProfiles.Data.BuildClaims());
+            return Result.Error("Cannot get user profiles");
         }
 
         var claimsIdentity = new ClaimsIdentity(userClaims, Constants.JwtAuthScheme);
