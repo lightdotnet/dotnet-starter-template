@@ -2,7 +2,8 @@
 
 namespace Monolith.HttpApi.Catalogs;
 
-public class CategoryHttpService(IHttpClientFactory httpClientFactory) : TryHttpClient(httpClientFactory)
+public class CategoryHttpService(IHttpClientFactory httpClientFactory)
+    : HttpClientBase(httpClientFactory)
 {
     public const string BasePath = "category";
 
@@ -10,27 +11,27 @@ public class CategoryHttpService(IHttpClientFactory httpClientFactory) : TryHttp
     {
         var url = BasePath;
 
-        return TryGetAsync<IEnumerable<CategoryVm>>(url);
+        return this.TryGetAsync<IEnumerable<CategoryVm>>(url);
     }
 
     public Task<Result> CreateAsync(CreateCategoryRequest request)
     {
         var url = BasePath;
 
-        return TryPostAsync(url, request);
+        return this.TryPostAsync(url, request);
     }
 
     public Task<Result> UpdateAsync(CategoryDto request)
     {
         var url = BasePath;
 
-        return TryPutAsync(url, request);
+        return this.TryPutAsync(url, request);
     }
 
     public Task<Result> DeleteAsync(string id)
     {
         var url = $"{BasePath}/{id}";
 
-        return TryDeleteAsync(url);
+        return this.TryDeleteAsync(url);
     }
 }

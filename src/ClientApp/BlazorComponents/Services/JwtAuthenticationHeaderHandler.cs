@@ -1,13 +1,9 @@
 ﻿using Monolith.HttpApi.Common.Interfaces;
-using System.Net;
 using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Text.Json;
 
-namespace Monolith.HttpApi.Common.HttpFactory;
+namespace Monolith.Blazor.Services;
 
-public class JwtAuthenticationHeaderHandler(ITokenProvider tokenProvider)
-    : DelegatingHandler
+public class JwtAuthenticationHeaderHandler(ITokenProvider tokenProvider) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
@@ -24,6 +20,7 @@ public class JwtAuthenticationHeaderHandler(ITokenProvider tokenProvider)
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
+            /*
             else
             {
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized)
@@ -34,6 +31,7 @@ public class JwtAuthenticationHeaderHandler(ITokenProvider tokenProvider)
                         MediaTypeNames.Application.Json)
                 };
             }
+            */
         }
 
         return await base.SendAsync(request, cancellationToken);

@@ -10,10 +10,11 @@ public static class ServiceCollectionExtensions
     /// Auto scan and add httpclients
     ///     Please add backend urls in configuration section "ApiUrls"
     /// </summary>
-    public static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddHttpClients(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        Action<IHttpClientBuilder>? configure = null)
     {
-        services.AddScoped<JwtAuthenticationHeaderHandler>();
-
         // get backend urls from section
         var backendUrls = configuration.GetSection("ApiUrls").Get<Dictionary<string, string>>();
 
@@ -34,8 +35,9 @@ public static class ServiceCollectionExtensions
                 .AddHttpClient(clientName, client =>
                 {
                     client.BaseAddress = new Uri(uri);
-                })
-                .AddHttpMessageHandler<JwtAuthenticationHeaderHandler>();
+                });
+
+            configure?.Invoke(httpClientBuilder);
         }
 
         return services;
