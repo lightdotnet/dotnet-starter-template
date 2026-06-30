@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Light.Mediator;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace Monolith.Database;
 
@@ -9,6 +11,7 @@ public static class MigrationsExtensions
     public static IServiceCollection AddMigrationsServices(this IServiceCollection services)
     {
         services.AddSingleton<ICurrentUser, MigratorCurrentUser>();
+        services.AddMediatorFromAssemblies(Assembly.GetExecutingAssembly());
 
         return services;
     }
