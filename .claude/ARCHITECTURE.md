@@ -16,19 +16,22 @@ This file aggregates **verified** architectural facts only, split into Backend, 
 
 | Module | Domain | Application | Infrastructure | Api | Notes |
 |---|---|---|---|---|---|
-| _unknown_ | | | | | Not yet scaffolded/verified |
+| _none yet_ | | | | | No `src/Modules/*` exist yet — only the pre-module shared kernel (`src/Shared`, `src/Infrastructure`) has been built. |
 
 ## Backend — Dependency Direction
 
 > Verified via project references, not inferred from folder names. Expected direction: `Api → Application → Domain`; `Infrastructure → Application` (implements interfaces) and `→ Domain`. Modules must not reference another module's `Domain`/`Infrastructure` directly.
 
-- _unknown_
+- Verified today: `src/Infrastructure/Infrastructure.csproj` → `src/Shared/Shared.csproj` (single `ProjectReference`). `Shared` has no project references (leaf). `tests/Framework.Tests/Framework.Tests.csproj` → both `Shared` and `Infrastructure`.
+- The intended per-module direction (`Api → Application → Domain`, `Infrastructure → Application`/`Domain`) is unverified — no module exists yet to check it against.
 
 ## Backend — Shared Kernel / Building Blocks
 
 > E.g. base entities, shared abstractions, common EF Core conventions used across modules — only list what's confirmed in code, with file references.
 
-- _unknown_
+- **`src/Shared`** (leaf project, no dependencies) — base entity/DTO wrappers over vendor `Light.Domain` (`Entities/AuditableEntity.cs`, `Entities/DomainEvent.cs`), `ICurrentUser`/`IDateTime` abstractions, `Status` value object, `PageQuery`/`IPage`, `ValidationBehaviour<,>` (FluentValidation pipeline behavior for the vendor mediator), permission-authorization building blocks under `Authorization/` (`SuperUserPolicy`, `AccessControl`, `CurrentUserBase`, internal `PolicyProvider`/`AuthorizationHandler`), `Constants/` (`ClaimTypeConstants`, `CronTimeConstants`), `Utilities/ReflectionHelper`.
+- **`src/Infrastructure`** (depends on `Shared`) — EF Core provider wiring (`Database/DbContextExtensions.cs`, `DbProvider.cs`, `BaseDbContext.cs`, `SqliteDbContextExtensions.cs`), audit/soft-delete tracking (`Database/TrackingExtensions.cs`) and domain-event dispatch (`Database/DispatchDomainEventsExtensions.cs`) meant to be called from each module's own `DbContext.SaveChangesAsync`, `Cors/`, `HealthChecks/`, `Mappings/MapsterSettings.cs`, `Modularity/AppModule.cs` + `AppModuleEndpoint.cs` (module registration base classes), `Endpoints/` (API controller base classes, `BasicAuthAttribute`), `AppLogging.cs` (static Serilog bootstrap logger).
+- No module has been scaffolded yet to confirm how it will actually consume these building blocks.
 
 ## Backend — Data Access
 
@@ -36,7 +39,7 @@ This file aggregates **verified** architectural facts only, split into Backend, 
 
 | Module | DbContext | Provider | Notes |
 |---|---|---|---|
-| _unknown_ | | | |
+| _none yet_ | | | No module `DbContext` exists yet. `src/Infrastructure/Database/BaseDbContext.cs` is the intended base class (applies the Sqlite `DateTimeOffset` fix in `OnModelCreating`); `DbContextExtensions.AddConfiguredDbContext<TContext>`/`GetDbProvider` support `InMemory`/`PostgreSQL`/`MSSQL`/`Sqlite` via an `IConfiguration["DbProvider"]` switch. |
 
 ## Backend — API Surface
 
@@ -80,7 +83,8 @@ This file aggregates **verified** architectural facts only, split into Backend, 
 
 > Findings from `review-architecture` runs go here, tagged with date and scope (backend/client app/integration).
 
-- _unknown_
+- **2026-07-29, backend, `src/Infrastructure/Database/MigrationsExtensions.cs`**: `AddMigrationsServices` registers mediator handlers via `Assembly.GetExecutingAssembly()`, which resolves to the `Infrastructure` assembly itself, not any future module assembly. Once modules with domain-event handlers exist, migration-time event dispatch may silently find no handlers — revisit then.
+- **2026-07-29, backend, `src/Infrastructure/Endpoints/ApiControllerBase.cs` + `VersionedApiController.cs`**: both duplicate an identical `_mediator` backing-field + lazy `Mediator` property. Likely unavoidable since they derive from two different vendor base classes (`Light.AspNetCore.Mvc.ApiControllerBase` vs `...VersionedApiController`); flagged in case the vendor library later offers a shared base to consolidate into.
 
 ---
-_Last updated: never (template not yet populated with verified facts)_
+_Last updated: 2026-07-29 — backend shared-kernel scope (`src/Shared`, `src/Infrastructure`); no modules/clients built yet._

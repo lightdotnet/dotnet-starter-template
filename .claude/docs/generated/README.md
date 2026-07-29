@@ -35,4 +35,4 @@ docs/generated/
 
 Each generated file carries a `<!-- manual -->`-marked section (see the templates) that must be preserved verbatim during any sync.
 
-This directory is currently empty — nothing has been generated yet. It is populated incrementally, one scope at a time, on request.
+Populated so far: `backend/overview.md`, `backend/architecture.md`, `backend/coding-conventions.md`, `backend/dependency-graph.md`, `backend/development-guide.md` — scope: `src/Shared`, `src/Infrastructure`, `tests/Framework.Tests` (no modules/host/clients yet, generated 2026-07-29). Everything else remains unpopulated until requested for that scope.
