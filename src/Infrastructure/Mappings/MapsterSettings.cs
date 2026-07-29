@@ -16,7 +16,7 @@ public class MapsterSettings
 
     private static void StatusConfigure()
     {
-        TypeAdapterConfig<Status, Status.ActiveStatus>
+        TypeAdapterConfig<ActiveStatus, ActiveStatus.State>
             .NewConfig()
             .Map(dest => dest, src => src.Value);
     }

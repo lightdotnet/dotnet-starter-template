@@ -10,21 +10,21 @@ public class StatusTests
     public void DefaultConstructor_ShouldDefaultToActive()
     {
         // Act
-        var status = new Status();
+        var status = new ActiveStatus();
 
         // Assert
-        Assert.Equal(Status.ActiveStatus.Active, status.Value);
+        Assert.Equal(ActiveStatus.State.Active, status.Value);
         Assert.True(status.IsActive);
     }
 
     [Theory]
-    [InlineData(Status.ActiveStatus.Inactive, false, true, false)]
-    [InlineData(Status.ActiveStatus.Active, true, false, false)]
-    [InlineData(Status.ActiveStatus.Locked, false, false, true)]
-    public void Flags_ShouldReflectValue(Status.ActiveStatus value, bool isActive, bool isInactive, bool isLocked)
+    [InlineData(ActiveStatus.State.Inactive, false, true, false)]
+    [InlineData(ActiveStatus.State.Active, true, false, false)]
+    [InlineData(ActiveStatus.State.Locked, false, false, true)]
+    public void Flags_ShouldReflectValue(ActiveStatus.State value, bool isActive, bool isInactive, bool isLocked)
     {
         // Act
-        var status = new Status(value);
+        var status = new ActiveStatus(value);
 
         // Assert
         Assert.Equal(isActive, status.IsActive);
@@ -36,13 +36,13 @@ public class StatusTests
     public void Update_ShouldMutateValueAndFlags()
     {
         // Arrange
-        var status = new Status(Status.ActiveStatus.Active);
+        var status = new ActiveStatus(ActiveStatus.State.Active);
 
         // Act
-        status.Update(Status.ActiveStatus.Locked);
+        status.Update(ActiveStatus.State.Locked);
 
         // Assert
-        Assert.Equal(Status.ActiveStatus.Locked, status.Value);
+        Assert.Equal(ActiveStatus.State.Locked, status.Value);
         Assert.True(status.IsLocked);
         Assert.False(status.IsActive);
     }
@@ -51,8 +51,8 @@ public class StatusTests
     public void Equals_ShouldBeTrue_WhenValueIsTheSame()
     {
         // Arrange
-        var a = new Status(Status.ActiveStatus.Locked);
-        var b = new Status(Status.ActiveStatus.Locked);
+        var a = new ActiveStatus(ActiveStatus.State.Locked);
+        var b = new ActiveStatus(ActiveStatus.State.Locked);
 
         // Assert
         Assert.Equal(a, b);
@@ -63,8 +63,8 @@ public class StatusTests
     public void Equals_ShouldBeFalse_WhenValueDiffers()
     {
         // Arrange
-        var a = new Status(Status.ActiveStatus.Active);
-        var b = new Status(Status.ActiveStatus.Locked);
+        var a = new ActiveStatus(ActiveStatus.State.Active);
+        var b = new ActiveStatus(ActiveStatus.State.Locked);
 
         // Assert
         Assert.NotEqual(a, b);
@@ -74,7 +74,7 @@ public class StatusTests
     public void Serialize_ShouldOnlyIncludeValue()
     {
         // Arrange
-        var status = new Status(Status.ActiveStatus.Active);
+        var status = new ActiveStatus(ActiveStatus.State.Active);
 
         // Act
         var json = JsonSerializer.Serialize(status);

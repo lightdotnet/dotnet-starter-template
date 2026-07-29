@@ -1,0 +1,28 @@
+using Light.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using StarterKit.Constants;
+
+namespace StarterKit.Identity.Jwt;
+
+public static class JwtServiceCollectionExtensions
+{
+    public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Override by BindConfiguration
+        var sectionName = "Jwt";
+        services.AddOptions<JwtOptions>().BindConfiguration(sectionName);
+        var jwtSettings = configuration.GetSection(sectionName).Get<JwtOptions>();
+        ArgumentNullException.ThrowIfNull(jwtSettings, nameof(JwtOptions));
+
+        // inject this for use jwt auth
+        services.AddJwtAuth(
+            jwtSettings.Issuer,
+            jwtSettings.SecretKey,
+            ClaimTypeConstants.Role); 
+
+        // services
+        services.AddScoped<JwtTokenMananger>();
+        services.AddTransient<ITokenService, TokenService>();
+    }
+}

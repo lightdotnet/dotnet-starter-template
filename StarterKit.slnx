@@ -4,8 +4,11 @@
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Identity.Contracts/Identity.Contracts.csproj" />
+    <Project Path="src/Identity/Identity.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
     <Project Path="src/Shared/Shared.csproj" />
+    <Project Path="src/StarterKit.WebApi/StarterKit.WebApi.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Framework.Tests/Framework.Tests.csproj" />

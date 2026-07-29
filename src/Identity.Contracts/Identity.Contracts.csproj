@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<RootNamespace>StarterKit.Identity</RootNamespace>
+	<AssemblyName>StarterKit.Identity.Contracts</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lightsoft.Result" />
+  </ItemGroup>
+
+</Project>
