@@ -1,4 +1,4 @@
-using StarterKit;
+using StarterKit.Shared;
 using Xunit;
 
 namespace Framework.Tests.Shared;

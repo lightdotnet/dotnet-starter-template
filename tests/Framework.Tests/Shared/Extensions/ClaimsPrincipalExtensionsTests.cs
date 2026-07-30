@@ -1,5 +1,5 @@
-using StarterKit.Constants;
-using StarterKit.Extensions;
+using StarterKit.Shared.Constants;
+using StarterKit.Shared.Extensions;
 using System.Security.Claims;
 using Xunit;
 

@@ -1,4 +1,4 @@
-﻿namespace StarterKit.Identity.Services;
+﻿namespace StarterKit.Identity.Contracts.Services;
 
 public interface IRoleService
 {

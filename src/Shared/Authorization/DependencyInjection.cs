@@ -1,8 +1,8 @@
 ﻿using Light.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using StarterKit.Authorization.Internal;
+using StarterKit.Shared.Authorization.Internal;
 
-namespace StarterKit.Authorization;
+namespace StarterKit.Shared.Authorization;
 
 public static class DependencyInjection
 {

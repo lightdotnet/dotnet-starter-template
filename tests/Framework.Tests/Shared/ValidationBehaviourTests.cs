@@ -1,6 +1,6 @@
 using FluentValidation;
 using Light.Mediator;
-using StarterKit;
+using StarterKit.Shared;
 using Xunit;
 using ValidationException = Light.Exceptions.ValidationException;
 

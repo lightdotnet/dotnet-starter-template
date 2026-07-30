@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using StarterKit.Authorization;
+using StarterKit.Shared;
+using StarterKit.Shared.Authorization;
 using System.Security.Claims;
 
-namespace StarterKit.Services;
+namespace StarterKit.Infrastructure.Services;
 
 public class ServerCurrentUser(IHttpContextAccessor httpContextAccessor)
     : CurrentUserBase, ICurrentUser

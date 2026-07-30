@@ -1,5 +1,6 @@
-using StarterKit;
-using StarterKit.Authorization;
+using StarterKit.Shared;
+using StarterKit.Shared.Authorization;
+using StarterKit.Shared.Constants;
 using System.Security.Claims;
 using Xunit;
 
@@ -43,9 +44,9 @@ public class AccessControlTests
     {
         // Arrange
         var superUser = new ClaimsPrincipal(new ClaimsIdentity(
-            [new Claim(StarterKit.Constants.ClaimTypeConstants.UserName, SuperUserPolicy.SuperUserName)]));
+            [new Claim(ClaimTypeConstants.UserName, SuperUserPolicy.SuperUserName)]));
         var regularUser = new ClaimsPrincipal(new ClaimsIdentity(
-            [new Claim(StarterKit.Constants.ClaimTypeConstants.UserName, "someone-else")]));
+            [new Claim(ClaimTypeConstants.UserName, "someone-else")]));
 
         // Act & Assert
         Assert.True(superUser.IsFullControl());

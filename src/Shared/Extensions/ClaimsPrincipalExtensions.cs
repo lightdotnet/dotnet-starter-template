@@ -1,7 +1,7 @@
-using StarterKit.Constants;
+using StarterKit.Shared.Constants;
 using ClaimsPrincipal = System.Security.Claims.ClaimsPrincipal;
 
-namespace StarterKit.Extensions;
+namespace StarterKit.Shared.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace StarterKit.Endpoints;
+namespace StarterKit.Infrastructure.Endpoints;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 public class BasicAuthAttribute : Attribute, IAuthorizationFilter

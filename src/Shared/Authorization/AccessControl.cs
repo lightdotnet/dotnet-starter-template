@@ -1,7 +1,7 @@
-﻿using StarterKit.Extensions;
+﻿using StarterKit.Shared.Extensions;
 using System.Security.Claims;
 
-namespace StarterKit.Authorization;
+namespace StarterKit.Shared.Authorization;
 
 public static class AccessControl
 {

@@ -1,5 +1,5 @@
-using StarterKit.Constants;
-using StarterKit.Utilities;
+using StarterKit.Shared.Constants;
+using StarterKit.Shared.Utilities;
 using Xunit;
 
 namespace Framework.Tests.Shared.Utilities;

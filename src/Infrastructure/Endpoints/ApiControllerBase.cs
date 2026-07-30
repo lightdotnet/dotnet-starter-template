@@ -1,4 +1,4 @@
-namespace StarterKit.Endpoints;
+namespace StarterKit.Infrastructure.Endpoints;
 
 public abstract class ApiControllerBase : Light.AspNetCore.Mvc.ApiControllerBase
 {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<RootNamespace>StarterKit.Identity</RootNamespace>
+	<RootNamespace>StarterKit.Identity.Contracts</RootNamespace>
 	<AssemblyName>StarterKit.Identity.Contracts</AssemblyName>
   </PropertyGroup>
 

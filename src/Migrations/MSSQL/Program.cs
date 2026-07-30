@@ -1,0 +1,18 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using MSSQL;
+using StarterKit.Identity.Api.Data;
+
+// set Environment
+//Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Live");
+
+using var host = Host.CreateHostBuilder(args).Build();
+
+using var scope = host.Services.CreateScope();
+
+var serviceProvider = scope.ServiceProvider;
+
+var identityInitialiser = serviceProvider.GetRequiredService<IdentityContextInitialiser>();
+
+await identityInitialiser.InitialiseAsync();
+
+await identityInitialiser.TrySeedAsync();

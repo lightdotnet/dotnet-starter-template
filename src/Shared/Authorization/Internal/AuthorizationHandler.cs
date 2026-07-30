@@ -1,8 +1,8 @@
 using Light.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization;
-using StarterKit.Extensions;
+using StarterKit.Shared.Extensions;
 
-namespace StarterKit.Authorization.Internal;
+namespace StarterKit.Shared.Authorization.Internal;
 
 internal class AuthorizationHandler : PermissionAuthorizationHandler
 {

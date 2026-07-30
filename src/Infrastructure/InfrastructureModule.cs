@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
-using StarterKit.Mappings;
-using StarterKit.Services;
+using StarterKit.Infrastructure.Mappings;
+using StarterKit.Infrastructure.Services;
+using StarterKit.Shared;
 
-namespace StarterKit;
+namespace StarterKit.Infrastructure;
 
 public static class InfrastructureModule
 {

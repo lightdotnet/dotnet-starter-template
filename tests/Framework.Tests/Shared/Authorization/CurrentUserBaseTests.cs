@@ -1,5 +1,5 @@
-using StarterKit.Authorization;
-using StarterKit.Constants;
+using StarterKit.Shared.Authorization;
+using StarterKit.Shared.Constants;
 using System.Security.Claims;
 using Xunit;
 

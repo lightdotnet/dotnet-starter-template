@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Routing;
 
-namespace StarterKit.Modularity;
+namespace StarterKit.Infrastructure.Modularity;
 
 public abstract class AppModuleEndpoint : Light.AspNetCore.Modularity.IModuleEndpoint
 {

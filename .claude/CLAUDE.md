@@ -12,14 +12,14 @@ This file is the entry point for every Claude Code session in this repository. R
 
 This repository is a **starter template monorepo for a full-stack application**: a C#/.NET backend and one or more frontend clients, meant to be cloned/forked as the starting point for new projects.
 
-- **Backend** — `src/` — ASP.NET Core Web API, **C#**, organized as a **Modular Monolith**. One solution (`.sln`), one deployable process, multiple business modules under `src/Modules/`, each internally layered (Domain / Application / Infrastructure / Api).
+- **Backend** — `src/` — ASP.NET Core Web API, **C#**, organized as a **Modular Monolith**. One solution (`.sln`), one deployable process. Business modules live as flat projects directly under `src/` (no `src/Modules/` nesting) — a simple module is a single `<Module>` project internally organized by folder (Entities/Application/Data/Controllers/etc.); a module complex enough to justify it is split Clean-Architecture-style into `<Module>.Domain` / `<Module>.Application` / `<Module>.Infrastructure` / `<Module>.Api` projects. Every module also has a `<Module>.Contracts` project — the only project other modules or the host may reference — exposing its public DTOs and service interfaces. See [ARCHITECTURE.md § Backend — Module Structure Convention](ARCHITECTURE.md#backend--module-structure-convention) for the decision criteria and naming rules.
 - **Clients** — `clients/` — one or more frontend apps, each in its own subfolder (e.g. `clients/web/` for the primary **Next.js** (TypeScript/React) app; additional apps such as `clients/admin/` or a future mobile client may be added later). Each client consumes the backend exclusively over HTTP as a JSON API. The backend's MVC controllers are **API-only** (no server-rendered Razor views) — all UI rendering happens in the client apps.
 - **Integration** — the only contract between backend and any client is the HTTP API surface (routes, DTOs, status/error shapes). No side reaches into another's internals; there is no shared DB access or shared source between `src/` and `clients/*`.
 
 Consequences of this:
 
 - There is one backend solution but potentially **multiple client apps** — don't assume `clients/` has only one subfolder, mirroring the backend's module plurality. A request about "the frontend" without naming an app is ambiguous once more than one exists — ask.
-- Module boundaries inside `src/Modules/` are the primary structural concern on the backend — treat cross-module reach-through (Module A's Infrastructure/Domain referenced directly by Module B) as an architecture violation, not a shortcut.
+- Module boundaries are the primary structural concern on the backend — each module's `<Module>.Contracts` project is the only allowed seam. Treat cross-module reach-through (Module A's internals — or, for a split module, its `Domain`/`Application`/`Infrastructure` project — referenced directly by Module B or by another module's `Contracts`) as an architecture violation, not a shortcut.
 - Changes to the API contract ripple into every client that consumes that endpoint (and vice versa for any typed client a frontend generates/consumes) — treat the HTTP contract as the seam to protect.
 - This repo is a **template**: expect it to start mostly empty/skeletal and be filled in incrementally. Do not assume scaffolding exists until verified — check before describing structure.
 
@@ -28,7 +28,7 @@ Consequences of this:
 | Layer | Stack |
 |---|---|
 | Backend runtime | ASP.NET Core (C#), API-only MVC controllers |
-| Backend architecture | Modular Monolith — `src/Modules/<ModuleName>/{Domain,Application,Infrastructure,Api}` |
+| Backend architecture | Modular Monolith — flat projects directly under `src/` (no `src/Modules/` nesting); each module is either a single `<Module>` project or split Clean-Architecture-style into `<Module>.{Domain,Application,Infrastructure,Api}` depending on complexity, plus always a `<Module>.Contracts` seam project |
 | Backend data access | EF Core (one `DbContext` per module is the intended default — verify per module, don't assume a single shared context) |
 | Client apps | `clients/<app-name>/` — one per frontend; the primary app (`clients/web/`) is Next.js (App Router), TypeScript, React |
 | Integration | REST/JSON over HTTP; each client keeps a typed API client generated from or hand-kept in sync with backend contracts |
@@ -62,7 +62,7 @@ Specialized agents live in [agents/](agents/). Prefer delegating to them over re
 
 | Agent | Use for |
 |---|---|
-| [architecture-reviewer](agents/architecture-reviewer.md) | Backend layering, module boundaries, dependency direction within/between `src/Modules/*` |
+| [architecture-reviewer](agents/architecture-reviewer.md) | Backend layering, module boundaries, dependency direction within/between modules under `src/` |
 | [dotnet-architect](agents/dotnet-architect.md) | Backend project/module structure, framework choices, new module shape |
 | [efcore-specialist](agents/efcore-specialist.md) | EF Core models, migrations, query performance, DbContext design per module |
 | [api-designer](agents/api-designer.md) | Backend REST API contract design, versioning, DTO shape |

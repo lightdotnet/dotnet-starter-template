@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace StarterKit.Utilities;
+namespace StarterKit.Shared.Utilities;
 
 public static class ReflectionHelper
 {

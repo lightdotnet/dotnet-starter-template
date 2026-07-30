@@ -1,5 +1,5 @@
-using StarterKit;
-using StarterKit.Services;
+using StarterKit.Infrastructure.Services;
+using StarterKit.Shared;
 using Xunit;
 
 namespace Framework.Tests.Infrastructure.Services;

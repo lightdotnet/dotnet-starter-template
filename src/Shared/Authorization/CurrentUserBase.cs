@@ -1,6 +1,6 @@
-﻿using StarterKit.Extensions;
+﻿using StarterKit.Shared.Extensions;
 
-namespace StarterKit.Authorization;
+namespace StarterKit.Shared.Authorization;
 
 public abstract class CurrentUserBase : ICurrentUser
 {

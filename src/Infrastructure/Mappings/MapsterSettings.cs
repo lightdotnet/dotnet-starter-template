@@ -1,6 +1,7 @@
 ﻿using Mapster;
+using StarterKit.Shared;
 
-namespace StarterKit.Mappings;
+namespace StarterKit.Infrastructure.Mappings;
 
 public class MapsterSettings
 {

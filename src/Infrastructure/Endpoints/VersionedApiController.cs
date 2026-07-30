@@ -1,6 +1,6 @@
 using Asp.Versioning;
 
-namespace StarterKit.Endpoints;
+namespace StarterKit.Infrastructure.Endpoints;
 
 [ApiVersion("1.0")]
 public abstract class VersionedApiController : Light.AspNetCore.Mvc.VersionedApiController

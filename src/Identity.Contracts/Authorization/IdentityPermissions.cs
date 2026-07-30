@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace StarterKit.Identity.Authorization;
+namespace StarterKit.Identity.Contracts.Authorization;
 
 public class IdentityPermissions
 {

@@ -1,4 +1,4 @@
-namespace StarterKit;
+namespace StarterKit.Shared;
 
 /// <summary>
 /// Lookup data entries with pagination

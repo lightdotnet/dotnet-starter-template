@@ -1,4 +1,4 @@
-﻿namespace StarterKit.Identity;
+﻿namespace StarterKit.Identity.Contracts;
 
 public record TokenDto(
     string AccessToken,

@@ -1,4 +1,4 @@
-using StarterKit.Authorization;
+using StarterKit.Shared.Authorization;
 using Xunit;
 
 namespace Framework.Tests.Shared.Authorization;

@@ -1,6 +1,6 @@
 using Serilog;
 
-namespace StarterKit;
+namespace StarterKit.Infrastructure;
 
 public class AppLogging
 {

@@ -1,4 +1,4 @@
-using StarterKit.Constants;
+using StarterKit.Shared.Constants;
 using Xunit;
 
 namespace Framework.Tests.Shared.Constants;

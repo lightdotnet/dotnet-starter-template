@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 
-namespace StarterKit.Cors;
+namespace StarterKit.Infrastructure.Cors;
 
 public static class DependencyInjection
 {

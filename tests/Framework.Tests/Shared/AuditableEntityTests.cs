@@ -1,4 +1,4 @@
-using StarterKit.Entities;
+using StarterKit.Shared.Entities;
 using Xunit;
 
 namespace Framework.Tests.Shared;

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<RootNamespace>StarterKit</RootNamespace>
+	<RootNamespace>StarterKit.Shared</RootNamespace>
 	<AssemblyName>StarterKit.Shared</AssemblyName>
   </PropertyGroup>
 

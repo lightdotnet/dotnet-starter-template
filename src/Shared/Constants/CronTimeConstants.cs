@@ -1,4 +1,4 @@
-namespace StarterKit.Constants;
+namespace StarterKit.Shared.Constants;
 
 public abstract class CronTimeConstants
 {

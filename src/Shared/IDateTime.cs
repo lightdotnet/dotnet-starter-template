@@ -1,4 +1,4 @@
-namespace StarterKit;
+namespace StarterKit.Shared;
 
 public interface IDateTime
 {

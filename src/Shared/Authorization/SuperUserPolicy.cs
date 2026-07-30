@@ -1,4 +1,4 @@
-namespace StarterKit.Authorization;
+namespace StarterKit.Shared.Authorization;
 
 /// <summary>
 /// Default user with full permissions.

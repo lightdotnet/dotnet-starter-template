@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Routing;
 
-namespace StarterKit.HealthChecks;
+namespace StarterKit.Infrastructure.HealthChecks;
 
 public static class Configure
 {

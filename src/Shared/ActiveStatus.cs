@@ -1,7 +1,7 @@
 using Light.Domain.ValueObjects;
 using System.Text.Json.Serialization;
 
-namespace StarterKit;
+namespace StarterKit.Shared;
 
 public class ActiveStatus : ValueObject
 {

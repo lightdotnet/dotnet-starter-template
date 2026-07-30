@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace StarterKit;
+namespace StarterKit.Shared;
 
 public abstract class BaseDto<TId>
 {

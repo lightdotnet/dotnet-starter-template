@@ -2,7 +2,7 @@
 using Light.Mediator;
 using ValidationException = Light.Exceptions.ValidationException;
 
-namespace StarterKit;
+namespace StarterKit.Shared;
 
 public class ValidationBehaviour<TRequest, TResponse>(
     IEnumerable<IValidator<TRequest>> validators) :

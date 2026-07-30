@@ -4,11 +4,16 @@
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Identity.Api/Identity.Api.csproj" />
     <Project Path="src/Identity.Contracts/Identity.Contracts.csproj" />
-    <Project Path="src/Identity/Identity.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="src/Persistence/Persistence.csproj" />
     <Project Path="src/Shared/Shared.csproj" />
     <Project Path="src/StarterKit.WebApi/StarterKit.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/src/migrations/">
+    <Project Path="src/Migrations/MSSQL/MSSQL.csproj" />
+    <Project Path="src/Migrations/Sqlite/Sqlite.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Framework.Tests/Framework.Tests.csproj" />

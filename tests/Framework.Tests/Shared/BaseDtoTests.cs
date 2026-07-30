@@ -1,4 +1,4 @@
-using StarterKit;
+using StarterKit.Shared;
 using System.Text.Json;
 using Xunit;
 
