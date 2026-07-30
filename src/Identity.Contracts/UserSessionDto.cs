@@ -1,6 +1,6 @@
 ﻿namespace StarterKit.Identity.Contracts;
 
-public class UserTokenDto
+public class UserSessionDto
 {
     public string Id { get; set; } = null!;
 

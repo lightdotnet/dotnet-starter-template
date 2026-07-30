@@ -1,4 +1,4 @@
-using StarterKit.Persistence.Migrations;
+using StarterKit.Persistence.MigrationSupport;
 using Xunit;
 
 namespace Framework.Tests.Persistence;

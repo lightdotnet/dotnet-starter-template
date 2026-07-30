@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StarterKit.Identity.Api.Data;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Infrastructure;
-using StarterKit.Persistence;
 using StarterKit.Persistence.MigrationSupport;
 using System.Reflection;
 
@@ -27,7 +25,7 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString(DbConnectionNames.Identity);
 
-        services.AddDbContext<AppIdentityDbContext>(options =>
+        services.AddDbContext<IdentityDbContext>(options =>
             options
                 .UseSqlite(connectionString, o =>
                 {
@@ -55,7 +53,7 @@ public static class DependencyInjection
                 options.User.RequireUniqueEmail = false;
             })
             .AddRoles<Role>()
-            .AddEntityFrameworkStores<AppIdentityDbContext>();
+            .AddEntityFrameworkStores<IdentityDbContext>();
 
         services.AddScoped<IdentityContextInitialiser>();
 

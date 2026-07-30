@@ -6,7 +6,7 @@ namespace StarterKit.Identity.Api.Data;
 
 public class IdentityContextInitialiser(
     ILogger<IdentityContextInitialiser> logger,
-    AppIdentityDbContext context,
+    IdentityDbContext context,
     UserManager<User> userManager,
     RoleManager<Role> roleManager)
 {

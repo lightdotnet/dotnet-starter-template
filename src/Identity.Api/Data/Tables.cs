@@ -18,7 +18,7 @@ public abstract class Tables
 
     /* Custom tables */
 
-    public const string JwtTokens = nameof(JwtTokens);
+    public const string UserSessions = nameof(UserSessions);
 
     public const string ServiceClaims = nameof(ServiceClaims);
 }

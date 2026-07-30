@@ -3,9 +3,9 @@ using Light.Domain.Entities;
 
 namespace StarterKit.Identity.Api.Entities;
 
-public class JwtToken : Entity
+public class UserSession : Entity
 {
-    public JwtToken() => Id = LightId.NewId();
+    public UserSession() => Id = LightId.NewId();
 
     public required string UserId { get; set; }
 

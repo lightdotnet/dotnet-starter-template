@@ -6,7 +6,7 @@ using StarterKit.Identity.Api.Entities;
 
 namespace MSSQL.Identity
 {
-    [DbContext(typeof(AppIdentityDbContext))]
+    [DbContext(typeof(IdentityDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -80,7 +80,7 @@ namespace MSSQL.Identity
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable(Tables.Users, Schemas.Identity);
+                    b.ToTable(Tables.Users, DefaultSchema.Schema);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -107,7 +107,7 @@ namespace MSSQL.Identity
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable(Tables.Roles, Schemas.Identity);
+                    b.ToTable(Tables.Roles, DefaultSchema.Schema);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -132,7 +132,7 @@ namespace MSSQL.Identity
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable(Tables.RoleClaims, Schemas.Identity);
+                    b.ToTable(Tables.RoleClaims, DefaultSchema.Schema);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -157,7 +157,7 @@ namespace MSSQL.Identity
 
                     b.HasIndex("UserId");
 
-                    b.ToTable(Tables.UserClaims, Schemas.Identity);
+                    b.ToTable(Tables.UserClaims, DefaultSchema.Schema);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -179,7 +179,7 @@ namespace MSSQL.Identity
 
                     b.HasIndex("UserId");
 
-                    b.ToTable(Tables.UserLogins, Schemas.Identity);
+                    b.ToTable(Tables.UserLogins, DefaultSchema.Schema);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -194,7 +194,7 @@ namespace MSSQL.Identity
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable(Tables.UserRoles, Schemas.Identity);
+                    b.ToTable(Tables.UserRoles, DefaultSchema.Schema);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -213,7 +213,7 @@ namespace MSSQL.Identity
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable(Tables.UserTokens, Schemas.Identity);
+                    b.ToTable(Tables.UserTokens, DefaultSchema.Schema);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -11,7 +11,7 @@ namespace StarterKit.Identity.Api.Jwt;
 public class JwtTokenManager(
     UserManager<User> userManager,
     RoleManager<Role> roleManager,
-    AppIdentityDbContext context)
+    IdentityDbContext context)
 {
     public UserManager<User> UserManager => userManager;
 
@@ -63,7 +63,7 @@ public class JwtTokenManager(
         DeviceDto? device = null,
         bool saveToken = true)
     {
-        var newToken = new JwtToken
+        var newToken = new UserSession
         {
             UserId = user.Id,
             TokenExpiresAt = tokenExpiresAt,
@@ -91,7 +91,7 @@ public class JwtTokenManager(
             newToken.Token = jwtToken;
         }
 
-        await context.JwtTokens.AddAsync(newToken);
+        await context.UserSessions.AddAsync(newToken);
         await context.SaveChangesAsync();
 
         // *** note: must return jwtToken cause save token to DB is options
@@ -108,7 +108,7 @@ public class JwtTokenManager(
         bool saveToken = true)
     {
         // check refresh token is exist and not out of lifetime
-        var userToken = await context.JwtTokens
+        var userToken = await context.UserSessions
             .Where(x =>
                 x.UserId == user.Id
                 && x.RefreshToken == refreshToken
@@ -150,11 +150,11 @@ public class JwtTokenManager(
         return new TokenDto(jwtToken, userToken.TokenExpiresInSeconds, userToken.RefreshToken);
     }
 
-    public async Task<IEnumerable<UserTokenDto>> GetUserTokensAsync(string userId)
+    public async Task<IEnumerable<UserSessionDto>> GetUserTokensAsync(string userId)
     {
         var now = TimeNow;
 
-        var list = await context.JwtTokens
+        var list = await context.UserSessions
             .Where(x =>
                 x.UserId == userId
                 &&
@@ -162,7 +162,7 @@ public class JwtTokenManager(
                     || (x.RefreshTokenExpiresAt.HasValue && x.RefreshTokenExpiresAt >= now))
                 && x.Revoked == false)
             .AsNoTracking()
-            .Select(s => new UserTokenDto
+            .Select(s => new UserSessionDto
             {
                 Id = s.Id,
                 ExpiresAt = s.TokenExpiresAt,
@@ -182,7 +182,7 @@ public class JwtTokenManager(
 
     public Task<bool> IsTokenValidAsync(string accessToken)
     {
-        return context.JwtTokens
+        return context.UserSessions
             .Where(x =>
                 x.Token == accessToken
                 && x.Revoked == false
@@ -192,7 +192,7 @@ public class JwtTokenManager(
 
     public Task RevokedAsync(string userId, string tokenId)
     {
-        return context.JwtTokens
+        return context.UserSessions
             .Where(x => x.Id == tokenId && x.UserId == userId)
             .ExecuteUpdateAsync(e => e.SetProperty(p => p.Revoked, true));
     }

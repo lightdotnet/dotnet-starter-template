@@ -2,119 +2,31 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Monolith.Identity.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using StarterKit.Identity.Api.Data;
 
 #nullable disable
 
 namespace PostgreSQL.Identity
 {
     [DbContext(typeof(IdentityDbContext))]
-    partial class IdentityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260730065715_CreateIdentitySchema")]
+    partial class CreateIdentitySchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasDefaultSchema("identity")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Monolith.Identity.Domain.JwtToken", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DeviceId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DeviceName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhysicalAddress")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("RefreshTokenExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("Revoked")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("TokenExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("JwtTokens", "Identity");
-                });
-
-            modelBuilder.Entity("Monolith.Identity.Domain.Notification", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FromName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FromUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("LastModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("ReadStatus")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("RemindRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ToUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Notifications", "System");
-                });
-
-            modelBuilder.Entity("Monolith.Identity.Domain.Role", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.Role", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -152,10 +64,10 @@ namespace PostgreSQL.Identity
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("Roles", "Identity");
+                    b.ToTable("Roles", "identity");
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.RoleClaim", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.RoleClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,10 +89,10 @@ namespace PostgreSQL.Identity
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("RoleClaims", "Identity");
+                    b.ToTable("RoleClaims", "identity");
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.User", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -268,10 +180,10 @@ namespace PostgreSQL.Identity
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("Users", "Identity");
+                    b.ToTable("Users", "identity");
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserClaim", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -293,10 +205,10 @@ namespace PostgreSQL.Identity
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserClaims", "Identity");
+                    b.ToTable("UserClaims", "identity");
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserLogin", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserLogin", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text");
@@ -315,10 +227,10 @@ namespace PostgreSQL.Identity
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLogins", "Identity");
+                    b.ToTable("UserLogins", "identity");
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserRole", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserRole", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("text");
@@ -330,10 +242,53 @@ namespace PostgreSQL.Identity
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", "Identity");
+                    b.ToTable("UserRoles", "identity");
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserToken", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DeviceId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DeviceName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhysicalAddress")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("RefreshTokenExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Revoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("TokenExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSessions", "identity");
+                });
+
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserToken", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("text");
@@ -349,21 +304,21 @@ namespace PostgreSQL.Identity
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("UserTokens", "Identity");
+                    b.ToTable("UserTokens", "identity");
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.RoleClaim", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.RoleClaim", b =>
                 {
-                    b.HasOne("Monolith.Identity.Domain.Role", null)
+                    b.HasOne("StarterKit.Identity.Api.Entities.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.User", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.User", b =>
                 {
-                    b.OwnsOne("Monolith.Identity.Domain.Status", "Status", b1 =>
+                    b.OwnsOne("StarterKit.Shared.ActiveStatus", "Status", b1 =>
                         {
                             b1.Property<string>("UserId")
                                 .HasColumnType("text");
@@ -374,7 +329,7 @@ namespace PostgreSQL.Identity
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users", "Identity");
+                            b1.ToTable("Users", "identity");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -384,42 +339,42 @@ namespace PostgreSQL.Identity
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserClaim", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserClaim", b =>
                 {
-                    b.HasOne("Monolith.Identity.Domain.User", null)
+                    b.HasOne("StarterKit.Identity.Api.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserLogin", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserLogin", b =>
                 {
-                    b.HasOne("Monolith.Identity.Domain.User", null)
+                    b.HasOne("StarterKit.Identity.Api.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserRole", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserRole", b =>
                 {
-                    b.HasOne("Monolith.Identity.Domain.Role", null)
+                    b.HasOne("StarterKit.Identity.Api.Entities.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Monolith.Identity.Domain.User", null)
+                    b.HasOne("StarterKit.Identity.Api.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Monolith.Identity.Domain.UserToken", b =>
+            modelBuilder.Entity("StarterKit.Identity.Api.Entities.UserToken", b =>
                 {
-                    b.HasOne("Monolith.Identity.Domain.User", null)
+                    b.HasOne("StarterKit.Identity.Api.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

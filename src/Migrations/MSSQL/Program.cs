@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MSSQL;
-using StarterKit.Identity.Api.Data;
 
 // set Environment
 //Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Live");

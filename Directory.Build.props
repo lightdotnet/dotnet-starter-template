@@ -7,5 +7,7 @@
         <!--
         <NoWarn>NU1803</NoWarn>
         -->
+		<!-- Remove this to turn on warnings packages with vulnerabilities -->
+	    <NoWarn>NU1903</NoWarn>
     </PropertyGroup>
   </Project>

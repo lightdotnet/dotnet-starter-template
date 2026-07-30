@@ -17,7 +17,7 @@ public static class DependencyInjection
     {
         AddActiveDirectory(services, configuration);
 
-        services.AddConfiguredDbContext<AppIdentityDbContext>(configuration, DbConnectionNames.Identity);
+        services.AddConfiguredDbContext<IdentityDbContext>(configuration, DbConnectionNames.Identity);
 
         var identityBuilder = services
             .AddIdentityCore<User>(options =>
@@ -39,7 +39,7 @@ public static class DependencyInjection
                 options.User.RequireUniqueEmail = false;
             })
             .AddRoles<Role>()
-            .AddEntityFrameworkStores<AppIdentityDbContext>()
+            .AddEntityFrameworkStores<IdentityDbContext>()
             .AddDefaultTokenProviders();
 
         services.AddTransient<IUserService, UserService>();

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using StarterKit.Identity.Api.Data;
 
 #nullable disable
 
@@ -11,61 +10,11 @@ namespace MSSQL.Identity
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.EnsureSchema(name: Schemas.Identity);
-
-            migrationBuilder.EnsureSchema(name: Schemas.Audit);
-
-            migrationBuilder.EnsureSchema(name: Schemas.System);
-
-            /* Custom */
-            migrationBuilder.CreateTable(
-                name: "Notifications",
-                schema: Schemas.System,
-                columns: table => new
-                {
-                    Id = table.Column<string>(maxLength: 450, nullable: false),
-                    FromUserID = table.Column<string>(maxLength: 450, nullable: false),
-                    FromName = table.Column<string>(maxLength: 200, nullable: true),
-                    ToUserID = table.Column<string>(maxLength: 450, nullable: false),
-                    Title = table.Column<string>(maxLength: 250, nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ReadStatus = table.Column<bool>(nullable: false),
-                    RemindRead = table.Column<bool>(nullable: false),
-                    Created = table.Column<DateTimeOffset>(nullable: false),
-                    CreatedBy = table.Column<string>(maxLength: 450, nullable: true),
-                    LastModified = table.Column<DateTimeOffset>(nullable: true),
-                    LastModifiedBy = table.Column<string>(maxLength: 450, nullable: true),
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Notifications", x => x.Id);
-                });
-
+            migrationBuilder.EnsureSchema(name: DefaultSchema.Schema);
 
             migrationBuilder.CreateTable(
-                name: "AuditEntries",
-                schema: Schemas.Audit,
-                columns: table => new
-                {
-                    Id = table.Column<string>(maxLength: 450, nullable: false),
-                    UserId = table.Column<string>(maxLength: 450, nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TableName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ChangeOnTime = table.Column<DateTimeOffset>(nullable: false),
-                    OldValues = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NewValues = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AffectedColumns = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PrimaryKey = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditEntries", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: Tables.JwtTokens,
-                schema: Schemas.Identity,
+                name: Tables.UserSessions,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 450, nullable: false),
@@ -82,14 +31,14 @@ namespace MSSQL.Identity
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey($"PK_{Tables.JwtTokens}", x => x.Id);
+                    table.PrimaryKey($"PK_{Tables.UserSessions}", x => x.Id);
                 });
 
             /**/
 
             migrationBuilder.CreateTable(
                 name: Tables.Roles,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -111,7 +60,7 @@ namespace MSSQL.Identity
 
             migrationBuilder.CreateTable(
                 name: Tables.Users,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -149,7 +98,7 @@ namespace MSSQL.Identity
 
             migrationBuilder.CreateTable(
                 name: Tables.RoleClaims,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -165,14 +114,14 @@ namespace MSSQL.Identity
                         name: $"FK_{Tables.RoleClaims}_{Tables.Roles}_RoleId",
                         column: x => x.RoleId,
                         principalTable: Tables.Roles,
-                        principalSchema: Schemas.Identity,
+                        principalSchema: DefaultSchema.Schema,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: Tables.UserClaims,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -188,14 +137,14 @@ namespace MSSQL.Identity
                         name: $"FK_{Tables.UserClaims}_{Tables.Users}_UserId",
                         column: x => x.UserId,
                         principalTable: Tables.Users,
-                        principalSchema: Schemas.Identity,
+                        principalSchema: DefaultSchema.Schema,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: Tables.UserLogins,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -210,14 +159,14 @@ namespace MSSQL.Identity
                         name: $"FK_{Tables.UserLogins}_{Tables.Users}_UserId",
                         column: x => x.UserId,
                         principalTable: Tables.Users,
-                        principalSchema: Schemas.Identity,
+                        principalSchema: DefaultSchema.Schema,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: Tables.UserRoles,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -230,21 +179,21 @@ namespace MSSQL.Identity
                         name: $"FK_{Tables.UserRoles}_{Tables.Roles}_RoleId",
                         column: x => x.RoleId,
                         principalTable: Tables.Roles,
-                        principalSchema: Schemas.Identity,
+                        principalSchema: DefaultSchema.Schema,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: $"FK_{Tables.UserRoles}_{Tables.Users}_UserId",
                         column: x => x.UserId,
                         principalTable: Tables.Users,
-                        principalSchema: Schemas.Identity,
+                        principalSchema: DefaultSchema.Schema,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: Tables.UserTokens,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -259,7 +208,7 @@ namespace MSSQL.Identity
                         name: $"FK_{Tables.UserTokens}_{Tables.Users}_UserId",
                         column: x => x.UserId,
                         principalTable: Tables.Users,
-                        principalSchema: Schemas.Identity,
+                        principalSchema: DefaultSchema.Schema,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -267,13 +216,13 @@ namespace MSSQL.Identity
             migrationBuilder.CreateIndex(
                 name: $"IX_{Tables.RoleClaims}_RoleId",
                 table: Tables.RoleClaims,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: Tables.Roles,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
@@ -281,39 +230,39 @@ namespace MSSQL.Identity
             migrationBuilder.CreateIndex(
                 name: $"IX_{Tables.UserClaims}_UserId",
                 table: Tables.UserClaims,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: $"IX_{Tables.UserLogins}_UserId",
                 table: Tables.UserLogins,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: $"IX_{Tables.UserRoles}_RoleId",
                 table: Tables.UserRoles,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: Tables.Users,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: Tables.Users,
-                schema: Schemas.Identity,
+                schema: DefaultSchema.Schema,
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: $"IX_{Tables.JwtTokens}",
-                table: Tables.JwtTokens,
-                schema: Schemas.Identity,
+                name: $"IX_{Tables.UserSessions}",
+                table: Tables.UserSessions,
+                schema: DefaultSchema.Schema,
                 column: "UserId");
         }
 
@@ -322,35 +271,35 @@ namespace MSSQL.Identity
         {
             migrationBuilder.DropTable(
                 name: Tables.RoleClaims,
-                schema: Schemas.Identity);
+                schema: DefaultSchema.Schema);
 
             migrationBuilder.DropTable(
                 name: Tables.UserClaims,
-                schema: Schemas.Identity);
+                schema: DefaultSchema.Schema);
 
             migrationBuilder.DropTable(
                 name: Tables.UserLogins,
-                schema: Schemas.Identity);
+                schema: DefaultSchema.Schema);
 
             migrationBuilder.DropTable(
                 name: Tables.UserRoles,
-                schema: Schemas.Identity);
+                schema: DefaultSchema.Schema);
 
             migrationBuilder.DropTable(
                 name: Tables.UserTokens,
-                schema: Schemas.Identity);
+                schema: DefaultSchema.Schema);
 
             migrationBuilder.DropTable(
                 name: Tables.Roles,
-                schema: Schemas.Identity);
+                schema: DefaultSchema.Schema);
 
             migrationBuilder.DropTable(
                 name: Tables.Users,
-                schema: Schemas.Identity);
+                schema: DefaultSchema.Schema);
 
             migrationBuilder.DropTable(
-                name: Tables.JwtTokens,
-                schema: Schemas.Identity);
+                name: Tables.UserSessions,
+                schema: DefaultSchema.Schema);
         }
     }
 }

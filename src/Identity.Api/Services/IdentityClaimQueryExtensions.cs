@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using StarterKit.Identity.Api.Data;
 using StarterKit.Identity.Contracts;
 
 namespace StarterKit.Identity.Api.Services;

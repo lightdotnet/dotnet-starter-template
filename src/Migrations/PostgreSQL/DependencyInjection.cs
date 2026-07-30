@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Monolith;
-using Monolith.Catalog.Infrastructure.Data;
-using Monolith.Catalog.Infrastructure.Data.SeedWork;
+using StarterKit.Identity.Api.Entities;
+using StarterKit.Infrastructure;
+using StarterKit.Persistence.MigrationSupport;
 using System.Reflection;
 
 namespace PostgreSQL;
@@ -18,14 +18,12 @@ public static class DependencyInjection
 
         services.AddIdentity(configuration);
 
-        services.AddCatalog(configuration);
-
         return services;
     }
 
     private static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString(DbConnectionNames.IDENTITY);
+        var connectionString = configuration.GetConnectionString(DbConnectionNames.Identity);
 
         services.AddDbContext<IdentityDbContext>(options =>
             options
@@ -58,23 +56,6 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<IdentityDbContext>();
 
         services.AddScoped<IdentityContextInitialiser>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddCatalog(this IServiceCollection services, IConfiguration configuration)
-    {
-        var connectionString = configuration.GetConnectionString(DbConnectionNames.DEFAULT);
-
-        services.AddDbContext<CatalogContext>(options =>
-            options
-                .UseNpgsql(connectionString, o =>
-                {
-                    o.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
-                })
-                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
-
-        services.AddScoped<CatalogContextInitialiser>();
 
         return services;
     }

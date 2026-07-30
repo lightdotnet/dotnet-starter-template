@@ -13,6 +13,7 @@
   </Folder>
   <Folder Name="/src/migrations/">
     <Project Path="src/Migrations/MSSQL/MSSQL.csproj" />
+    <Project Path="src/Migrations/PostgreSQL/PostgreSQL.csproj" />
     <Project Path="src/Migrations/Sqlite/Sqlite.csproj" />
   </Folder>
   <Folder Name="/tests/">

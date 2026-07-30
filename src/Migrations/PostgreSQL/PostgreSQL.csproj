@@ -26,8 +26,13 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(AspnetVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(AspnetVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(AspnetVersion)" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
-	<PackageReference Include="Lightsoft.Serilog" Version="1.0.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Identity.Api\Identity.Api.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Persistence\Persistence.csproj" />
+    <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,8 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules.Catalog\Modules.Catalog.csproj" />
-    <ProjectReference Include="..\..\Modules.Identity\Modules.Identity.csproj" />
+    <Folder Include="Identity\" />
   </ItemGroup>
 
 </Project>

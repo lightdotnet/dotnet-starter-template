@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Monolith.Catalog.Infrastructure.Data.SeedWork;
 using PostgreSQL;
 
 // set Environment
@@ -16,9 +15,3 @@ var identityInitialiser = serviceProvider.GetRequiredService<IdentityContextInit
 await identityInitialiser.InitialiseAsync();
 
 await identityInitialiser.TrySeedAsync();
-
-var catalogInitialiser = serviceProvider.GetRequiredService<CatalogContextInitialiser>();
-
-await catalogInitialiser.InitialiseAsync();
-
-await catalogInitialiser.TrySeedAsync();
