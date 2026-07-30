@@ -35,6 +35,6 @@ public class IdentityDbContext(
 
         builder.BuildEntities();
 
-        Database.FixDateTimeOffsetSqlite(builder);
+        Database.FixSqliteDateTimeOffset(builder);
     }
 }

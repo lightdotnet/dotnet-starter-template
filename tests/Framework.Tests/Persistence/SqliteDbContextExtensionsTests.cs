@@ -20,12 +20,12 @@ public class SqliteDbContextExtensionsTests
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            Database.FixDateTimeOffsetSqlite(modelBuilder);
+            Database.FixSqliteDateTimeOffset(modelBuilder);
         }
     }
 
     [Fact]
-    public async Task FixDateTimeOffsetSqlite_ShouldRoundTrip_TruncatedToWholeSeconds()
+    public async Task FixSqliteDateTimeOffset_ShouldRoundTrip_TruncatedToWholeSeconds()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -55,7 +55,7 @@ public class SqliteDbContextExtensionsTests
     }
 
     [Fact]
-    public async Task FixDateTimeOffsetSqlite_ShouldRoundTripEpochValue_NotAsNull()
+    public async Task FixSqliteDateTimeOffset_ShouldRoundTripEpochValue_NotAsNull()
     {
         // Arrange: the nullable converter used to use 0 as both the "null" sentinel and a valid Unix
         // timestamp (epoch), so a genuinely-stored epoch value collided with null. Now it uses a
@@ -85,7 +85,7 @@ public class SqliteDbContextExtensionsTests
     }
 
     [Fact]
-    public async Task FixDateTimeOffsetSqlite_ShouldRoundTripNull_AsNull()
+    public async Task FixSqliteDateTimeOffset_ShouldRoundTripNull_AsNull()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;

@@ -36,4 +36,10 @@ public class AppLogging
     {
         Logger.Warning(message, values);
     }
+
+    public static void CloseAndFlush()
+    {
+        _logger?.Dispose();
+        _logger = null;
+    }
 }

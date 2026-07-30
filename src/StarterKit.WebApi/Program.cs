@@ -32,7 +32,7 @@ try
 
     app.UseWebSockets();
 
-    app.MapEndpoints();
+    app.MapEndpoints(builder.Configuration.GetValue<bool>("AllowAnonymous"));
 
     app.Run();
 }
@@ -45,4 +45,5 @@ finally
 {
     Log.Information("Shut down complete.");
     Log.CloseAndFlush();
+    AppLogging.CloseAndFlush();
 }

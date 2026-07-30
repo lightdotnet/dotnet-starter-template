@@ -14,6 +14,7 @@ using StarterKit.Infrastructure.Services;
 using StarterKit.Shared;
 using StarterKit.Shared.Authorization;
 using System.Reflection;
+using StarterKit.Infrastructure.HealthChecks;
 
 namespace StarterKit.WebApi;
 
@@ -39,7 +40,7 @@ public static class ConfigureExtensions
         services.AddFileGenerator();
 
         services.AddSharedInfrastructure();
-        services.AddHealthChecks();
+        services.AddHealthChecksService();
         services.AddCorsPolicy(configuration);
 
         services.AddHttpContextAccessor();
@@ -64,11 +65,7 @@ public static class ConfigureExtensions
             .UseAuthorization()
             .UseSwagger();
 
-        app.MapHealthChecks("/hc", new HealthCheckOptions()
-        {
-            Predicate = _ => true,
-            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        });
+        app.MapHealthChecksEndpoint();
 
         app.UseModules<AppModule>(assemblies);
 
@@ -86,25 +83,5 @@ public static class ConfigureExtensions
         endpoints.MapModuleEndpoints<AppModule>(assemblies);
 
         return app;
-    }
-
-    public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder builder)
-    {
-        var isDebug = false;
-
-#if DEBUG
-        //isDebug = true;
-#endif
-
-        if (isDebug)
-        {
-            builder.MapControllers().AllowAnonymous();
-        }
-        else
-        {
-            builder.MapControllers().RequireAuthorization();
-        }
-
-        return builder;
     }
 }
