@@ -5,7 +5,7 @@ using StarterKit.Identity.Api.Data;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Infrastructure;
 using StarterKit.Persistence;
-using StarterKit.Persistence.Migrations;
+using StarterKit.Persistence.MigrationSupport;
 using System.Reflection;
 
 namespace MSSQL;

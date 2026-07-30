@@ -2,7 +2,7 @@ using StarterKit.Shared.Authorization;
 using StarterKit.Shared.Constants;
 using System.Security.Claims;
 
-namespace StarterKit.Persistence.Migrations;
+namespace StarterKit.Persistence.MigrationSupport;
 
 /// <summary>
 /// System identity used when running EF Core migrations outside an HTTP request, where no JWT/claims exist.

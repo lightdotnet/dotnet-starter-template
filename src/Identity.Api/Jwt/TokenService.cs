@@ -10,7 +10,7 @@ namespace StarterKit.Identity.Api.Jwt;
 
 internal class TokenService(
     IOptions<JwtOptions> jwtOptions,
-    JwtTokenMananger jwtTokenMananger,
+    JwtTokenManager jwtTokenMananger,
     IActiveDirectoryService domainService) : ITokenService
 {
     private readonly UserManager<User> _userManager = jwtTokenMananger.UserManager;

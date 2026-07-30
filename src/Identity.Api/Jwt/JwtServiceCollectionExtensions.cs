@@ -22,7 +22,7 @@ public static class JwtServiceCollectionExtensions
             ClaimTypeConstants.Role);
 
         // services
-        services.AddScoped<JwtTokenMananger>();
+        services.AddScoped<JwtTokenManager>();
         services.AddTransient<ITokenService, TokenService>();
     }
 }

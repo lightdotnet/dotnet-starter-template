@@ -3,7 +3,7 @@ using StarterKit.Identity.Contracts;
 
 namespace StarterKit.Identity.Api.Services;
 
-public static class QueryExtensions
+public static class IdentityClaimQueryExtensions
 {
     public static Task<bool> CheckUserHasClaimAsync(this IdentityDbContext context, string userId, string claimType, string claimValue)
     {

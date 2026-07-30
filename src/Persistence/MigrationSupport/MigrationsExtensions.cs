@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using StarterKit.Shared;
 using System.Reflection;
 
-namespace StarterKit.Persistence.Migrations;
+namespace StarterKit.Persistence.MigrationSupport;
 
 public static class MigrationsExtensions
 {

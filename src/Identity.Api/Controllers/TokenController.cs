@@ -11,7 +11,7 @@ namespace StarterKit.Identity.Api.Controllers;
 [Route("api/v{version:apiVersion}/oauth")]
 public class TokenController(
     ITokenService tokenService,
-    JwtTokenMananger jwtTokenMananger) : ApiControllerBase
+    JwtTokenManager jwtTokenMananger) : ApiControllerBase
 {
     [AllowAnonymous]
     [HttpPost("token/get")]

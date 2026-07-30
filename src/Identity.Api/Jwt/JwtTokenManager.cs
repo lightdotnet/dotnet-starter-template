@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace StarterKit.Identity.Api.Jwt;
 
-public class JwtTokenMananger(
+public class JwtTokenManager(
     UserManager<User> userManager,
     RoleManager<Role> roleManager,
     AppIdentityDbContext context)

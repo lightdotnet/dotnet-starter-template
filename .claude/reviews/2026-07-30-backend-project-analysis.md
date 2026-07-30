@@ -28,8 +28,17 @@ No circular references. Dependency direction is sound at the project level.
 - Drop the CQRS wrapper — publish `UserCreatedEvent` directly from `UserService.CreateAsync`; or
 - Commit to CQRS for all Identity writes and demote services to internal/read-only helpers.
 
-### D2. Soft-delete is wired up but disabled — likely a real bug, not just an inconsistency
-`AppIdentityDbContext` calls `AuditEntries(..., enableSoftDelete: false)`, so `User.Deleted`/`DeletedBy` (from `ISoftDelete`) are never populated and `UserManager.DeleteAsync` issues a **hard delete**. But `TokenService.CheckInvalidUser` actively checks `user.Deleted != null` to reject logins — dead logic that will never trigger. Decide: enable soft-delete for `AppIdentityDbContext`, or remove `ISoftDelete`/the columns/the dead check from `User`/`TokenService`. Left as-is, this is a data-loss risk masquerading as a safety check that doesn't actually run.
+### D2. Soft-delete is wired up but never actually happens — audit-trail loss, not a login-bypass risk
+**Corrected 2026-07-30**: this was originally framed as "a deleted user could still log in" — that's wrong and worth retracting explicitly. `TokenService.GetTokenAsync`/`RefreshTokenAsync` both short-circuit on `user is null` *before* calling `CheckInvalidUser` (`TokenService.cs:28,81`), so once `UserManager.DeleteAsync` hard-deletes the row, `FindByNameAsync`/`FindByIdAsync` already return `null` and login/refresh is rejected regardless of the `Deleted` field. `CheckInvalidUser`'s `user.Deleted != null` check is dead code (unreachable in practice), but that's incidental — it's not a security hole.
+
+The actual cost of disabling soft-delete (`AppIdentityDbContext` calls `AuditEntries(..., enableSoftDelete: false)`):
+- `User.Delete()` (`Entities/User.cs:55-65`) anonymizes the row first — nulls `UserName`/`Email`/`PhoneNumber`/`FirstName`/`LastName`/`PasswordHash`, locks `Status` — clearly written for a soft-delete-and-anonymize pattern (the kind used for GDPR-style "forget me" while keeping a tombstone). But `UserService.DeleteAsync` (`Services/UserService.cs:170-186`) calls `user.Delete()` and then immediately `userManager.DeleteAsync(user)`, which hard-deletes that same just-anonymized row in the same operation — so the anonymization work is wasted; the row is gone either way.
+- Once the row is gone, anything elsewhere that stamped `CreatedBy`/`LastModifiedBy`/a `UserId` foreign key with this user's Id (e.g. `JwtTokens.UserId`, or audit fields on any other module's entities once they exist) becomes an orphaned reference with no way to resolve back to even an anonymized tombstone — e.g. an audit log showing "created by `<UserId>`" can no longer look up who that was.
+- `User.Deleted`/`DeletedBy` end up permanently `null` for every row that still exists — dead schema. Any future admin/audit feature that queries `WHERE Deleted IS NOT NULL` to list deleted users will always get zero rows, silently.
+
+Decide: flip `enableSoftDelete: true` in `AppIdentityDbContext.SaveChanges[Async]` (keeps the anonymized tombstone row; `Deleted`/`DeletedBy` become meaningful; `TokenService`'s check then becomes the actual enforcement point, since the row still exists for an ID-based lookup) — or, if hard delete is genuinely intended, remove `ISoftDelete`, the `Deleted`/`DeletedBy` columns, and the now-pointless check from `User`/`TokenService` so the code stops implying a mechanism that isn't really there.
+
+If soft-delete is enabled: `TrackingExtensions.AuditEntries` (`Persistence/Extensions/TrackingExtensions.cs:19-31`) already does the "who and when" stamping automatically — for any tracked `ISoftDelete` entity in `EntityState.Deleted`, it sets `Entity.Deleted = auditTime` and `Entity.DeletedBy = userId` and flips the entry to `EntityState.Modified` so EF Core issues an `UPDATE` instead of a `DELETE`. Since `AppIdentityDbContext` already passes `currentUser.UserId`/`clock.AuditTime` into this call today (just with the flag off), turning this on is a **one-line change** (`false` → `true`), not new logic to write.
 
 ---
 
@@ -46,16 +55,17 @@ No circular references. Dependency direction is sound at the project level.
 
 ## Naming / structure cleanup
 
-> N1 (below) was proposed as a rename but has been decided against — see note under the table.
-
-| # | Current | Proposed | Why |
-|---|---|---|---|
-| N2 | `Identity.Api/Jwt/JwtTokenMananger.cs` (class itself is `JwtTokenMananger`) | `JwtTokenManager.cs` / `JwtTokenManager` | Typo in both filename and type name |
-| N3 | `Identity.Api/Extensions/IdentityResultExtension.cs` (class inside is already plural `IdentityResultExtensions`) | `IdentityResultExtensions.cs` | File name doesn't match the class it contains |
-| N4 | `Persistence/Migrations/` (runtime helpers: `MigrationsExtensions.cs`, `MigratorCurrentUser.cs`) sits next to the unrelated top-level `src/Migrations/` (design-time EF projects) | `Persistence/MigrationSupport/` or `Persistence/DesignTimeSupport/` | Same word, two unrelated concepts — actively confusing when navigating the tree |
-| N5 | `Identity.Api/Services/QueryExtensions.cs` vs `Persistence/Extensions/QueryableResultExtensions.cs` — not actual duplicates (different responsibilities: Identity-specific claim-union logic vs generic paging/result helpers), but the near-identical names invite confusion | `IdentityClaimQueryExtensions.cs` | Disambiguate by name since responsibilities are genuinely different |
+> N1 was proposed as a rename but has been decided against. N2–N5 have all been applied and verified in code — nothing open in this section.
 
 **N1 — decided, kept as-is**: `src/Identity.Api` stays named `Identity.Api`, not renamed to `Identity`. The `.Api` suffix is intentional: `Identity` is a deliberate future candidate for extraction into an independent microservice, and keeping the `.Api` name now means the standalone service's own API project would already have the right name, avoiding a rename later. This is now captured in [ARCHITECTURE.md § Backend — Module Structure Convention](../ARCHITECTURE.md#backend--module-structure-convention) as an explicit naming option (`<Module>` by default, `<Module>.Api` for extraction candidates).
+
+**N3 — done**: `Identity.Api/Extensions/IdentityResultExtension.cs` → `IdentityResultExtensions.cs`; class inside already matched (`IdentityResultExtensions`). Verified in code.
+
+**N4 — done**: `Persistence/Migrations/` → `Persistence/MigrationSupport/`; namespace updated to `StarterKit.Persistence.MigrationSupport` consistently everywhere it's consumed, including `src/Migrations/MSSQL` and `src/Migrations/Sqlite` (outside this analysis's scope, but needed updating since they referenced the old namespace). No remaining references to the old namespace. Verified in code.
+
+**N5 — done**: `Identity.Api/Services/QueryExtensions.cs` → `IdentityClaimQueryExtensions.cs`, and the class itself renamed from `QueryExtensions` to `IdentityClaimQueryExtensions` to match (this second step was initially missed, then fixed). No remaining references to the old class name. Verified in code.
+
+**N2 — done**: `Identity.Api/Jwt/JwtTokenMananger.cs` → `JwtTokenManager.cs`, class renamed to `JwtTokenManager`. All three consumers (`Controllers/TokenController.cs`, `Jwt/JwtServiceCollectionExtensions.cs`, `Jwt/TokenService.cs`) updated — no remaining references to the old typo'd name anywhere in `src/`. Verified in code.
 
 ## Dependency / package hygiene
 
@@ -69,14 +79,14 @@ No circular references. Dependency direction is sound at the project level.
 
 ## Housekeeping
 
-- `src/Identity.Api/obj/` and `src/Identity.Contracts/obj/` contain stale build artifacts referencing pre-refactor assembly names (`Identity.Core`, `Identity.EntityFrameworkCore`, `StaterKit.Identity.EntityFrameworkCore` — note the "StaterKit" typo). Not source, but run `dotnet clean` (or delete `bin`/`obj`) before doing the renames above so stale artifacts don't cause confusion mid-refactor.
-- `AppIdentityDbContext` cannot inherit `Persistence/Context/BaseDbContext.cs` (it must derive from `IdentityDbContext<...>`), so it re-applies the Sqlite `DateTimeOffset` fix manually via the shared extension method instead. This is a reasonable, unavoidable exception — worth one line in `ARCHITECTURE.md` documenting it as a known exception rather than leaving it as silent drift once docs are next synced.
-- `JwtToken` extends the plain vendor `Entity` base type instead of the shared `AuditableEntity` convention used elsewhere — fine if tokens intentionally carry no audit trail, but worth an explicit decision rather than an accident.
+- **Still open, verified 2026-07-30**: `src/Identity.Api/obj/` and `src/Identity.Contracts/obj/` still contain stale build artifacts referencing pre-refactor assembly names (`Identity.Core.AssemblyInfo.cs`, `StaterKit.Identity.EntityFrameworkCore.*` — note the "StaterKit" typo). Run `dotnet clean` (or delete `bin`/`obj`) to clear these.
+- **Done**: `AppIdentityDbContext`'s inability to inherit `Persistence/Context/BaseDbContext.cs` (must derive from `IdentityDbContext<...>` instead) is now documented as a known/accepted exception in `ARCHITECTURE.md`'s Data Access table.
+- **Still open, verified 2026-07-30**: `JwtToken` still extends the plain vendor `Entity` base type, unchanged from the original finding — no decision made yet on whether it should carry an audit trail via `AuditableEntity`.
 
 ---
 
 ## Explicitly out of scope here
 
 - `src/Migrations/**` (MSSQL/Sqlite/PostgreSQL design-time projects) — excluded per request.
-- No code has been changed yet. N1 has been decided (kept as-is, see note above) — everything else, especially P1–P6, is wide-reaching and should be treated as its own reviewed change, not a drive-by edit.
-- `.claude/PROJECT.md` and `.claude/ARCHITECTURE.md` have since been updated (2026-07-30, same day) with the module-structure convention and current verified facts (`Persistence`, `Identity.Contracts`, `Identity.Api`, `StarterKit.WebApi`). Everything else in this file (D1, D2, P1–P6, N2–N5, dependency hygiene, housekeeping) is still pending.
+- All of N1–N5 are resolved (see notes above, verified in code 2026-07-30). Still pending: **D1**, **D2** (decisions), **P1–P6** (correctness/performance — wide-reaching, treat as their own reviewed change, not a drive-by edit), dependency/package hygiene, and 2 of 3 housekeeping items (stale `bin`/`obj`, `JwtToken`/`AuditableEntity` decision).
+- `.claude/PROJECT.md` and `.claude/ARCHITECTURE.md` have since been updated (2026-07-30, same day) with the module-structure convention and current verified facts (`Persistence`, `Identity.Contracts`, `Identity.Api`, `StarterKit.WebApi`).

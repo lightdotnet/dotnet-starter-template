@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using StarterKit.Identity.Api.Entities;
-using StarterKit.Persistence.Migrations;
+using StarterKit.Persistence.MigrationSupport;
 
 namespace StarterKit.Identity.Api.Data;
 
