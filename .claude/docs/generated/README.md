@@ -35,4 +35,4 @@ docs/generated/
 
 Each generated file carries a `<!-- manual -->`-marked section (see the templates) that must be preserved verbatim during any sync.
 
-Populated so far: `backend/overview.md`, `backend/architecture.md`, `backend/coding-conventions.md`, `backend/dependency-graph.md`, `backend/development-guide.md` — scope: `src/Shared`, `src/Infrastructure`, `tests/Framework.Tests` (no modules/host/clients yet, generated 2026-07-29). Everything else remains unpopulated until requested for that scope.
+Populated so far: `backend/overview.md`, `backend/architecture.md`, `backend/coding-conventions.md`, `backend/dependency-graph.md`, `backend/development-guide.md` — scope: `src/Shared`, `src/Infrastructure`, `tests/Framework.Tests` (no modules/host/clients yet, generated 2026-07-29). `clients/admin/overview.md`, `clients/admin/architecture.md`, `clients/admin/coding-conventions.md`, `clients/admin/dependency-graph.md`, `clients/admin/development-guide.md` — scope: `clients/admin` UI shell only, no backend integration yet (generated 2026-07-31). Everything else remains unpopulated until requested for that scope.

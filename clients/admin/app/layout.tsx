@@ -1,0 +1,38 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/providers/theme-provider";
+import { AccentColorProvider } from "@/hooks/use-accent-color";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import "./globals.css";
+
+const inter = Inter({
+  variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Admin Dashboard",
+  description: "Admin dashboard for the ModularMonolith starter kit.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${inter.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider>
+          <AccentColorProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </AccentColorProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

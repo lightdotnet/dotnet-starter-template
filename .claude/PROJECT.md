@@ -7,7 +7,7 @@
 - **Type**: Starter template monorepo — C#/.NET backend (Modular Monolith) + one or more frontend clients.
 - **Backend**: `src/` — ASP.NET Core Web API, API-only MVC controllers.
 - **Clients**: `clients/<app-name>/` — one or more apps; the primary one is Next.js, TypeScript/React.
-- **Status**: First backend module (`Identity`) and composition-root host (`StarterKit.WebApi`) built; `clients/` not started yet — verify current state before describing further additions as built.
+- **Status**: First backend module (`Identity`) and composition-root host (`StarterKit.WebApi`) built. First client app (`clients/admin/`, a Next.js admin dashboard) scaffolded as a UI shell — no calls to `src/Identity.Api` yet. Verify current state before describing further additions as built.
 
 ## Backend Modules
 
@@ -37,7 +37,7 @@
 
 | App | Path | Responsibility | Stack | Status |
 |---|---|---|---|---|
-| _unknown_ | | | | not yet analyzed |
+| admin | `clients/admin/` | Admin dashboard — UI shell only (design-token system, dark mode, reusable component library, collapsible/responsive sidebar + full-width topbar). No calls to `src/Identity.Api` yet — all data on the one existing page (`/`) is mock data. | Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS v4, shadcn-generated primitives on `radix-ui` + `class-variance-authority`, `next-themes`, pnpm | Scaffolded — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md) |
 
 ## Cross-Cutting Concerns
 
@@ -59,11 +59,11 @@
 
 ## Open Questions / Gaps
 
-- No `clients/` app yet.
+- `clients/admin/` is UI-shell-only — real auth/data wiring to `src/Identity.Api` (API client layer, CORS/env config, token handling) hasn't been designed yet.
 - Module-structure convention is now decided (see [ARCHITECTURE.md](ARCHITECTURE.md#backend--module-structure-convention)), but `Identity` — the only module built — predates it and doesn't fully conform yet (naming, internal layering discipline). Treat as pending cleanup, not a second convention to reconcile.
 - Cross-module boundary enforcement (via `<Module>.Contracts`) is unverified in practice — only one module exists so far.
 - `MigrationsExtensions.AddMigrationsServices` registers mediator handlers via `Assembly.GetExecutingAssembly()` (now the `Persistence` assembly) — worth re-checking once real module assemblies with domain-event handlers exist, since it won't pick those up automatically.
 - Several correctness/naming/dependency-hygiene findings from the 2026-07-30 four-agent review are still open — see [reviews/2026-07-30-backend-project-analysis.md](reviews/2026-07-30-backend-project-analysis.md) for the full prioritized list (not duplicated here to avoid two copies drifting apart).
 
 ---
-_Last updated: 2026-07-30 — module structure convention adopted; scope now covers `src/Shared`, `src/Infrastructure`, `src/Persistence`, `src/Identity.Contracts`, `src/Identity.Api`, `src/StarterKit.WebApi`, `tests/Framework.Tests`; still no `clients/`._
+_Last updated: 2026-07-31 — added first client app (`clients/admin/`, UI-shell only); backend scope unchanged (`src/Shared`, `src/Infrastructure`, `src/Persistence`, `src/Identity.Contracts`, `src/Identity.Api`, `src/StarterKit.WebApi`, `tests/Framework.Tests`)._
