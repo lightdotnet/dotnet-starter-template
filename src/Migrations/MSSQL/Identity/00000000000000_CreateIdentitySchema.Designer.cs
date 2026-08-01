@@ -118,6 +118,9 @@ namespace MSSQL.Identity
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("Created")
+                        .HasDatabaseName("UserCreatedIndex");
+
                     b.ToTable(Tables.Users, DefaultSchema.Schema);
                 });
 

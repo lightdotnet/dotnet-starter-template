@@ -260,7 +260,13 @@ namespace MSSQL.Identity
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: $"IX_{Tables.UserSessions}",
+                name: "UserCreatedIndex",
+                table: Tables.Users,
+                schema: DefaultSchema.Schema,
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: $"IX_{Tables.UserSessions}_UserId",
                 table: Tables.UserSessions,
                 schema: DefaultSchema.Schema,
                 column: "UserId");
