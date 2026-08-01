@@ -2,88 +2,135 @@
 
 ## Layering
 
-Observed folder organization (verified via directory listing):
+Observed folder organization (verified via directory listing) — everything now lives under `clients/admin/src/` (previously at `clients/admin/` root):
 
 ```text
-app/                      routes (App Router) — layout.tsx, globals.css, (dashboard)/{layout.tsx,page.tsx}
-components/
-  ui/                     shadcn-CLI-generated primitives (owned source, not a runtime UI-kit dependency)
-  layout/                 app chrome: topbar, sidebar, sidebar-nav-item, brand, breadcrumbs, accent-color-picker, theme-toggle, user-menu
-  shared/                 cross-feature reusable pieces (currently just search-box.tsx)
-features/
-  dashboard/              feature-scoped: stat-card.tsx, users-table.tsx, sample-data.ts
-hooks/                    use-sidebar, use-accent-color, use-scrolled, use-has-mounted
-providers/                theme-provider.tsx (next-themes wrapper)
-constants/                nav-items.ts
-types/                    nav.ts
-lib/                      utils.ts (cn helper)
+src/
+  app/                      routing only — layout.tsx, globals.css, login/page.tsx, (dashboard)/{layout.tsx,page.tsx,user-profile/page.tsx}
+  features/
+    auth/                   api/{login,refresh-token,login-action}.ts, components/{login-page,login-form}.tsx, index.ts
+    user-profile/           api/{get-current-user,list-sessions,revoke-session,resolve-session}.ts, components/user-profile-page.tsx, types/user-session.ts, index.ts
+    dashboard/              api/sample-data.ts (mock, not a backend call), components/{stat-card,users-table,dashboard-page}.tsx, index.ts
+    users/                  api/*.ts (8 endpoint files, API-only — no components/, no UI consumer), index.ts
+    roles/                  api/*.ts (5 endpoint files, API-only — no UI consumer), types/role.ts, index.ts
+  components/
+    ui/                     shadcn-CLI-generated primitives (24 files)
+    layout/                 topbar, sidebar, sidebar-nav-item, brand, breadcrumbs, user-menu, app-shell
+    theme/                  theme-provider, accent-color-provider, theme-toggle, accent-color-picker, use-has-mounted, index.ts (barrel)
+    shared/                 search-box.tsx
+  hooks/                    use-sidebar.tsx, use-scrolled.ts
+  lib/
+    server/                 config.ts, http.ts, call-guard.ts, session-cookie.ts, session.ts
+    shared/                 utils.ts, dedupe-claims.ts, user-display.ts
+  constants/                nav-items.ts
+  types/                    api.ts, nav.ts, session.ts, token.ts, user.ts
+  proxy.ts                  Next.js 16 convention file (middleware-equivalent)
 ```
 
-This is a route → layout-chrome → feature-component → primitive layering: `app/*` pages compose `features/*` and `components/ui/*`; `components/layout/*` compose `components/ui/*` plus `hooks/*`/`constants/*`/`types/*`; `components/ui/*` are leaf primitives depending only on `lib/utils` and Radix/lucide.
+This is now a **feature-folder** layering, replacing the earlier route → layout-chrome → feature-component → primitive-only structure: `app/*` pages are pure re-exports from a feature's public API; `features/<name>/` owns its own `api/`, `components/`, and (when a type has exactly one consumer) `types/`, each exposed through an `index.ts` barrel; `components/layout/*` (app chrome) and `components/theme/*` compose `components/ui/*` plus `hooks/*`/`lib/shared/*`/`constants/*`/`types/*`; `components/ui/*` remains the leaf primitive layer.
 
 ## Dependency Direction
 
-Verified via actual `import` statements in the files read:
+Verified via actual `import` statements:
 
 ```text
-app/layout.tsx        -> providers/theme-provider, hooks/use-accent-color, components/ui/tooltip
-app/(dashboard)/layout.tsx -> hooks/use-sidebar, components/layout/{sidebar,topbar}
-app/(dashboard)/page.tsx   -> components/ui/card, features/dashboard/{stat-card,users-table,sample-data}
+src/proxy.ts                       -> lib/server/session-cookie (constant only, no next/headers — edge-safe)
+src/app/layout.tsx                 -> components/theme (ThemeProvider, AccentColorProvider), components/ui/tooltip
+src/app/login/page.tsx             -> features/auth (LoginPage)
+src/app/(dashboard)/layout.tsx     -> components/layout/app-shell, features/user-profile (resolveSession)
+src/app/(dashboard)/page.tsx       -> features/dashboard (DashboardPage)
+src/app/(dashboard)/user-profile/page.tsx -> features/user-profile (UserProfilePage)
 
-components/layout/topbar.tsx      -> lib/utils, hooks/{use-scrolled,use-sidebar}, components/ui/{button,badge},
-                                      components/layout/{breadcrumbs,brand}, components/shared/search-box,
-                                      components/layout/{theme-toggle,accent-color-picker,user-menu}
-components/layout/sidebar.tsx     -> lib/utils, hooks/use-sidebar, components/layout/sidebar-nav-item,
-                                      constants/nav-items, components/ui/sheet
-components/layout/sidebar-nav-item.tsx -> lib/utils, hooks/use-sidebar, types/nav
-components/layout/breadcrumbs.tsx -> components/ui/breadcrumb, constants/nav-items, types/nav
-components/layout/user-menu.tsx   -> components/ui/{avatar,button,dropdown-menu} (no external data — MOCK_USER inline)
-components/layout/accent-color-picker.tsx -> components/ui/{button,dropdown-menu}, hooks/use-accent-color
-components/layout/theme-toggle.tsx        -> next-themes, hooks/use-has-mounted, components/ui/{button,dropdown-menu}
+components/layout/app-shell.tsx    -> hooks/use-sidebar, components/layout/{sidebar,topbar}
+components/layout/topbar.tsx       -> lib/shared/utils, hooks/{use-scrolled,use-sidebar}, components/ui/{button,badge},
+                                       components/layout/{breadcrumbs,brand,user-menu}, components/shared/search-box,
+                                       components/theme (ThemeToggle, AccentColorPicker)
+components/layout/sidebar.tsx      -> lib/shared/utils, hooks/use-sidebar, components/layout/sidebar-nav-item,
+                                       constants/nav-items, components/ui/sheet
+components/layout/sidebar-nav-item.tsx -> lib/shared/utils, hooks/use-sidebar, types/nav
+components/layout/breadcrumbs.tsx  -> components/ui/breadcrumb, constants/nav-items, types/nav
+components/layout/user-menu.tsx    -> components/ui/{avatar,button,dropdown-menu}, lib/shared/user-display, types/user
+                                       (now takes a `user: UserDto | null` prop — no more hardcoded MOCK_USER)
 
-features/dashboard/stat-card.tsx   -> components/ui/card, lib/utils, features/dashboard/sample-data (types)
-features/dashboard/users-table.tsx -> components/ui/{badge,table,pagination,avatar,empty}, features/dashboard/sample-data
+components/theme/theme-toggle.tsx        -> next-themes, ./use-has-mounted, components/ui/{button,dropdown-menu}
+components/theme/accent-color-picker.tsx -> components/ui/{button,dropdown-menu}, ./accent-color-provider
 
-components/ui/*  -> lib/utils, radix-ui (unified package), class-variance-authority, lucide-react
-                     (button.tsx additionally -> components/ui/spinner)
+features/auth/index.ts              -> ./components/login-page, ./api/login, ./api/refresh-token
+features/auth/components/login-page.tsx  -> components/ui/card, ./login-form
+features/auth/components/login-form.tsx  -> components/ui/{button,input,label,alert}, features/auth/api/login-action
+features/auth/api/login-action.ts   -> "use server"; features/auth/api/login, features/user-profile (getCurrentUser),
+                                        lib/shared/dedupe-claims, lib/server/session-cookie, types/session
+features/auth/api/login.ts          -> lib/server/http, lib/server/call-guard, types/{api,token}
+
+features/user-profile/index.ts      -> ./components/user-profile-page, ./api/{resolve-session,get-current-user,list-sessions,revoke-session}, ./types/user-session
+features/user-profile/components/user-profile-page.tsx -> components/ui/{card,badge,separator,avatar,alert}, qrcode,
+                                        features/user-profile/api/resolve-session, lib/shared/{dedupe-claims,user-display}
+features/user-profile/api/resolve-session.ts -> lib/server/session (getSession), ./get-current-user, types/{api,session,user}
+features/user-profile/api/get-current-user.ts -> lib/server/http, lib/server/call-guard, types/{api,user}
+features/user-profile/api/{list-sessions,revoke-session}.ts -> lib/server/http, lib/server/call-guard, ./types/user-session (list)
+
+features/dashboard/index.ts         -> ./components/dashboard-page
+features/dashboard/components/dashboard-page.tsx -> components/ui/card, ./stat-card, ./users-table, features/dashboard/api/sample-data
+features/dashboard/components/{stat-card,users-table}.tsx -> components/ui/*, lib/shared/utils, features/dashboard/api/sample-data (mock data, no backend call)
+
+features/users/*, features/roles/*  -> lib/server/http, lib/server/call-guard, types/{api,user} / features/roles/types/role
+                                        (no importer outside their own feature — no UI consumer yet)
+
+lib/server/session.ts               -> next/headers (cookies), lib/server/session-cookie, types/session
+lib/server/http.ts                  -> lib/server/config (getApiBaseUrl)
+components/ui/*                     -> lib/shared/utils, radix-ui, class-variance-authority, lucide-react
+                                        (button.tsx additionally -> components/ui/spinner)
 ```
 
-Direction is one-way: `components/ui/*` never imports from `components/layout/*` or `features/*`; `features/*` and `components/layout/*` only import from `components/ui/*`, `hooks/*`, `lib/*`, `constants/*`, `types/*` — never from each other's sibling feature folders (there is currently only one feature, `dashboard`, so cross-feature isolation is unverified in practice).
+Direction is still one-way: `components/ui/*` never imports from `components/layout/*`, `components/theme/*`, or `features/*`. Cross-feature imports go through a feature's `index.ts` barrel, not its internals — e.g. `features/auth/api/login-action.ts` imports `getCurrentUser` from `@/features/user-profile` (the barrel), not from `@/features/user-profile/api/get-current-user` directly. `features/dashboard`, `features/users`, and `features/roles` are not imported by any other feature.
 
 ## Key Design Patterns
 
-- **Context-provider-per-concern for client state**: `SidebarProvider`/`useSidebar` (`hooks/use-sidebar.tsx`), `AccentColorProvider`/`useAccentColor` (`hooks/use-accent-color.tsx`), and `next-themes`' own provider (wrapped in `providers/theme-provider.tsx`) each own one slice of persisted UI state, each exposing a single custom hook and throwing if used outside its provider.
-- **Owned, CLI-generated UI primitives** (not a runtime component-library dependency): `components/ui/*` was generated via the `shadcn` CLI (`components.json`, style `"radix-nova"`) on top of the unified `radix-ui` package and `class-variance-authority`. Components follow a consistent `data-slot="<name>"` attribute convention plus `cva()`-driven `variant`/`size` props (seen in `button.tsx`, `badge.tsx`, `card.tsx`, `avatar.tsx`, `empty.tsx`). `components/ui/button.tsx` has been hand-modified past what the CLI would generate: it adds a `loading` prop (renders `Spinner` + swaps `aria-busy`/`disabled`) and a `cursor-pointer` utility class baked into `buttonVariants` — a deliberate deviation to track if the component is ever regenerated via the CLI.
-- **Single-CSS-variable theming**: `--primary` (defined in `app/globals.css`) is the one variable that drives button backgrounds, focus rings, and active-nav-item text color. Accent color presets (`:root[data-accent="blue"]`, `"violet"`, `"rose"`, `"orange"`, `"amber"`; green is the unattributed default) each override only `--primary` for light and (via `.dark[data-accent="..."]`) dark mode — every other themed token derives from it rather than being duplicated per accent.
-- **Runtime accent swap via DOM attribute + localStorage**: `AccentColorProvider` sets `data-accent` on `document.documentElement` and persists the choice to `localStorage` (`admin.accent-color`); `SidebarProvider` does the same for sidebar hidden/expanded state (`admin.sidebar.hidden`, `admin.sidebar.expanded`).
-- **Hydration-safe browser-state restoration**: because `localStorage` can't be read during SSR/first paint, both `SidebarProvider` and `AccentColorProvider` initialize with a default value, then restore the persisted value inside a `useEffect` gated by a `hydrated` flag (explicitly commented as intentional, with `eslint-disable react-hooks/set-state-in-effect`). `hooks/use-has-mounted.ts` (`useSyncExternalStore`) provides the same guard for `ThemeToggle`'s icon, which otherwise depends on `next-themes`' client-only `theme` value.
-- **Mobile drawer closes on route change via render-time state adjustment** (not an effect): `SidebarProvider` compares `usePathname()` against a `prevPathname` state value during render and closes the mobile `Sheet` if it changed — the code cites the React docs' "adjusting state when a prop changes" pattern explicitly in a comment.
-- **Dark mode via `next-themes`**, `attribute="class"`, `defaultTheme="system"`, `enableSystem`, `disableTransitionOnChange` — `.dark` class toggled on `<html>`; `app/layout.tsx` sets `suppressHydrationWarning` on `<html>` to avoid a hydration warning from the attribute being set client-side.
+- **Feature-folder + barrel-export convention**: each `features/<name>/` owns `api/` (one file per backend endpoint), `components/`, optionally `types/` (only for types with exactly one consumer — `features/roles/types/role.ts`, `features/user-profile/types/user-session.ts`), and an `index.ts` that is the only sanctioned import surface for other features or `app/*`.
+- **Routing files are pure re-exports**: every `app/**/page.tsx` is a one-line `export { X as default } from "@/features/<name>";` — no logic lives in `app/`.
+- **Server-only API layer, one function per endpoint file**: `lib/server/http.ts` (`requestJson`/`requestVoid`) is the single fetch wrapper; every `features/*/api/*.ts` file wraps exactly one backend call and returns a normalized result via `lib/server/call-guard.ts`'s `guardCall`/`guardResponseCall`/`guardRawCall` (chosen based on whether the backend endpoint returns a `Result<T>` envelope, a bare `ApiResponse`, or a raw value/array).
+- **Cookie session + server-side session resolution, no client cache**: `lib/server/session.ts` reads the `admin_session` cookie; `features/user-profile/api/resolve-session.ts` composes that with a live `getCurrentUser()` call. Kept in two layers deliberately — `getSession()` has no feature dependency, while `resolveSession()` needs `user-profile`'s API, so it lives in the feature instead of `lib/server`.
+- **Edge-safe cookie name constant**: `lib/server/session-cookie.ts` exports only the `SESSION_COOKIE_NAME` string with no `next/headers` import, specifically so `proxy.ts` (which runs on the edge runtime) can import it without pulling in the Node-only cookie-reading API.
+- **Context-provider-per-concern for client state**: `SidebarProvider`/`useSidebar`, `AccentColorProvider`/`useAccentColor`, and `next-themes`' provider (wrapped in `components/theme/theme-provider.tsx`) each own one slice of persisted UI state via a throwing custom hook — unchanged pattern, relocated files.
+- **Owned, CLI-generated UI primitives**: `components/ui/*` (24 files, style `"radix-nova"`) still follows the `data-slot="<name>"` + `cva()` convention. `button.tsx` retains its hand-modification beyond CLI output: a `loading` prop (renders `Spinner`, sets `aria-busy`/`disabled`) plus a `cursor-pointer` utility baked into `buttonVariants`.
+- **Single-CSS-variable theming** and **runtime accent swap via DOM attribute + localStorage**: unchanged from before — `--primary` drives themed surfaces, `AccentColorProvider` sets `data-accent` on `<html>`.
+- **Hydration-safe browser-state restoration**: unchanged pattern (`hydrated` flag + `useEffect`, `eslint-disable react-hooks/set-state-in-effect`) in `SidebarProvider` and `AccentColorProvider`; `components/theme/use-has-mounted.ts` (`useSyncExternalStore`) still guards `ThemeToggle`.
+- **Mobile drawer closes on route change via render-time state adjustment**: unchanged, still in `hooks/use-sidebar.tsx`.
 
 ## Shared Kernel / Common Building Blocks Used
 
-- `components/ui/*` — the app's own primitive layer (not shared with any sibling app; `clients/admin` is the only client app in the repo).
-- `lib/utils.ts` (`cn`) — used by nearly every component in `components/ui/*`, `components/layout/*`, and `features/dashboard/*` for conditional/merged Tailwind classes.
-- `hooks/*` — `use-sidebar`, `use-accent-color`, `use-scrolled`, `use-has-mounted` are cross-cutting building blocks consumed by layout components.
-- No package or code is shared with another client app — `clients/` currently has only `admin`.
+- `components/ui/*` — the app's own primitive layer.
+- `lib/shared/utils.ts` (`cn`), `lib/shared/dedupe-claims.ts`, `lib/shared/user-display.ts` — cross-cutting helpers consumed by 2+ features or by layout chrome (moved out of a flat `lib/utils.ts` into `lib/shared/` alongside these new helpers).
+- `lib/server/*` — the server-only building blocks (`http.ts`, `call-guard.ts`, `config.ts`, `session.ts`, `session-cookie.ts`) every feature's `api/` layer is built on.
+- `hooks/*`, `components/theme/*` — cross-cutting building blocks consumed by layout components.
+- No package or code is shared with another client app — `clients/` still contains only `admin`.
 
 ## Module/Route Boundaries
 
-Only one route group exists: `(dashboard)`, containing the single route `/`. There are no other route groups or route-level boundaries to evaluate yet. `constants/nav-items.ts` declares additional nav targets (`/identity`, `/identity/users`, `/identity/roles`, `/settings`) that have no corresponding routes under `app/` — these represent planned/future route boundaries, not currently enforced ones.
+Two route groups/areas now exist:
+- `(dashboard)` — wraps `/` and `/user-profile` with `resolveSession()` + `AppShell` (top bar, sidebar).
+- `login` (ungrouped) — `/login`, rendered under the root layout only, no `AppShell`/session resolution.
+
+`constants/nav-items.ts` still declares `/identity`, `/identity/users`, `/identity/roles`, `/settings` with no corresponding routes — unchanged planned/future boundaries, now backed by API-only `features/users`/`features/roles` scaffolding but still no pages.
+
+Feature isolation is enforced by convention (barrel-only cross-feature imports), verified in the one place it's exercised so far: `features/auth/api/login-action.ts` imports `getCurrentUser` via `@/features/user-profile`'s barrel, not its internals.
 
 ## Known Architectural Risks / Debt
 
 | Finding | Severity | Notes |
 |---|---|---|
-| Nav items reference routes with no `page.tsx` (`/identity`, `/identity/users`, `/identity/roles`, `/settings`) | Low | Currently a UI-shell-only build; clicking these links would 404. Expected at this stage, but worth tracking as these get built out. |
-| No API client layer / no backend integration | Low (by design) | Explicitly scoped out for this pass — dashboard renders only `features/dashboard/sample-data.ts`. Not a defect, but the next feature phase needs to establish the `lib/api/`-equivalent pattern. |
-| `prettier` + `prettier-plugin-tailwindcss` are installed but have no config file (`.prettierrc*`) and no `format`/related npm script | Low | `unknown` whether formatting is enforced anywhere (editor-only vs. CI) — flagged rather than assumed. |
-| No automated test suite (no `*.test.*`/`*.spec.*` files, no test runner in `package.json`) | Low (by design at this stage) | Matches an early UI-shell build; will need addressing once business logic accrues. |
-| `components/ui/button.tsx` hand-modified beyond shadcn CLI output (`loading` prop, `cursor-pointer`) | Low | Not a risk per se, but re-running the shadcn CLI to update `button.tsx` would silently drop these customizations unless done carefully. |
+| Session cookie stores the access/refresh token and claims as **plaintext JSON** | Medium | `login-action.ts` sets the cookie `httpOnly` but unencrypted, with its own comment: "Plaintext for now — encryption is a separate follow-up step." A `TOKEN_ENCRYPTION_KEY` env var and `getTokenEncryptionKey()` function already exist (`lib/server/config.ts`, `.env.example`) but are **not called anywhere** — prep work for a follow-up that hasn't landed. Worth tracking as real risk now that auth is live, not hypothetical. |
+| No token refresh flow wired up | Low–Medium | `features/auth/api/refresh-token.ts` (`refreshToken()`) exists and is exported from the feature barrel but has no caller. The session cookie's `maxAge` is tied to the access token's `expiresIn`, so once it expires the cookie is simply gone and `proxy.ts` redirects to `/login` — there's no silent renewal. |
+| Nav items reference routes with no `page.tsx` (`/identity`, `/identity/users`, `/identity/roles`, `/settings`) | Low | Unchanged from before. `features/users`/`features/roles` now provide the API surface these pages would need, but no UI has been built yet — clicking these links still 404s. |
+| `features/users` and `features/roles` are fully API-only with zero UI consumers | Low (by design at this stage) | 13 endpoint files total across the two features, none imported outside their own feature. Expected mid-build state, but worth revisiting once user/role management UI is scoped. |
+| Dashboard still renders hardcoded mock data (`features/dashboard/api/sample-data.ts`) | Low (by design) | Despite the rest of the app gaining real backend integration this cycle, the dashboard itself wasn't part of that work — flagged so it isn't mistaken for "already done." |
+| `prettier` + `prettier-plugin-tailwindcss` installed but no config file/`format` script | Low | Unchanged — still `unknown` whether formatting is enforced anywhere. |
+| No automated test suite | Low (by design at this stage) | Unchanged — no `*.test.*`/`*.spec.*` files, no test runner in `package.json`. Now more notable given real auth/session logic exists to test. |
+| `components/ui/button.tsx` hand-modified beyond shadcn CLI output (`loading` prop, `cursor-pointer`) | Low | Unchanged — re-running the shadcn CLI would silently drop these customizations unless done carefully. |
 
 ## Notes
 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-07-31 — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-01 — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
