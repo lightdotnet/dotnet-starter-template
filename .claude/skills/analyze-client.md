@@ -20,7 +20,7 @@ Build (or refresh) a deep understanding of exactly one client app: its routes/fe
 3. **Understand structure**: delegate to [nextjs-architect](../agents/nextjs-architect.md) if a structural assessment (data-fetching pattern, state management, component organization) is wanted.
 4. **Map backend integration**: identify the API client layer (e.g. `clients/<app-name>/lib/api/`) and which backend endpoints this app actually calls — delegate to [api-contract-reviewer](../agents/api-contract-reviewer.md) if contract drift needs checking.
 5. **Read minimally**: open only the files needed to describe the scoped area's responsibility — not every component in the app.
-6. **Update docs, if requested**: write/update `.claude/PROJECT.md` (Client Apps table, this app's row) and/or `.claude/docs/generated/clients/<app-name>/overview.md` using the [client-app-overview template](../docs/templates/client-app-overview.md). Only when explicitly asked.
+6. **Update docs, if requested**: write/update `.claude/PROJECT-CLIENTS.md` (Client Apps table, this app's row) and/or `.claude/docs/generated/clients/<app-name>/overview.md` using the [client-app-overview template](../docs/templates/client-app-overview.md). Only when explicitly asked.
 
 ## Expected Outputs
 

@@ -29,7 +29,7 @@ tools: Glob, Grep, Read
 - That app's `app/` (or `pages/`) structure, `package.json` for the Next.js version and key libraries already in use.
 - Existing components/hooks within that app for established local patterns before recommending a new one.
 - That app's `lib/` (or equivalent) for the existing API client/data-fetching setup — reuse it rather than inventing a parallel one.
-- `.claude/ARCHITECTURE.md` (Clients section) and `.claude/DEVELOPMENT.md` (Clients section) for already-verified conventions for that app.
+- `.claude/ARCHITECTURE-CLIENTS.md` and `.claude/DEVELOPMENT.md` (Clients section) for already-verified conventions for that app.
 
 ## Expected Output
 

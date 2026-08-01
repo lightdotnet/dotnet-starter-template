@@ -13,7 +13,7 @@ Guide the addition of new functionality without assuming repo-wide impact, and w
 
 - A description of the desired feature/behavior.
 - Which side(s) it touches: a new/changed backend module, new/changed UI in one or more named client apps, or both (ask if unclear — including which client app(s), once `clients/` has more than one).
-- Any relevant existing documentation (`.claude/PROJECT.md`, `.claude/ARCHITECTURE.md`, `.claude/DEVELOPMENT.md`) for the target scope.
+- Any relevant existing documentation for the target scope: `.claude/PROJECT-BACKEND.md`/`.claude/ARCHITECTURE-BACKEND.md` (backend), `.claude/PROJECT-CLIENTS.md`/`.claude/ARCHITECTURE-CLIENTS.md` (clients), and `.claude/DEVELOPMENT.md`. See the `/context-backend`/`/context-frontend`/`/context-full` commands ([commands/](../commands/)) to load the right set.
 
 ## Workflow
 

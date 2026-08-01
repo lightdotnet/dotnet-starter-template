@@ -12,7 +12,7 @@ This file is the entry point for every Claude Code session in this repository. R
 
 This repository is a **starter template monorepo for a full-stack application**: a C#/.NET backend and one or more frontend clients, meant to be cloned/forked as the starting point for new projects.
 
-- **Backend** — `src/` — ASP.NET Core Web API, **C#**, organized as a **Modular Monolith**. One solution (`.sln`), one deployable process. Business modules live as flat projects directly under `src/` (no `src/Modules/` nesting) — a simple module is a single `<Module>` project internally organized by folder (Entities/Application/Data/Controllers/etc.); a module complex enough to justify it is split Clean-Architecture-style into `<Module>.Domain` / `<Module>.Application` / `<Module>.Infrastructure` / `<Module>.Api` projects. Every module also has a `<Module>.Contracts` project — the only project other modules or the host may reference — exposing its public DTOs and service interfaces. See [ARCHITECTURE.md § Backend — Module Structure Convention](ARCHITECTURE.md#backend--module-structure-convention) for the decision criteria and naming rules.
+- **Backend** — `src/` — ASP.NET Core Web API, **C#**, organized as a **Modular Monolith**. One solution (`.sln`), one deployable process. Business modules live as flat projects directly under `src/` (no `src/Modules/` nesting) — a simple module is a single `<Module>` project internally organized by folder (Entities/Application/Data/Controllers/etc.); a module complex enough to justify it is split Clean-Architecture-style into `<Module>.Domain` / `<Module>.Application` / `<Module>.Infrastructure` / `<Module>.Api` projects. Every module also has a `<Module>.Contracts` project — the only project other modules or the host may reference — exposing its public DTOs and service interfaces. See [ARCHITECTURE-BACKEND.md § Module Structure Convention](ARCHITECTURE-BACKEND.md#backend--module-structure-convention) for the decision criteria and naming rules.
 - **Clients** — `clients/` — one or more frontend apps, each in its own subfolder (e.g. `clients/web/` for the primary **Next.js** (TypeScript/React) app; additional apps such as `clients/admin/` or a future mobile client may be added later). Each client consumes the backend exclusively over HTTP as a JSON API. The backend's MVC controllers are **API-only** (no server-rendered Razor views) — all UI rendering happens in the client apps.
 - **Integration** — the only contract between backend and any client is the HTTP API surface (routes, DTOs, status/error shapes). No side reaches into another's internals; there is no shared DB access or shared source between `src/` and `clients/*`.
 
@@ -33,7 +33,7 @@ Consequences of this:
 | Client apps | `clients/<app-name>/` — one per frontend; the primary app (`clients/web/`) is Next.js (App Router), TypeScript, React |
 | Integration | REST/JSON over HTTP; each client keeps a typed API client generated from or hand-kept in sync with backend contracts |
 
-Treat this table as intent for a template, not yet-verified fact — cross-check against `.claude/PROJECT.md` / `.claude/ARCHITECTURE.md` and actual code before asserting specifics to the user, including how many client apps actually exist under `clients/`.
+Treat this table as intent for a template, not yet-verified fact — cross-check against `.claude/PROJECT-BACKEND.md`/`.claude/PROJECT-CLIENTS.md`/`.claude/ARCHITECTURE-BACKEND.md`/`.claude/ARCHITECTURE-CLIENTS.md` (or the root `.claude/PROJECT.md`/`.claude/ARCHITECTURE.md` for the cross-cutting summary) and actual code before asserting specifics to the user, including how many client apps actually exist under `clients/`.
 
 ## 2. AI Operating Rules
 
@@ -41,7 +41,7 @@ Treat this table as intent for a template, not yet-verified fact — cross-check
 2. **Prefer specialized agents over doing everything inline.** See [Agent Usage](#4-agent-usage) — backend architecture, EF Core, API design, frontend architecture, security, performance, testing, docs, and dependency questions each have a dedicated agent. Delegate to them rather than reasoning about all domains yourself in the main context.
 3. **Minimize token usage.** Summarize instead of pasting large file contents back to the user. Avoid re-reading files already read this session. Avoid speculative exploration "just in case."
 4. **Repository analysis is incremental, never automatic.** Do not proactively scan or document the whole repo, the whole backend, or all of `clients/` unless the user explicitly asks. A request about one module or one client app is a request about that scope only.
-5. **Documentation synchronization only happens on request.** Never regenerate or rewrite files under `.claude/docs/generated/` (or any `AI_CONTEXT.md`/`PROJECT.md`/`ARCHITECTURE.md` content) unless the user explicitly asks to generate or sync docs.
+5. **Documentation synchronization only happens on request.** Never regenerate or rewrite files under `.claude/docs/generated/` (or any `AI_CONTEXT.md`/`PROJECT*.md`/`ARCHITECTURE*.md` content) unless the user explicitly asks to generate or sync docs.
 6. **Ask before assuming structure.** If it's unclear which module or which client app (once `clients/` has more than one) a request applies to, ask rather than guessing.
 7. **No destructive or wide-blast-radius edits without confirmation.** Changes to the shared kernel/building blocks, cross-module refactors, changes to an API contract that one or more clients depend on, or dependency bumps touching both `src/` and `clients/*` require explicit user confirmation first.
 8. **Language**: see [§0 Language Convention](#0-language-convention) — Vietnamese input is normal; everything written to the repo is English.
@@ -49,7 +49,7 @@ Treat this table as intent for a template, not yet-verified fact — cross-check
 
 ## 3. Documentation Rules
 
-- `.claude/PROJECT.md`, `.claude/ARCHITECTURE.md` are **living templates** — they start mostly empty and are filled in incrementally as modules/projects/client apps are analyzed, and only on request.
+- `.claude/PROJECT.md`/`.claude/ARCHITECTURE.md` hold only the cross-cutting summary. Backend-scoped detail lives in `.claude/PROJECT-BACKEND.md`/`.claude/ARCHITECTURE-BACKEND.md`; client-scoped detail lives in `.claude/PROJECT-CLIENTS.md`/`.claude/ARCHITECTURE-CLIENTS.md`. All of these are **living templates** — they start mostly empty and are filled in incrementally as modules/projects/client apps are analyzed, and only on request. Use the `/context-backend`, `/context-frontend`, or `/context-full` commands ([commands/](commands/)) to load the right scope in one step instead of reading each file individually.
 - `.claude/docs/templates/` holds **unpopulated templates** for generated docs (backend/module overview, per-client-app overview, API docs, DB docs, domain model, conventions, dependency graph, dev guide). Never delete or repurpose these.
 - `.claude/docs/generated/` holds **actual generated documentation**, split into `backend/` and `clients/<app-name>/` (e.g. `docs/generated/backend/modules/<ModuleName>/overview.md`, `docs/generated/clients/web/overview.md`). Only written to when a sync/generate workflow is explicitly invoked.
 - Manually-authored documentation (anything a human wrote and didn't come from a generate/sync workflow) must be preserved during sync — never silently overwritten. See [sync-documentation workflow](workflows/sync-documentation.md).
@@ -133,3 +133,4 @@ Session- and task-level workflows live in [workflows/](workflows/) — see [WORK
 | "Implement a feature" | [workflows/implement-feature.md](workflows/implement-feature.md) |
 | "Update CLAUDE documentation" | [skills/sync-docs.md](skills/sync-docs.md), scoped to `.claude/` docs only |
 | "Run a ROT review of .claude" / "check for stale agents/skills" | [ROT.md](ROT.md) |
+| "Load backend/frontend/full context" | `/context-backend`, `/context-frontend`, or `/context-full` ([commands/](commands/)) |

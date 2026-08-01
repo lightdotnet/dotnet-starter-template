@@ -1,6 +1,6 @@
 ---
 name: api-contract-reviewer
-description: Use for checking consistency between the backend API contract (src/Modules/*/Api controllers, DTOs) and how a client app under clients/<app-name>/ actually consumes it — drift detection, typed-client sync, mismatched request/response shapes, stale routes. Invoke for "does the frontend match the API," "check for contract drift," or "will this backend change break the client(s)." Not for designing the API itself (use api-designer) or general frontend code quality (use frontend-code-reviewer).
+description: Use for checking consistency between the backend API contract (each module's Api project/Controllers folder, and its Contracts DTOs) and how a client app under clients/<app-name>/ actually consumes it — drift detection, typed-client sync, mismatched request/response shapes, stale routes. Invoke for "does the frontend match the API," "check for contract drift," or "will this backend change break the client(s)." Not for designing the API itself (use api-designer) or general frontend code quality (use frontend-code-reviewer).
 tools: Glob, Grep, Read
 ---
 

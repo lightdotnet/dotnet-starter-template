@@ -9,11 +9,11 @@ Triggered by requests like "analyze the backend/solution" or "analyze the soluti
 3. **Understand dependencies**: delegate to [dependency-analyzer](../agents/dependency-analyzer.md) for the project/package reference graph, flagging any cross-module boundary violations.
 4. **Optionally assess structure**: if the user also wants a structural/architecture read, delegate to [architecture-reviewer](../agents/architecture-reviewer.md).
 5. **Update documentation only if requested**:
-   - Update the Backend Modules table in `.claude/PROJECT.md`.
+   - Update the Backend Modules table in `.claude/PROJECT-BACKEND.md`.
    - Write/update `.claude/docs/generated/backend/overview.md` using [solution-overview template](../docs/templates/solution-overview.md).
    - If not asked, report findings conversationally without writing files.
 
 ## Output
 
 - A description of the backend's modules, responsibilities, and dependency graph.
-- Optionally, updated `.claude/PROJECT.md` entries and/or a generated backend overview doc.
+- Optionally, updated `.claude/PROJECT-BACKEND.md` entries and/or a generated backend overview doc.

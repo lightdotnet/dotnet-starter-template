@@ -14,7 +14,7 @@
 - **Target framework(s)**: `net10.0` (all of `src/Shared`, `src/Infrastructure`, `tests/Framework.Tests`).
 - **Shared build props/targets**: `Directory.Build.props` sets `ImplicitUsings=enable` and `Nullable=enable` repo-wide. `Directory.Packages.props` centralizes all package versions (`ManagePackageVersionsCentrally=true`, `CentralPackageTransitivePinningEnabled=false`); `Framework.Tests.csproj` opts out (`ManagePackageVersionsCentrally=false`) and pins its own test package versions directly.
 - **Central package management**: yes, repo-wide via `Directory.Packages.props` (except `Framework.Tests`, see above).
-- **Module structure convention**: unverified — no `src/Modules/*` exists yet (expected: `src/Modules/<ModuleName>/{Domain,Application,Infrastructure,Api}` per `.claude/CLAUDE.md`).
+- **Module structure convention**: flat projects directly under `src/` (no `src/Modules/` nesting), plus a `<Module>.Contracts` seam project per module — see `.claude/ARCHITECTURE-BACKEND.md § Module Structure Convention`. `Identity` is the first module built (single project, `Identity.Api` + `Identity.Contracts`); its internal layering is informal and not yet fully conformant — see `.claude/ARCHITECTURE-BACKEND.md` for details.
 - **Vendor library family**: a private NuGet package family `Lightsoft.*` (namespace `Light.*`) supplies the mediator (`Lightsoft.Mediator`), `Result`/`Paged` contracts (`Lightsoft.Result`), domain base types (`Lightsoft.SharedKernel`, namespace `Light.Domain`), ASP.NET Core authorization/modularity/CORS helpers, EF Core helpers, and Serilog setup. Treat these as fixed external API, not renameable/refactorable project code.
 
 ### Coding Style

@@ -14,7 +14,7 @@ See `CLAUDE.md` §0. The user writes requests in Vietnamese — treat that as co
 
 Always assume, until verified otherwise for the specific task at hand:
 
-- **One backend solution** under `src/` (ASP.NET Core, C#), organized as a **Modular Monolith**: `src/Modules/<ModuleName>/{<ModuleName>.Domain, <ModuleName>.Application, <ModuleName>.Infrastructure, <ModuleName>.Api}`, plus a shared/building-blocks project and a composition-root host project that wires modules together.
+- **One backend solution** under `src/` (ASP.NET Core, C#), organized as a **Modular Monolith**: business modules live as flat projects directly under `src/` (no `src/Modules/` nesting) — a simple module is one `<Module>`/`<Module>.Api` project organized internally by folder; a complex module splits Clean-Architecture-style into `<Module>.{Domain,Application,Infrastructure,Api}`. Every module also gets a `<Module>.Contracts` seam project — the only project other modules or the host may reference. Plus a shared/building-blocks project and a composition-root host project that wires modules together. See [ARCHITECTURE-BACKEND.md § Module Structure Convention](ARCHITECTURE-BACKEND.md#backend--module-structure-convention).
 - **One or more client apps** under `clients/<app-name>/` (e.g. `clients/web/` for the primary Next.js/TypeScript/React app) — do not assume there's only one, mirroring the backend's module plurality. Check `Glob clients/*/` before describing "the frontend" as if it were singular.
 - **Modules are the real boundary**, not folders-as-decoration. A module's `Domain`/`Application` should not be referenced directly by another module — cross-module interaction goes through a module's public contract (its `Api`/`Application`-exposed interfaces or events), never a direct reach into another module's `Infrastructure` or `Domain`.
 - **The backend and each client only talk over HTTP.** No shared source, no shared DB access, no in-process calls between `src/` and `clients/*`. The API contract (routes + DTOs + error shape) is the entire integration surface, for every client.
@@ -27,7 +27,7 @@ Always assume, until verified otherwise for the specific task at hand:
 2. **Index before content.** Use `Glob`/`Grep` to locate relevant `.csproj`/`.sln`/namespaces (backend) or `package.json`/route folders (a client app) before opening files. Don't open files "to see what's there."
 3. **Read incrementally.** Open only the files needed for the current step of the task. Re-scope and read more only when a genuine dependency is found (e.g., a referenced project, a shared building block, an API route a client calls).
 4. **No repo-wide scans without an explicit request.** "Analyze this folder" means that folder. "Analyze this module" means that module and its direct dependencies — not sibling modules. "Analyze the frontend" without a named app means all of `clients/` (see [skills/analyze-frontend.md](skills/analyze-frontend.md)); a named app means just that one (see [skills/analyze-client.md](skills/analyze-client.md)).
-5. **Cache findings in the right place.** Verified facts about structure go into `PROJECT.md`/`ARCHITECTURE.md` (only when a sync/generate step is explicitly requested) — not into ad hoc notes that vanish at session end.
+5. **Cache findings in the right place.** Verified facts about structure go into the scoped file — `PROJECT-BACKEND.md`/`ARCHITECTURE-BACKEND.md` for backend, `PROJECT-CLIENTS.md`/`ARCHITECTURE-CLIENTS.md` for clients, or the root `PROJECT.md`/`ARCHITECTURE.md` for genuinely cross-cutting facts — only when a sync/generate step is explicitly requested. Not into ad hoc notes that vanish at session end.
 
 ## Token Efficiency Rules
 
@@ -62,7 +62,7 @@ See `CLAUDE.md` §2.9. This is the standard lifecycle for any request that adds 
 
 ## Documentation Discipline
 
-- Never regenerate `docs/generated/**` or rewrite `PROJECT.md`/`ARCHITECTURE.md` sections as a side effect of an unrelated task.
+- Never regenerate `docs/generated/**` or rewrite `PROJECT.md`/`PROJECT-BACKEND.md`/`PROJECT-CLIENTS.md`/`ARCHITECTURE.md`/`ARCHITECTURE-BACKEND.md`/`ARCHITECTURE-CLIENTS.md` sections as a side effect of an unrelated task.
 - When a sync is requested, follow [workflows/sync-documentation.md](workflows/sync-documentation.md) exactly: diff against code, update changed sections, remove stale ones, preserve manually-authored content.
 - Templates in `docs/templates/` are structural skeletons — copy their structure into `docs/generated/` outputs, don't edit the templates themselves during normal doc generation.
 - Test-suite execution follows the same "only on explicit request" discipline as docs — see Code-Change Workflow Gate above.

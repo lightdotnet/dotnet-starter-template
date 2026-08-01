@@ -7,7 +7,7 @@ description: Playbook for updating existing generated documentation to match the
 
 ## Purpose
 
-Bring existing documentation under `.claude/docs/generated/` (and, if requested, `.claude/PROJECT.md`/`.claude/ARCHITECTURE.md`) up to date with the current code — additive, corrective, and stale-content-removing, never a blind rewrite.
+Bring existing documentation under `.claude/docs/generated/` (and, if requested, `.claude/PROJECT.md`/`.claude/PROJECT-BACKEND.md`/`.claude/PROJECT-CLIENTS.md`/`.claude/ARCHITECTURE.md`/`.claude/ARCHITECTURE-BACKEND.md`/`.claude/ARCHITECTURE-CLIENTS.md`) up to date with the current code — additive, corrective, and stale-content-removing, never a blind rewrite.
 
 ## Inputs
 

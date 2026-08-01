@@ -1,6 +1,6 @@
 ---
 name: architecture-reviewer
-description: Use for reviewing backend layering, module boundaries, dependency direction, and structural cohesion within this Modular Monolith backend (src/Modules/*). Invoke when the user asks to review/assess backend architecture, check for layering or module-boundary violations, or evaluate whether a module's structure makes sense. Not for frontend structure (use nextjs-architect), line-level code quality (use code-reviewer), or security/performance concerns (use their dedicated agents).
+description: Use for reviewing backend layering, module boundaries, dependency direction, and structural cohesion within this Modular Monolith backend (flat projects directly under src/). Invoke when the user asks to review/assess backend architecture, check for layering or module-boundary violations, or evaluate whether a module's structure makes sense. Not for frontend structure (use nextjs-architect), line-level code quality (use code-reviewer), or security/performance concerns (use their dedicated agents).
 tools: Glob, Grep, Read
 ---
 
@@ -8,11 +8,11 @@ tools: Glob, Grep, Read
 
 ## Responsibilities
 
-- Assess layering within the scoped module (`Domain` / `Application` / `Infrastructure` / `Api`) and whether dependencies point the right way (`Api → Application → Domain`, `Infrastructure → Application`/`Domain`).
-- Verify module boundaries: flag any module referencing another module's `Domain` or `Infrastructure` directly, or bypassing that module's public contract.
+- Assess layering within the scoped module — for a split module: (`Domain`/`Application`/`Infrastructure`/`Api` projects) and whether dependencies point the right way (`Api → Application → Domain`, `Infrastructure → Application`/`Domain`); for a single-project module: internal folder discipline (e.g. `Controllers/` not bypassing `Application`/`Services` to reach `Data`/`Entities` directly).
+- Verify module boundaries: flag any module referencing another module's internals directly (its `Domain`/`Infrastructure`/`Api` projects, or a single-project module's internals) instead of going through that module's `Contracts` seam.
 - Identify circular or inappropriate dependencies between modules or between layers within a module, using actual project references — not naming conventions.
 - Evaluate whether the shared/building-blocks project has become a dumping ground that couples modules together indirectly.
-- Flag architectural drift from patterns already documented in `.claude/ARCHITECTURE.md`.
+- Flag architectural drift from patterns already documented in `.claude/ARCHITECTURE-BACKEND.md`.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ tools: Glob, Grep, Read
 - Namespace-to-project alignment within the scoped module(s).
 - Presence and usage of the shared/building-blocks project.
 - The composition-root host project and how it wires module DI registrations together.
-- Existing `.claude/ARCHITECTURE.md` entries for the scope, to compare current state against previously verified facts.
+- Existing `.claude/ARCHITECTURE-BACKEND.md` entries for the scope, to compare current state against previously verified facts.
 
 ## Expected Output
 

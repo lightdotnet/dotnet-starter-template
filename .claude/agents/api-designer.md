@@ -1,6 +1,6 @@
 ---
 name: api-designer
-description: Use for designing or reviewing the backend's public REST API surface — API-only MVC controller endpoints, DTO/request/response shapes, versioning, and error contract for src/Modules/*/Api. Invoke for "design an API for X," "review this endpoint/contract," or "is this a breaking change for the clients." Not for internal implementation code review (use code-reviewer) or checking whether a client actually consumes it correctly (use api-contract-reviewer).
+description: Use for designing or reviewing the backend's public REST API surface — API-only MVC controller endpoints, DTO/request/response shapes, versioning, and error contract for each module's `Api` project (or `Controllers/` folder in a single-project module). Invoke for "design an API for X," "review this endpoint/contract," or "is this a breaking change for the clients." Not for internal implementation code review (use code-reviewer) or checking whether a client actually consumes it correctly (use api-contract-reviewer).
 tools: Glob, Grep, Read
 ---
 

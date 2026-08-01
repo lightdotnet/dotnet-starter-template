@@ -1,6 +1,6 @@
 # ROT.md — Scheduled Maintenance for `.claude/`
 
-This file defines the recurring review that keeps `.claude/` itself healthy: agents, skills, workflows, templates, and the core docs (`CLAUDE.md`, `AI_CONTEXT.md`, `ARCHITECTURE.md`, `PROJECT.md`, `DEVELOPMENT.md`, `WORKFLOWS.md`). It is a **meta-maintenance** doc — it reviews the `.claude/` configuration, not the application code (see [workflows/sync-documentation.md](workflows/sync-documentation.md) for that).
+This file defines the recurring review that keeps `.claude/` itself healthy: agents, skills, workflows, templates, commands, and the core docs (`CLAUDE.md`, `AI_CONTEXT.md`, `ARCHITECTURE.md` + `ARCHITECTURE-BACKEND.md`/`ARCHITECTURE-CLIENTS.md`, `PROJECT.md` + `PROJECT-BACKEND.md`/`PROJECT-CLIENTS.md`, `DEVELOPMENT.md`, `WORKFLOWS.md`). It is a **meta-maintenance** doc — it reviews the `.claude/` configuration, not the application code (see [workflows/sync-documentation.md](workflows/sync-documentation.md) for that).
 
 **ROT** = the three things a review looks for:
 
@@ -15,9 +15,9 @@ Like everything else under `.claude/`, ROT review is **explicit and pull-based**
 | Cadence | Trigger | Scope |
 |---|---|---|
 | Monthly (or every ~4–6 weeks of active work) | Manual — user runs it | Full `.claude/` sweep |
-| After `scaffold-project` completes | One-time, event-based | Reconcile `CLAUDE.md`/`ARCHITECTURE.md`/`PROJECT.md` intended-shape sections against what was actually scaffolded |
-| After adding/removing a backend module or a client app under `clients/` | Event-based | `ARCHITECTURE.md`, `PROJECT.md`, `DEVELOPMENT.md`, any agent/skill/template that names specific modules/apps/routes |
-| After a stack/tooling decision changes (e.g. switch data-fetching library, EF Core provider, router style) | Event-based | `CLAUDE.md` §1.1, `DEVELOPMENT.md`, `ARCHITECTURE.md`, affected agents |
+| After `scaffold-project` completes | One-time, event-based | Reconcile `CLAUDE.md`/`ARCHITECTURE*.md`/`PROJECT*.md` intended-shape sections against what was actually scaffolded |
+| After adding/removing a backend module or a client app under `clients/` | Event-based | `ARCHITECTURE-BACKEND.md`/`ARCHITECTURE-CLIENTS.md`, `PROJECT-BACKEND.md`/`PROJECT-CLIENTS.md`, `DEVELOPMENT.md`, any agent/skill/template/command that names specific modules/apps/routes |
+| After a stack/tooling decision changes (e.g. switch data-fetching library, EF Core provider, router style) | Event-based | `CLAUDE.md` §1.1, `DEVELOPMENT.md`, `ARCHITECTURE-BACKEND.md`/`ARCHITECTURE-CLIENTS.md`, affected agents |
 | Before a release/milestone tag | Event-based | Full sweep, with emphasis on Trivial (unused agents/skills accumulate over a project's life) |
 
 Track actual runs in the [Review Log](#review-log) below so the next review knows the baseline.
@@ -34,12 +34,13 @@ Ask Claude: *"Run a ROT review of `.claude/` per ROT.md"* (optionally scoped, e.
 
 ## Checklist
 
-### Core docs (`CLAUDE.md`, `AI_CONTEXT.md`, `ARCHITECTURE.md`, `PROJECT.md`, `DEVELOPMENT.md`, `WORKFLOWS.md`)
+### Core docs (`CLAUDE.md`, `AI_CONTEXT.md`, `ARCHITECTURE.md` + split files, `PROJECT.md` + split files, `DEVELOPMENT.md`, `WORKFLOWS.md`)
 
-- [ ] Every agent/skill/workflow link in `CLAUDE.md` §4–6 and `WORKFLOWS.md` resolves to a file that still exists.
+- [ ] Every agent/skill/workflow/command link in `CLAUDE.md` §4–6 and `WORKFLOWS.md` resolves to a file that still exists.
 - [ ] `CLAUDE.md` §1.1 (Tech Stack) still matches what's actually in `src/`/`clients/*` (or is still correctly marked "intent, not yet verified" if nothing's scaffolded).
-- [ ] `ARCHITECTURE.md`/`PROJECT.md`/`DEVELOPMENT.md` "verified" sections aren't silently stale — either they match current code, or they're honestly still `unknown`.
-- [ ] No core doc contradicts another (e.g. `ARCHITECTURE.md` describing a module `DEVELOPMENT.md` doesn't mention, or vice versa).
+- [ ] `ARCHITECTURE-BACKEND.md`/`ARCHITECTURE-CLIENTS.md`/`PROJECT-BACKEND.md`/`PROJECT-CLIENTS.md`/`DEVELOPMENT.md` "verified" sections aren't silently stale — either they match current code, or they're honestly still `unknown`.
+- [ ] No core doc contradicts another (e.g. `ARCHITECTURE-BACKEND.md` describing a module `DEVELOPMENT.md` doesn't mention, or vice versa) — including each root `PROJECT.md`/`ARCHITECTURE.md` not contradicting its own `-BACKEND`/`-CLIENTS` split file.
+- [ ] `commands/context-backend.md`/`context-frontend.md`/`context-full.md` still list the correct files to load (they'll go stale if a core doc is ever renamed/re-split again).
 
 ### Agents (`agents/*.md`)
 
@@ -71,6 +72,7 @@ Ask Claude: *"Run a ROT review of `.claude/` per ROT.md"* (optionally scoped, e.
 | Date | Scope | Reviewer | R/O/T found | Actions taken |
 |---|---|---|---|---|
 | 2026-07-29 | Full `.claude/` (initial creation of this file, following the C#+Next.js re-sync) | Claude + user | None yet — baseline entry | N/A |
+| 2026-08-01 | Full `.claude/` sweep | Claude + user | 9× Outdated: `AI_CONTEXT.md`, `DEVELOPMENT.md`, `agents/dotnet-architect.md`, `agents/architecture-reviewer.md`, `agents/api-designer.md`, `agents/api-contract-reviewer.md`, `skills/analyze-module.md`, `workflows/new-session.md`, `workflows/scaffold-project.md` all still described the pre-2026-07-30 nested `src/Modules/<Name>/{Domain,Application,Infrastructure,Api}` convention instead of the adopted flat-project + `.Contracts`-seam convention. No Redundant/Trivial found — all agents/skills/workflows still referenced, boundaries clear, `WORKFLOWS.md` matches actual files, templates all used. | All 9 Outdated findings fixed this session. Noted out-of-ROT-scope staleness in `docs/generated/backend/*.md` (predates the Identity module entirely) — left for a future `sync-documentation` run. |
 
 ---
 _This file is itself subject to ROT review — if the schedule or checklist stops matching how the project actually works, update it during a review rather than letting it drift._
