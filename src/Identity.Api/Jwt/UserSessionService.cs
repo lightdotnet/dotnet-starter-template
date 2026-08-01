@@ -1,67 +1,20 @@
-﻿using Light.Exceptions;
-using Microsoft.AspNetCore.Identity;
+using Light.Exceptions;
 using StarterKit.Identity.Api.Data;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Identity.Contracts;
-using StarterKit.Shared.Constants;
-using System.Security.Claims;
 
 namespace StarterKit.Identity.Api.Jwt;
 
-public class JwtTokenManager(
-    UserManager<User> userManager,
-    RoleManager<Role> roleManager,
-    IdentityDbContext context)
+internal class UserSessionService(
+    JwtTokenIssuer tokenIssuer,
+    IdentityDbContext context,
+    TimeProvider timeProvider) : IUserSessionService
 {
-    public UserManager<User> UserManager => userManager;
-
-    public virtual DateTimeOffset TimeNow => DateTimeOffset.Now;
-
-    public virtual async Task<IList<Claim>> GetUserClaimsAsync(User user)
-    {
-        //var userClaims = await userManager.GetClaimsAsync(user);
-        var userRoles = await userManager.GetRolesAsync(user);
-
-        //var roleClaims = new List<Claim>();
-        var permissionClaims = new List<Claim>();
-
-        foreach (var userRole in userRoles)
-        {
-            //roleClaims.Add(new Claim(ClaimTypes.Role, userRole));
-
-            var role = await roleManager.FindByNameAsync(userRole);
-            if (role is null)
-                continue;
-
-            var roleClaims = await roleManager.GetClaimsAsync(role);
-
-            permissionClaims.AddRange(roleClaims);
-        }
-
-        var claims = new List<Claim>
-        {
-            { ClaimTypeConstants.UserId, user.Id },
-            { ClaimTypeConstants.UserName, user.UserName },
-            //{ ClaimTypes.FirstName, user.FirstName },
-            //{ ClaimTypes.LastName, user.LastName },
-            //{ ClaimTypes.PhoneNumber, user.PhoneNumber },
-            //{ ClaimTypes.Email, user.Email },
-        }
-        //.Union(userClaims)
-        //.Union(roleClaims)
-        .Union(permissionClaims)
-        .Where(x => !string.IsNullOrEmpty(x.Value))
-        .ToList();
-
-        return claims;
-    }
-
-    public virtual async Task<TokenDto> GenerateTokenByAsync(
+    public virtual async Task<TokenDto> GenerateTokenAsync(
         User user,
         string issuer, string secretKey,
         DateTime tokenExpiresAt, DateTime refreshTokenExpiresAt,
-        DeviceDto? device = null,
-        bool saveToken = true)
+        DeviceDto? device = null)
     {
         var newToken = new UserSession
         {
@@ -75,26 +28,13 @@ public class JwtTokenManager(
             PhysicalAddress = device?.PhysicalAddress,
         };
 
-        var claims = await GetUserClaimsAsync(user);
+        var jwtToken = await tokenIssuer.IssueAsync(user, newToken.Id, issuer, secretKey, tokenExpiresAt);
 
-        // add TokenID
-        claims.Add(new Claim(ClaimTypeConstants.TokenId, newToken.Id));
-
-        var jwtToken = JwtHelper.GenerateToken(
-            issuer,
-            claims,
-            tokenExpiresAt,
-            secretKey);
-
-        if (saveToken is true)
-        {
-            newToken.Token = jwtToken;
-        }
+        newToken.Token = jwtToken;
 
         await context.UserSessions.AddAsync(newToken);
         await context.SaveChangesAsync();
 
-        // *** note: must return jwtToken cause save token to DB is options
         return new TokenDto(jwtToken, newToken.TokenExpiresInSeconds, newToken.RefreshToken);
     }
 
@@ -103,38 +43,23 @@ public class JwtTokenManager(
         string refreshToken,
         string issuer, string secretKey,
         DateTime tokenExpiresAt, DateTime refreshTokenExpiresAt,
-        string roleClaimType = ClaimTypeConstants.Role, string userIdClaimType = ClaimTypeConstants.UserId,
-        DeviceDto? device = null,
-        bool saveToken = true)
+        DeviceDto? device = null)
     {
+        var now = timeProvider.GetUtcNow();
+        
         // check refresh token is exist and not out of lifetime
         var userToken = await context.UserSessions
             .Where(x =>
                 x.UserId == user.Id
                 && x.RefreshToken == refreshToken
-                && x.RefreshTokenExpiresAt >= TimeNow.Date
+                && x.RefreshTokenExpiresAt >= now.Date
                 && x.Revoked == false)
             .FirstOrDefaultAsync()
             ?? throw new UnauthorizedException("Refresh token invalid.");
 
-        var claims = await GetUserClaimsAsync(user);
+        var jwtToken = await tokenIssuer.IssueAsync(user, userToken.Id, issuer, secretKey, tokenExpiresAt);
 
-        // add TokenID
-        claims.Add(new Claim(ClaimTypeConstants.TokenId, userToken.Id));
-
-        var timeNow = TimeNow.DateTime;
-
-        var jwtToken = JwtHelper.GenerateToken(
-            issuer,
-            claims,
-            tokenExpiresAt,
-            secretKey);
-
-        if (saveToken is true)
-        {
-            userToken.Token = jwtToken;
-        }
-
+        userToken.Token = jwtToken;
         userToken.TokenExpiresAt = tokenExpiresAt;
         userToken.RefreshToken = JwtHelper.GenerateRefreshToken();
         userToken.RefreshTokenExpiresAt = refreshTokenExpiresAt;
@@ -146,13 +71,12 @@ public class JwtTokenManager(
 
         await context.SaveChangesAsync();
 
-        // *** note: must return jwtToken cause save token to DB is options
         return new TokenDto(jwtToken, userToken.TokenExpiresInSeconds, userToken.RefreshToken);
     }
 
     public async Task<IEnumerable<UserSessionDto>> GetUserTokensAsync(string userId)
     {
-        var now = TimeNow;
+        var now = timeProvider.GetUtcNow();
 
         var list = await context.UserSessions
             .Where(x =>
@@ -182,15 +106,18 @@ public class JwtTokenManager(
 
     public Task<bool> IsTokenValidAsync(string accessToken)
     {
+        var now = timeProvider.GetUtcNow();
+        
         return context.UserSessions
             .Where(x =>
                 x.Token == accessToken
                 && x.Revoked == false
-                && x.TokenExpiresAt > TimeNow)
+                && x.TokenExpiresAt > now)
+            .AsNoTracking()
             .AnyAsync();
     }
 
-    public Task RevokedAsync(string userId, string tokenId)
+    public Task RevokeAsync(string userId, string tokenId)
     {
         return context.UserSessions
             .Where(x => x.Id == tokenId && x.UserId == userId)

@@ -6,8 +6,9 @@ using StarterKit.Infrastructure.Endpoints;
 
 namespace StarterKit.Identity.Api.Controllers;
 
+[ApiExplorerSettings(GroupName = "identity")]
 [MustHavePermission(IdentityPermissions.Roles.View)]
-public class RoleController(IRoleService roleService) : ApiControllerBase
+public class RoleController(IRoleService roleService) : VersionedApiController
 {
     [HttpGet]
     public async Task<IActionResult> GetAsync()

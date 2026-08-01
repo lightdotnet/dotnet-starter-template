@@ -22,7 +22,7 @@
     <!-- Light framework -->
     <PackageVersion Include="Lightsoft.ActiveDirectory" Version="1.10.2-preview1" />
     <PackageVersion Include="Lightsoft.AspNetCore.Authorization" Version="10.2.1-preview1" />
-    <PackageVersion Include="Lightsoft.AspNetCore.Extensions" Version="10.1.1-preview1" />
+    <PackageVersion Include="Lightsoft.AspNetCore.Extensions" Version="10.1.1-preview2" />
     <PackageVersion Include="Lightsoft.AspNetCore.Modularity" Version="10.2.1-preview1" />
     <PackageVersion Include="Lightsoft.AspNetCore.Swagger" Version="10.1.1-preview1" />
     <PackageVersion Include="Lightsoft.Caching" Version="9.0.7.2" />

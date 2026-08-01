@@ -22,7 +22,8 @@ public static class JwtServiceCollectionExtensions
             ClaimTypeConstants.Role);
 
         // services
-        services.AddScoped<JwtTokenManager>();
-        services.AddTransient<ITokenService, TokenService>();
+        services.AddScoped<JwtTokenIssuer>();
+        services.AddScoped<IUserSessionService, UserSessionService>();
+        services.AddTransient<IAuthenticationService, AuthenticationService>();
     }
 }

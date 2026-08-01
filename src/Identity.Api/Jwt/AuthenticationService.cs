@@ -1,4 +1,4 @@
-﻿using Light.ActiveDirectory.Interfaces;
+using Light.ActiveDirectory.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using StarterKit.Identity.Api.Entities;
@@ -8,20 +8,20 @@ using System.Security.Claims;
 
 namespace StarterKit.Identity.Api.Jwt;
 
-internal class TokenService(
+internal class AuthenticationService(
     IOptions<JwtOptions> jwtOptions,
-    JwtTokenManager jwtTokenMananger,
-    IActiveDirectoryService domainService) : ITokenService
+    IUserSessionService userSessionService,
+    UserManager<User> userManager,
+    IActiveDirectoryService domainService,
+    TimeProvider timeProvider) : IAuthenticationService
 {
-    private readonly UserManager<User> _userManager = jwtTokenMananger.UserManager;
-
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
     public async Task<IResult<TokenDto>> GetTokenAsync(
         string username, string password,
         DeviceDto? device = null)
     {
-        var user = await _userManager.FindByNameAsync(username);
+        var user = await userManager.FindByNameAsync(username);
 
         var errorResult = Result<TokenDto>.Error("Invalid credentials");
 
@@ -36,7 +36,7 @@ internal class TokenService(
         }
         else
         {
-            var checkLocalPassword = await _userManager.CheckPasswordAsync(user, password);
+            var checkLocalPassword = await userManager.CheckPasswordAsync(user, password);
             isPasswordValid = checkLocalPassword;
         }
 
@@ -45,10 +45,12 @@ internal class TokenService(
             return errorResult;
         }
 
-        var tokenExpiresAt = DateTime.Now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
-        var refreshTokenExpiresAt = DateTime.Today.AddDays(_jwt.RefreshTokenExpirationDays);
+        var now = timeProvider.GetUtcNow().UtcDateTime;
 
-        var token = await jwtTokenMananger.GenerateTokenByAsync(
+        var tokenExpiresAt = now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
+        var refreshTokenExpiresAt = now.AddDays(_jwt.RefreshTokenExpirationDays);
+
+        var token = await userSessionService.GenerateTokenAsync(
             user,
             _jwt.Issuer,
             _jwt.SecretKey,
@@ -76,22 +78,23 @@ internal class TokenService(
         if (string.IsNullOrEmpty(userId))
             return Result<TokenDto>.Unauthorized("Error when read info from token.");
 
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId);
 
         if (user is null || await CheckInvalidUser(user))
             return Result<TokenDto>.Unauthorized("Invalid credentials.");
 
-        var tokenExpiresAt = DateTime.Now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
-        var refreshTokenExpiresAt = DateTime.Today.AddDays(_jwt.RefreshTokenExpirationDays);
+        var now = timeProvider.GetUtcNow().UtcDateTime;
 
-        var token = await jwtTokenMananger.RefreshTokenAsync(
+        var tokenExpiresAt = now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
+        var refreshTokenExpiresAt = now.AddDays(_jwt.RefreshTokenExpirationDays);
+
+        var token = await userSessionService.RefreshTokenAsync(
             user,
             refreshToken,
             _jwt.Issuer,
             _jwt.SecretKey,
             tokenExpiresAt,
             refreshTokenExpiresAt,
-            ClaimTypeConstants.Role, ClaimTypeConstants.UserId,
             device);
 
         return Result<TokenDto>.Success(token);

@@ -8,11 +8,20 @@ using StarterKit.Shared;
 
 namespace StarterKit.Identity.Api.Controllers;
 
+[ApiExplorerSettings(GroupName = "identity")]
 [MustHavePermission(IdentityPermissions.Users.View)]
 public class UserController(
     IUserService userService,
-    IActiveDirectoryService activeDirectoryService) : ApiControllerBase
+    IActiveDirectoryService activeDirectoryService) : VersionedApiController
 {
+    [HttpPost("search")]
+    public async Task<IActionResult> SearchAsync(
+        [FromQuery] SearchUserQuery search,
+        [FromQuery] PageQuery page)
+    {
+        return Ok(await userService.SearchAsync(search, page.PageNumber, page.PageSize));
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAsync()
     {

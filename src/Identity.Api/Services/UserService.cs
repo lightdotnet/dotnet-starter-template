@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Light.Specification;
+using Microsoft.AspNetCore.Identity;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Identity.Api.Extensions;
 using StarterKit.Identity.Contracts;
 using StarterKit.Identity.Contracts.Services;
+using StarterKit.Persistence.Extensions;
 using StarterKit.Shared;
 using StarterKit.Shared.Extensions;
 using System.Security.Claims;
@@ -12,6 +14,26 @@ namespace StarterKit.Identity.Api.Services;
 public class UserService(UserManager<User> userManager) : IUserService
 {
     protected UserManager<User> UserManager => userManager;
+
+    public virtual async Task<PagedResult<UserDto>> SearchAsync(SearchUserQuery search, int pageNumber, int pageSize)
+    {
+        return await userManager.Users
+            .AsNoTracking()
+            .WhereIf(
+                !string.IsNullOrEmpty(search.SearchValue),
+                x =>
+                    x.UserName!.Contains(search.SearchValue!)
+                    || x.FirstName!.Contains(search.SearchValue!)
+                    || x.LastName!.Contains(search.SearchValue!)
+                    || x.Email!.Contains(search.SearchValue!)
+                    || x.PhoneNumber!.Contains(search.SearchValue!)
+                )
+            .OrderByDescending(x => x.Created)
+            .ThenBy(x => x.UserName)
+            .MapToDto()
+            .ToPagedResultAsync(pageNumber, pageSize)
+            .ConfigureAwait(false);
+    }
 
     public virtual async Task<IEnumerable<UserDto>> GetAllAsync()
     {
@@ -69,9 +91,7 @@ public class UserService(UserManager<User> userManager) : IUserService
 
     public virtual async Task<IResult<UserDto>> GetByIdAsync(string id)
     {
-        var user = await userManager
-            .FindByIdAsync(id)
-            .ConfigureAwait(false);
+        var user = await userManager.FindByIdAsync(id).ConfigureAwait(false);
 
         if (user == null)
             return Result<UserDto>.NotFound($"User {id} not found");
@@ -83,9 +103,7 @@ public class UserService(UserManager<User> userManager) : IUserService
 
     public virtual async Task<IResult<UserDto>> GetByUserNameAsync(string userName)
     {
-        var user = await userManager
-            .FindByNameAsync(userName)
-            .ConfigureAwait(false);
+        var user = await userManager.FindByNameAsync(userName).ConfigureAwait(false);
 
         if (user == null)
             return Result<UserDto>.NotFound($"User {userName} not found");

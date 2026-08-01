@@ -1,8 +1,8 @@
-﻿using StarterKit.Identity.Contracts;
+using StarterKit.Identity.Contracts;
 
 namespace StarterKit.Identity.Api.Jwt;
 
-public interface ITokenService
+public interface IAuthenticationService
 {
     Task<IResult<TokenDto>> GetTokenAsync(
         string username, string password,

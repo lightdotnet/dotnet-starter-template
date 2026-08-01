@@ -7,11 +7,9 @@ using StarterKit.Infrastructure.Endpoints;
 
 namespace StarterKit.Identity.Api.Controllers;
 
-[ApiExplorerSettings(GroupName = "")]
-[Route("api/v{version:apiVersion}/oauth")]
+[ApiExplorerSettings(GroupName = "identity")]
 public class TokenController(
-    ITokenService tokenService,
-    JwtTokenManager jwtTokenMananger) : ApiControllerBase
+    IAuthenticationService authenticationService) : VersionedApiController
 {
     [AllowAnonymous]
     [HttpPost("token/get")]
@@ -22,7 +20,7 @@ public class TokenController(
     {
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
 
-        var res = await tokenService.GetTokenAsync(
+        var res = await authenticationService.GetTokenAsync(
             request.Username,
             request.Password,
             new DeviceDto
@@ -41,7 +39,7 @@ public class TokenController(
     {
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
 
-        var res = await tokenService.RefreshTokenAsync(
+        var res = await authenticationService.RefreshTokenAsync(
             request.AccessToken,
             request.RefreshToken,
             new DeviceDto
@@ -49,14 +47,6 @@ public class TokenController(
                 IpAddress = ipAddress,
             });
 
-        return Ok(res);
-    }
-
-    [HttpGet("token/check")]
-    public async Task<IActionResult> CheckToken()
-    {
-        var accessToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var res = await jwtTokenMananger.IsTokenValidAsync(accessToken);
         return Ok(res);
     }
 }

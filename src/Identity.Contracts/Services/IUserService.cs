@@ -3,6 +3,11 @@
 public interface IUserService
 {
     /// <summary>
+    /// Search users with pagination
+    /// </summary>
+    Task<PagedResult<UserDto>> SearchAsync(SearchUserQuery search, int pageNumber, int pageSize);
+
+    /// <summary>
     /// Get all users
     /// </summary>
     Task<IEnumerable<UserDto>> GetAllAsync();
