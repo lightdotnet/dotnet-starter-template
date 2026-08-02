@@ -8,7 +8,7 @@ ASP.NET Core (C#) Modular Monolith backend for the StarterKit template. The pre-
 
 | Module | Path | Responsibility | Status |
 |---|---|---|---|
-| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance. Single-project module (`Entities/`, `Data/`, `Application/`, `Services/`, `Jwt/`, `Controllers/` folders in `Identity.Api`) plus a `Contracts` seam project (DTOs, `IUserService`/`IRoleService`/`IServiceClaimService`). `.Api` suffix kept deliberately — anticipated candidate for future extraction into an independent identity service. | Built, but internal layering is still informal — CQRS commands and traditional service classes coexist for what should be one pattern. No test coverage yet from `tests/Framework.Tests`. |
+| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance. Single-project module (`Entities/`, `Data/`, `Application/`, `Services/`, `Jwt/`, `Controllers/` folders in `Identity.Api`) plus a `Contracts` seam project (DTOs, `IUserService`/`IRoleService`/`IServiceClaimService`). `.Api` suffix kept deliberately — anticipated candidate for future extraction into an independent identity service. | Built, but internal layering is still informal — CQRS commands and traditional service classes coexist for what should be one pattern. Now has automated test coverage via `tests/Identity.Tests` (98 tests: `Extensions/`, `Jwt/`, `Entities/`, `Services/`, `Controllers/`) — `Identity.Api.csproj` grants it `InternalsVisibleTo` to reach the module's `internal` JWT orchestration classes. |
 
 ## Shared/Host Projects
 
@@ -36,9 +36,11 @@ StarterKit.WebApi -> Shared
 Framework.Tests (tests/) -> Shared
 Framework.Tests (tests/) -> Infrastructure
 Framework.Tests (tests/) -> Persistence
+Identity.Tests (tests/) -> Identity.Api
+Identity.Tests (tests/) -> Shared
 ```
 
-`Shared` and `Identity.Contracts` are both leaves — `Identity.Contracts` is the first real example of the per-module `Contracts` seam and is confirmed to hold no `ProjectReference`s. No cross-module boundary violations found — `Identity` is still the only module, so the "modules reference only each other's `Contracts`" rule is unverified in practice (no second module exists to test it against). `Framework.Tests` does not yet reference `Identity.Api`/`Identity.Contracts` — no test coverage of the Identity module.
+`Shared` and `Identity.Contracts` are both leaves — `Identity.Contracts` is the first real example of the per-module `Contracts` seam and is confirmed to hold no `ProjectReference`s. No cross-module boundary violations found — `Identity` is still the only module, so the "modules reference only each other's `Contracts`" rule is unverified in practice (no second module exists to test it against). `Identity.Tests` is a second, separate test project (alongside `Framework.Tests`) that now covers the Identity module.
 
 ## Entry Points
 
@@ -50,7 +52,7 @@ One `DbContext` per module is the intended default.
 
 | Module | DbContext | Provider | Notes |
 |---|---|---|---|
-| Identity | `AppIdentityDbContext` (`src/Identity.Api/Data/AppIdentityDbContext.cs`) | Configured via `Persistence.DbContextExtensions.AddConfiguredDbContext`/`GetDbProvider` (`InMemory`/`PostgreSQL`/`MSSQL`/`Sqlite`, selected via `IConfiguration["DbProvider"]`; default in `appsettings.json` is `MSSQL`, pointing at a local `(localdb)\mssqllocaldb` instance) | Extends ASP.NET Identity's `IdentityDbContext<...>` directly (can't also extend `Persistence/Context/BaseDbContext.cs` — single inheritance), so it re-applies the Sqlite `DateTimeOffset` fix manually. Soft-delete is passed as `enableSoftDelete: false` despite `User` implementing `ISoftDelete` — flagged as a likely bug in `reviews/2026-07-30-backend-project-analysis.md`. |
+| Identity | `IdentityDbContext` (`src/Identity.Api/Data/IdentityDbContext.cs`, renamed from `AppIdentityDbContext`) | Configured via `Persistence.DbContextExtensions.AddConfiguredDbContext`/`GetDbProvider` (`InMemory`/`PostgreSQL`/`MSSQL`/`Sqlite`, selected via `IConfiguration["DbProvider"]`; default in `appsettings.json` is `MSSQL`, pointing at a local `(localdb)\mssqllocaldb` instance) | Extends ASP.NET Identity's `IdentityDbContext<...>` directly (can't also extend `Persistence/Context/BaseDbContext.cs` — single inheritance), so it re-applies the Sqlite `DateTimeOffset` fix manually. Soft-delete is still passed as `enableSoftDelete: false` despite `User` implementing `ISoftDelete` — flagged as a likely bug (D2) in `reviews/2026-07-30-backend-project-analysis.md`. `User` now has an index on `Created` and `UserSessions` an index on `UserId` (`EntityBuilderExtensions.BuildEntities`) — MSSQL migrations were reset to a fresh baseline this session (`src/Migrations/MSSQL/Identity/20260801104131_CreateIdentitySchema.cs`); Sqlite/PostgreSQL got an incremental `AddUserCreatedIndex` migration on top of their existing baseline. |
 
 ## External Dependencies
 
@@ -71,4 +73,4 @@ One `DbContext` per module is the intended default.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-01 — scope: backend solution — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-02 (resynced — added `tests/Identity.Tests`, closing the Identity module's test-coverage gap) — scope: backend solution — see .claude/CLAUDE.md for update rules._

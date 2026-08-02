@@ -15,8 +15,10 @@
 | `tests/Framework.Tests/Framework.Tests.csproj` | `src/Shared/Shared.csproj` | |
 | `tests/Framework.Tests/Framework.Tests.csproj` | `src/Infrastructure/Infrastructure.csproj` | |
 | `tests/Framework.Tests/Framework.Tests.csproj` | `src/Persistence/Persistence.csproj` | |
+| `tests/Identity.Tests/Identity.Tests.csproj` | `src/Identity.Api/Identity.Api.csproj` | |
+| `tests/Identity.Tests/Identity.Tests.csproj` | `src/Shared/Shared.csproj` | |
 
-`src/Shared/Shared.csproj` and `src/Identity.Contracts/Identity.Contracts.csproj` both have no project references (leaves). `Identity.Contracts` being a confirmed leaf is what makes it usable as the module's cross-boundary seam. `Framework.Tests` does not reference `Identity.Api`/`Identity.Contracts` — no automated coverage of the Identity module yet.
+`src/Shared/Shared.csproj` and `src/Identity.Contracts/Identity.Contracts.csproj` both have no project references (leaves). `Identity.Contracts` being a confirmed leaf is what makes it usable as the module's cross-boundary seam. `Identity.Api.csproj` also declares `<InternalsVisibleTo Include="Identity.Tests" />` (mirroring the pattern `Shared`/`Infrastructure`/`Persistence` use for `Framework.Tests`), giving `Identity.Tests` access to the module's `internal` JWT orchestration classes (`AuthenticationService`, `UserSessionService`, `JwtTokenIssuer`, `JwtSigningService`).
 
 ## Package References
 
@@ -52,8 +54,14 @@
 | Framework.Tests | xunit.v3 | 3.2.2 | Test framework. |
 | Framework.Tests | xunit.runner.visualstudio | 3.1.5 | Test runner/discovery. |
 | Framework.Tests | Microsoft.NET.Test.Sdk | 18.8.1 | Test SDK. |
+| Identity.Tests | xunit.v3 | 3.2.2 | Test framework. |
+| Identity.Tests | xunit.runner.visualstudio | 3.1.5 | Test runner/discovery. |
+| Identity.Tests | Microsoft.NET.Test.Sdk | 18.8.1 | Test SDK. |
+| Identity.Tests | Moq | 4.20.72 | Mocking library — used for `UserManager<User>`/service-interface test doubles; `Framework.Tests` uses hand-written fakes instead, so this is the first mocking-library dependency in the backend test suite. |
 
 `SQLitePCLRaw.bundle_e_sqlite3` (3.0.5, Sqlite native bundle) is centrally pinned in `Directory.Packages.props` but not directly referenced by any `<PackageReference>` observed in this pass (likely a transitive dependency of `Microsoft.EntityFrameworkCore.Sqlite`).
+
+**Undeclared transitive dependency**: `UserService.SearchAsync` (`src/Identity.Api/Services/UserService.cs`) uses `Light.EntityFrameworkCore.Extensions`' `WhereIf` — supplied by the `Lightsoft.EntityFrameworkCore` package, which `Identity.Api.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the `ProjectReference` to `Persistence` (which does declare it). Works today because `CentralPackageTransitivePinningEnabled=false` doesn't block it, but it's an implicit coupling — if `Persistence` ever drops that package, `Identity.Api` would silently break.
 
 ## Circular References
 
@@ -61,7 +69,7 @@ None found.
 
 ## Version Mismatches
 
-None — all packages are centrally managed via `Directory.Packages.props` (`Framework.Tests` pins its own 3 test packages independently, no overlap with the centrally-managed set).
+None — all packages are centrally managed via `Directory.Packages.props` (`Framework.Tests` and `Identity.Tests` each opt out via `ManagePackageVersionsCentrally=false` and pin their own test packages independently — `Identity.Tests` adds `Moq` on top of the same 3 xunit/Test.Sdk packages `Framework.Tests` uses — no overlap with the centrally-managed set).
 
 ## Cross-Module Boundary Violations (backend only)
 
@@ -72,4 +80,4 @@ None found. `Identity.Api` references only `Identity.Contracts`, `Infrastructure
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-01 — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-02 (resynced — added `tests/Identity.Tests` project references/packages, `Identity.Api`'s new `InternalsVisibleTo`) — scope: Backend — see .claude/CLAUDE.md for update rules._

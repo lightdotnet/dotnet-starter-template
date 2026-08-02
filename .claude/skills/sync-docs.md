@@ -20,12 +20,14 @@ Bring existing documentation under `.claude/docs/generated/` (and, if requested,
 2. **Read current doc**: load the existing generated doc content for the scope.
 3. **Read current code**: inspect the actual current state of the scoped module/project/folder/frontend area.
 4. **Diff**: identify what changed (new facts), what's now stale (no longer true), and what's unaffected.
-5. **Preserve manual content**: any clearly human-authored section (e.g. a "Notes" section, an explicit manual marker) must be kept verbatim.
-6. **Delegate the write**: invoke [documentation-writer](../agents/documentation-writer.md) to apply the update.
-7. **Report**: summarize what was added, updated, and removed.
+5. **Present one consolidated summary and get one approval**: list every file that will change and a short summary of what changes in each, then ask for a single approval covering the whole batch — never one approval per file.
+6. **Preserve manual content**: any clearly human-authored section (e.g. a "Notes" section, an explicit manual marker) must be kept verbatim.
+7. **Delegate the write**: invoke [documentation-writer](../agents/documentation-writer.md) to apply the update.
+8. **Report**: summarize what was added, updated, and removed.
 
 ## Expected Outputs
 
+- A pre-write summary (files + planned changes) with a single approval gate before any file is touched.
 - Updated doc file(s) reflecting current code, with manual content intact.
 - A changelog-style summary of the sync (added/updated/removed).
 
