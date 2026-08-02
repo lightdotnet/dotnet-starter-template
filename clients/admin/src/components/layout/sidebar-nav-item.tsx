@@ -49,7 +49,7 @@ export function SidebarNavItem({ item }: { item: NavItem }) {
           onClick={() => toggleExpanded(item.href)}
           aria-expanded={expanded}
           className={cn(
-            "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-sidebar-foreground/80 transition-colors duration-fast ease-standard hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            "flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-sidebar-foreground/80 transition-colors duration-fast ease-standard hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             branchActive && "text-sidebar-accent-foreground",
           )}
         >

@@ -17,6 +17,30 @@ function buildUrl(path: string, query?: Record<string, string | undefined>): URL
   return url;
 }
 
+/**
+ * Non-2xx responses can carry a real reason in the body — this app's own
+ * `ApiResponse.message` envelope, an ASP.NET `ValidationProblemDetails.errors`
+ * map, or a `ProblemDetails.title` — prefer whichever is present over the
+ * generic status-code message.
+ */
+async function extractErrorMessage(response: Response, path: string): Promise<string> {
+  try {
+    const body = await response.clone().json();
+    if (typeof body?.message === "string" && body.message) return body.message;
+    if (body?.errors && typeof body.errors === "object") {
+      const firstMessage = Object.values(body.errors)
+        .flat()
+        .find((message) => typeof message === "string");
+      if (firstMessage) return firstMessage as string;
+    }
+    if (typeof body?.title === "string" && body.title) return body.title;
+  } catch {
+    // Non-JSON body — fall through to the generic message.
+  }
+
+  return `Backend request to ${path} failed with status ${response.status}.`;
+}
+
 async function send(path: string, options: RequestOptions): Promise<Response> {
   const response = await fetch(buildUrl(path, options.query), {
     method: options.method ?? "GET",
@@ -30,9 +54,7 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
   });
 
   if (!response.ok) {
-    throw new Error(
-      `Backend request to ${path} failed with status ${response.status}.`,
-    );
+    throw new Error(await extractErrorMessage(response, path));
   }
 
   return response;
