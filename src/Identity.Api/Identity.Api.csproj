@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Identity.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Lightsoft.ActiveDirectory" />
     <PackageReference Include="Lightsoft.SharedKernel" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
