@@ -6,7 +6,7 @@ import type { SearchUsersParams, UserDto } from "@/types/user";
 export function searchUsers(accessToken: string, params: SearchUsersParams = {}) {
   return guardCall(() =>
     requestJson<PagedResult<UserDto>>("user/search", {
-      method: "POST",
+      method: "GET",
       accessToken,
       query: {
         searchValue: params.searchValue,

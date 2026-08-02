@@ -1,3 +1,4 @@
+export { UsersPage } from "./components/users-page";
 export { searchUsers } from "./api/search-users";
 export { getAllUsers } from "./api/get-all-users";
 export { getUserById } from "./api/get-user-by-id";
