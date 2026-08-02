@@ -6,11 +6,7 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const resolved = await resolveSession();
-  const user =
-    resolved?.profile.isSuccess && resolved.profile.data
-      ? resolved.profile.data
-      : null;
+  const session = await resolveSession();
 
-  return <AppShell user={user}>{children}</AppShell>;
+  return <AppShell user={session?.profile ?? null}>{children}</AppShell>;
 }

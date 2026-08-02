@@ -11,12 +11,12 @@ import { Brand } from "@/components/layout/brand";
 import { SearchBox } from "@/components/shared/search-box";
 import { ThemeToggle, AccentColorPicker } from "@/components/theme";
 import { UserMenu } from "@/components/layout/user-menu";
-import type { UserDto } from "@/types/user";
+import type { ProfileData } from "@/types/session";
 
 // Placeholder count — no notifications backend wired up in this UI shell.
 const MOCK_NOTIFICATION_COUNT = 3;
 
-export function TopBar({ user }: { user: UserDto | null }) {
+export function TopBar({ user }: { user: ProfileData | null }) {
   const scrolled = useScrolled();
   const { hidden, toggleSidebar, setMobileOpen } = useSidebar();
 

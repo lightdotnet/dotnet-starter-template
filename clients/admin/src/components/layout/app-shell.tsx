@@ -1,13 +1,13 @@
 import { SidebarProvider } from "@/hooks/use-sidebar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
-import type { UserDto } from "@/types/user";
+import type { ProfileData } from "@/types/session";
 
 export function AppShell({
   user,
   children,
 }: {
-  user: UserDto | null;
+  user: ProfileData | null;
   children: React.ReactNode;
 }) {
   return (

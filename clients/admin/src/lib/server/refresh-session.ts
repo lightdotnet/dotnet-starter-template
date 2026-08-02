@@ -1,0 +1,31 @@
+import { refreshToken } from "@/features/auth/api/refresh-token";
+import { extractPermissions, extractRoles } from "@/lib/server/jwt";
+import type { SessionData } from "@/types/session";
+
+/**
+ * Attempts to rotate the access/refresh token. Returns null on any failure —
+ * callers must not treat a failed refresh as proof the session is dead:
+ * multi-tab rotation races look identical to a real failure from here, and
+ * the actual backend calls enforce revocation anyway.
+ */
+export async function refreshSession(session: SessionData): Promise<SessionData | null> {
+  if (!session.refreshToken) return null;
+
+  const result = await refreshToken({
+    accessToken: session.accessToken,
+    refreshToken: session.refreshToken,
+  });
+
+  if (!result.isSuccess || !result.data) return null;
+
+  const token = result.data;
+  return {
+    ...session,
+    accessToken: token.accessToken,
+    expiresAt: Date.now() + token.expiresIn * 1000,
+    refreshToken: token.refreshToken,
+    // Roles/permissions live in the JWT — re-decode from the freshly-issued token.
+    permissions: extractPermissions(token.accessToken),
+    roles: extractRoles(token.accessToken),
+  };
+}

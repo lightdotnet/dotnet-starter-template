@@ -13,9 +13,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getDisplayName, getInitials } from "@/lib/shared/user-display";
-import type { UserDto } from "@/types/user";
+import { logoutAction } from "@/features/auth/api/logout-action";
+import type { ProfileData } from "@/types/session";
 
-export function UserMenu({ user }: { user: UserDto | null }) {
+export function UserMenu({ user }: { user: ProfileData | null }) {
   const name = user ? getDisplayName(user) : "Unknown user";
 
   return (
@@ -55,7 +56,7 @@ export function UserMenu({ user }: { user: UserDto | null }) {
           Settings
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
+        <DropdownMenuItem variant="destructive" onClick={() => void logoutAction()}>
           <LogOut />
           Log out
         </DropdownMenuItem>
