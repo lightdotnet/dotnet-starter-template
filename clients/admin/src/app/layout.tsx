@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider, AccentColorProvider } from "@/components/theme";
+import { AppToaster } from "@/components/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AccentColorProvider>
             <TooltipProvider>{children}</TooltipProvider>
+            <AppToaster />
           </AccentColorProvider>
         </ThemeProvider>
       </body>

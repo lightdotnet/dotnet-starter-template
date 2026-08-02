@@ -228,3 +228,27 @@
     background-clip: content-box;
   }
 }
+
+/* Toastr-style toast progress-bar countdown (components/toast). */
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Hide native up/down spinner arrows on number inputs. */
+@layer base {
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
