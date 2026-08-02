@@ -7,11 +7,12 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | From | To | Notes |
 |---|---|---|
 | `proxy.ts` | `lib/server/session-cookie.ts` | Constant-only import — keeps the edge-runtime `proxy.ts` free of `next/headers` |
-| `app/layout.tsx` | `components/theme` (barrel), `components/ui/tooltip.tsx` | Root layout |
+| `app/layout.tsx` | `components/theme` (barrel), `components/toast` (barrel — `AppToaster`), `components/ui/tooltip.tsx` | Root layout |
 | `app/login/page.tsx` | `features/auth` (barrel) | Re-export only |
 | `app/(dashboard)/layout.tsx` | `components/layout/app-shell.tsx`, `features/user-profile` (barrel) | Calls `resolveSession()` before rendering `AppShell` |
 | `app/(dashboard)/page.tsx` | `features/dashboard` (barrel) | Re-export only |
 | `app/(dashboard)/user-profile/page.tsx` | `features/user-profile` (barrel) | Re-export only |
+| `app/(dashboard)/identity/users/page.tsx` | `features/users` (barrel) | Re-export only — new route |
 | `components/layout/app-shell.tsx` | `hooks/use-sidebar.tsx`, `components/layout/{sidebar,topbar}.tsx` | Extracted out of the former `app/(dashboard)/layout.tsx` |
 | `components/layout/topbar.tsx` | `lib/shared/utils.ts`, `hooks/{use-scrolled,use-sidebar}.ts(x)`, `components/ui/{button,badge}.tsx`, `components/layout/{breadcrumbs,brand,user-menu}.tsx`, `components/shared/search-box.tsx`, `components/theme` (barrel: `ThemeToggle`, `AccentColorPicker`) | |
 | `components/layout/sidebar.tsx` | `lib/shared/utils.ts`, `hooks/use-sidebar.tsx`, `components/layout/sidebar-nav-item.tsx`, `constants/nav-items.ts`, `components/ui/sheet.tsx` | |
@@ -35,12 +36,24 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `features/dashboard/index.ts` | `./components/dashboard-page.tsx` | Barrel |
 | `features/dashboard/components/dashboard-page.tsx` | `components/ui/card.tsx`, `./stat-card.tsx`, `./users-table.tsx`, `features/dashboard/api/sample-data.ts` | |
 | `features/dashboard/components/{stat-card,users-table}.tsx` | `components/ui/*`, `lib/shared/utils.ts`, `features/dashboard/api/sample-data.ts` | Mock data — no backend call |
-| `features/users/index.ts` | `./api/{search-users,get-all-users,get-user-by-id,get-user-by-username,create-user,update-user,delete-user,force-password}.ts` | Barrel; not imported outside this feature |
-| `features/users/api/*.ts` (8 files) | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,user}.ts` | |
-| `features/roles/index.ts` | `./api/{get-all-roles,get-role-by-id,create-role,update-role,delete-role}.ts`, `./types/role.ts` | Barrel; not imported outside this feature |
+| `features/users/index.ts` | `./components/users-page.tsx`, `./api/{search-users,get-all-users,get-user-by-id,get-user-by-username,create-user,update-user,delete-user,force-password}.ts` | Barrel; now imported by `app/(dashboard)/identity/users/page.tsx` — first UI consumer |
+| `features/users/components/users-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/search-users.ts`, `features/users/components/users-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `constants/permissions.ts`, `components/ui/empty.tsx`, `next/navigation` (`redirect`) | New — async Server Component; gates on `Users.View`/`Users.Create` |
+| `features/users/components/users-data-table.tsx` | `components/shared/data-table` (barrel — `DataTable` + types), `components/ui/{avatar,badge}.tsx`, `features/users/components/create-user-dialog.tsx`, `features/user-profile/components/user-status-badge.tsx`, `lib/shared/user-display.ts`, `types/user.ts`, `next/navigation` (`useRouter`/`usePathname`/`useSearchParams`) | New — thin `DataTable` wrapper; drives URL-param search/pagination |
+| `features/users/components/create-user-dialog.tsx` | `components/ui/{alert,button,dialog,input,label}.tsx`, `components/toast` (barrel — `notifySuccess`), `features/users/api/create-user-action.ts` | New |
+| `features/users/api/create-user-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/create-user.ts`, `types/user.ts` | New — `"use server"` |
+| `features/users/api/search-users.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,user}.ts` | **Fixed this sync**: `method` changed `POST` → `GET`, matching `UserController`'s `[HttpGet("search")]` |
+| `features/users/api/*.ts` (7 remaining files) | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,user}.ts` | |
+| `features/roles/index.ts` | `./api/{get-all-roles,get-role-by-id,create-role,update-role,delete-role}.ts`, `./types/role.ts` | Barrel; not imported outside this feature — unchanged this sync |
 | `features/roles/api/*.ts` (5 files) | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | |
+| `components/shared/data-table/data-table.tsx` | `components/ui/{table,skeleton,empty,alert}.tsx`, `./data-table-toolbar.tsx`, `./data-table-pagination.tsx`, `./types.ts` | New; exported via `./index.ts` barrel |
+| `components/shared/data-table/data-table-toolbar.tsx` | `components/ui/{button,dropdown-menu}.tsx`, `lib/shared/utils.ts`, `./types.ts` | New — debounced (400ms) search input |
+| `components/shared/data-table/data-table-pagination.tsx` | `components/ui/{input,pagination}.tsx` | New — exports `getPageWindow()` helper |
+| `components/toast/toaster.tsx` | `next-themes`, `sonner`, `./toast-theme.ts` | New |
+| `components/toast/notify.ts` | `sonner` | New |
+| `components/toast/toast-theme.ts` | `sonner` (types only) | New |
 | `lib/server/session.ts` | `next/headers` (`cookies`), `lib/server/session-cookie.ts`, `types/session.ts` | |
-| `lib/server/http.ts` | `lib/server/config.ts` (`getApiBaseUrl`) | |
+| `lib/server/http.ts` | `lib/server/config.ts` (`getApiBaseUrl`) | `send()` gained `extractErrorMessage()` — reads non-2xx response bodies for a real error message |
+| `lib/server/authorization.ts` | `types/session.ts` (`SessionData`) | Pre-existing file, gained its first real consumer this sync (`features/users/components/users-page.tsx`) |
 | `components/ui/*` | `lib/shared/utils.ts`, `radix-ui`, `class-variance-authority`, `lucide-react` | `button.tsx` additionally imports `components/ui/spinner.tsx` |
 | `hooks/use-sidebar.tsx` | `next/navigation` (`usePathname`) | |
 
@@ -58,8 +71,9 @@ From `clients/admin/package.json` (`dependencies`):
 | `clsx` | `^2.1.1` | Used inside `lib/shared/utils.ts`'s `cn()` |
 | `tailwind-merge` | `^3.6.0` | Used inside `lib/shared/utils.ts`'s `cn()` |
 | `lucide-react` | `^1.28.0` | Icon set |
-| `next-themes` | `^0.4.6` | Theme (light/dark/system) switching |
-| `qrcode` | `^1.5.4` | **New** — QR code generation for `/user-profile`'s user-ID code |
+| `next-themes` | `^0.4.6` | Theme (light/dark/system) switching; also drives `components/toast/toaster.tsx`'s light/dark toast theme |
+| `qrcode` | `^1.5.4` | QR code generation for `/user-profile`'s user-ID code |
+| `sonner` | `^2.0.7` | **New** — toast notifications, wrapped by `components/toast/` (not imported directly by feature code) |
 | `shadcn` | `^4.16.0` | CLI that generated `components/ui/*`; also imported at runtime (`shadcn/tailwind.css`) |
 | `tw-animate-css` | `^1.4.0` | Animation utility classes |
 
@@ -70,7 +84,7 @@ From `clients/admin/package.json` (`dependencies`):
 | `@tailwindcss/postcss` | `^4` | Tailwind v4 PostCSS plugin |
 | `tailwindcss` | `^4` | |
 | `@types/node` | `^20` | |
-| `@types/qrcode` | `^1.5.6` | **New** — types for the `qrcode` runtime dependency |
+| `@types/qrcode` | `^1.5.6` | Types for the `qrcode` runtime dependency |
 | `@types/react` | `^19` | |
 | `@types/react-dom` | `^19` | |
 | `eslint` | `^9` | |
@@ -83,7 +97,7 @@ Package manager: pnpm (`pnpm-lock.yaml`). A `pnpm-workspace.yaml` exists but onl
 
 ## Circular References
 
-None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`) go one direction only, through the target feature's barrel.
+None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`, `features/users` → `features/user-profile`) go one direction only, through the target feature's barrel. `components/shared/data-table/*` and `components/toast/*` are consumed by `features/users` but import nothing from `features/*` themselves, so no cycle there either.
 
 ## Version Mismatches
 
@@ -98,4 +112,4 @@ Not applicable — this is a client-app dependency graph, not backend.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-01 — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-02 — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
