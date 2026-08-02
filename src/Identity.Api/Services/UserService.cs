@@ -17,16 +17,24 @@ public class UserService(UserManager<User> userManager) : IUserService
 
     public virtual async Task<PagedResult<UserDto>> SearchAsync(SearchUserQuery search, int pageNumber, int pageSize)
     {
+        // Only search once the value is within a sane length: too short (<2) is a near-universal
+        // match not worth the 5-column scan, too long (>256) is an unbounded-input guard.
+        var searchValue = search.SearchValue?.Trim();
+        var hasSearch = searchValue is { Length: >= 2 and <= 256 };
+
         return await userManager.Users
             .AsNoTracking()
+            // Contains() case-sensitivity depends on the active provider's default collation
+            // (case-insensitive on SQL Server, case-sensitive on PostgreSQL) - normalize
+            // explicitly (e.g. EF.Functions.ILike on PostgreSQL) if that needs to be consistent.
             .WhereIf(
-                !string.IsNullOrEmpty(search.SearchValue),
+                hasSearch,
                 x =>
-                    x.UserName!.Contains(search.SearchValue!)
-                    || x.FirstName!.Contains(search.SearchValue!)
-                    || x.LastName!.Contains(search.SearchValue!)
-                    || x.Email!.Contains(search.SearchValue!)
-                    || x.PhoneNumber!.Contains(search.SearchValue!)
+                    x.UserName!.Contains(searchValue!)
+                    || x.FirstName!.Contains(searchValue!)
+                    || x.LastName!.Contains(searchValue!)
+                    || x.Email!.Contains(searchValue!)
+                    || x.PhoneNumber!.Contains(searchValue!)
                 )
             .OrderByDescending(x => x.Created)
             .ThenBy(x => x.UserName)

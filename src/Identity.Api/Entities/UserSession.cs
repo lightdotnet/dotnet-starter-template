@@ -27,5 +27,5 @@ public class UserSession : Entity
 
     public string? PhysicalAddress { get; set; }
 
-    public long TokenExpiresInSeconds => (long)(TokenExpiresAt - DateTimeOffset.Now).TotalSeconds;
+    public long GetTokenExpiresInSeconds(DateTimeOffset now) => (long)(TokenExpiresAt - now).TotalSeconds;
 }

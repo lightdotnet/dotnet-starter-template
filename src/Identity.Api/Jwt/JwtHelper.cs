@@ -1,32 +1,12 @@
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using StarterKit.Shared.Constants;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
+using System.Text.Json;
 
 namespace StarterKit.Identity.Api.Jwt;
 
 public static class JwtHelper
 {
-    public static string GenerateToken(string issuer, IEnumerable<Claim> claims, DateTime expiresAt, string key)
-    {
-        var signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-            SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: issuer,
-            claims: claims,
-            expires: expiresAt,
-            signingCredentials: signingCredentials);
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-
-        var encryptedToken = tokenHandler.WriteToken(token);
-
-        return encryptedToken;
-    }
-
     public static string GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
@@ -35,30 +15,49 @@ public static class JwtHelper
         return Convert.ToBase64String(randomNumber);
     }
 
-    public static ClaimsPrincipal GetPrincipalFromExpiredToken(string token, string issuer, string key, string roleClaimType)
+    /// <summary>
+    /// return Claim to use ClaimsIdentity
+    /// </summary>
+    public static List<Claim> ReadClaims(string jwt)
     {
-        var tokenValidationParameters = new TokenValidationParameters
+        var payload = jwt.Split('.')[1];
+        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(ParseBase64WithoutPadding(payload));
+
+        if (keyValuePairs is null)
+            return [];
+
+        var claims = new List<Claim>();
+
+        AddMultiValueClaims(claims, keyValuePairs, ClaimTypeConstants.Role);
+        AddMultiValueClaims(claims, keyValuePairs, ClaimTypeConstants.Permission);
+
+        claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString() ?? string.Empty)));
+
+        return claims;
+    }
+
+    private static void AddMultiValueClaims(List<Claim> claims, Dictionary<string, object> source, string claimType)
+    {
+        if (!source.Remove(claimType, out var value) || value?.ToString() is not { Length: > 0 } stringValue)
+            return;
+
+        if (stringValue.Trim().StartsWith('['))
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-            ValidateIssuer = true,
-            ValidIssuer = issuer,
-            ValidateAudience = false,
-            RoleClaimType = roleClaimType,
-            ClockSkew = TimeSpan.Zero,
-            ValidateLifetime = false
-        };
+            var values = JsonSerializer.Deserialize<string[]>(stringValue);
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-
-        if (securityToken is not JwtSecurityToken jwtSecurityToken
-            || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-        {
-            throw new SecurityTokenException("Invalid token");
+            if (values is not null)
+                claims.AddRange(values.Select(v => new Claim(claimType, v)));
         }
+        else
+        {
+            claims.Add(new Claim(claimType, stringValue));
+        }
+    }
 
-        return principal;
+    private static byte[] ParseBase64WithoutPadding(string payload)
+    {
+        payload = payload.Trim().Replace('-', '+').Replace('_', '/');
+        var base64 = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+        return Convert.FromBase64String(base64);
     }
 }

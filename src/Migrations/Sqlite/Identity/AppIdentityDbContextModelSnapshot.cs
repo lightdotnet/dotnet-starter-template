@@ -163,6 +163,8 @@ namespace Sqlite.Identity
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Created");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 

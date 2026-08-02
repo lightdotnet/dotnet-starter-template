@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Identity.Contracts;
+using StarterKit.Shared;
 using StarterKit.Shared.Constants;
 using System.Security.Claims;
 
@@ -13,7 +14,8 @@ internal class AuthenticationService(
     IUserSessionService userSessionService,
     UserManager<User> userManager,
     IActiveDirectoryService domainService,
-    TimeProvider timeProvider) : IAuthenticationService
+    JwtSigningService jwtSigningService,
+    IDateTime dateTime) : IAuthenticationService
 {
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
@@ -45,15 +47,10 @@ internal class AuthenticationService(
             return errorResult;
         }
 
-        var now = timeProvider.GetUtcNow().UtcDateTime;
-
-        var tokenExpiresAt = now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
-        var refreshTokenExpiresAt = now.AddDays(_jwt.RefreshTokenExpirationDays);
+        var (tokenExpiresAt, refreshTokenExpiresAt) = ComputeExpirations();
 
         var token = await userSessionService.GenerateTokenAsync(
             user,
-            _jwt.Issuer,
-            _jwt.SecretKey,
             tokenExpiresAt,
             refreshTokenExpiresAt,
             device);
@@ -66,11 +63,7 @@ internal class AuthenticationService(
         DeviceDto? device = null)
     {
         // get UserPrincipal from expired token
-        var userPrincipal = JwtHelper.GetPrincipalFromExpiredToken(
-            accessToken,
-            jwtOptions.Value.Issuer,
-            jwtOptions.Value.SecretKey,
-            ClaimTypeConstants.Role);
+        var userPrincipal = jwtSigningService.Validate(accessToken, expired: true);
 
         // get userID from UserPrincipal
         var userId = userPrincipal.FindFirstValue(ClaimTypeConstants.UserId);
@@ -83,21 +76,25 @@ internal class AuthenticationService(
         if (user is null || await CheckInvalidUser(user))
             return Result<TokenDto>.Unauthorized("Invalid credentials.");
 
-        var now = timeProvider.GetUtcNow().UtcDateTime;
-
-        var tokenExpiresAt = now.AddSeconds(_jwt.AccessTokenExpirationSeconds);
-        var refreshTokenExpiresAt = now.AddDays(_jwt.RefreshTokenExpirationDays);
+        var (tokenExpiresAt, refreshTokenExpiresAt) = ComputeExpirations();
 
         var token = await userSessionService.RefreshTokenAsync(
             user,
             refreshToken,
-            _jwt.Issuer,
-            _jwt.SecretKey,
             tokenExpiresAt,
             refreshTokenExpiresAt,
             device);
 
         return Result<TokenDto>.Success(token);
+    }
+
+    private (DateTime TokenExpiresAt, DateTime RefreshTokenExpiresAt) ComputeExpirations()
+    {
+        var now = dateTime.UtcNow.UtcDateTime;
+
+        return (
+            now.AddSeconds(_jwt.AccessTokenExpirationSeconds),
+            now.AddDays(_jwt.RefreshTokenExpirationDays));
     }
 
     public virtual Task<bool> CheckInvalidUser(User user)

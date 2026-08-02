@@ -1,20 +1,18 @@
 ﻿using Asp.Versioning.Conventions;
 using FluentValidation;
-using HealthChecks.UI.Client;
 using Light.AspNetCore.Builder;
 using Light.AspNetCore.Middlewares;
 using Light.AspNetCore.Swagger;
 using Light.Mediator;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using StarterKit.Identity.Api;
 using StarterKit.Infrastructure;
 using StarterKit.Infrastructure.Cors;
+using StarterKit.Infrastructure.HealthChecks;
 using StarterKit.Infrastructure.Modularity;
 using StarterKit.Infrastructure.Services;
 using StarterKit.Shared;
 using StarterKit.Shared.Authorization;
 using System.Reflection;
-using StarterKit.Infrastructure.HealthChecks;
 
 namespace StarterKit.WebApi;
 

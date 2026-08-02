@@ -10,6 +10,7 @@ public class AccessControlTests
 {
     private sealed class FakeCurrentUser(string? username) : ICurrentUser
     {
+        public string? SessionId => "s-1";
         public string? UserId => "u-1";
         public string? Username => username;
         public bool IsAuthenticated => true;

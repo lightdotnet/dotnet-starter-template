@@ -6,6 +6,8 @@ public abstract class CurrentUserBase : ICurrentUser
 {
     public virtual System.Security.Claims.ClaimsPrincipal? User { get; set; }
 
+    public string? SessionId => User?.GetSessionId();
+
     public string? UserId => User?.GetUserId();
 
     public string? Username => User?.GetUserName();

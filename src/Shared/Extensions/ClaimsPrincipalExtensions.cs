@@ -10,6 +10,9 @@ public static class ClaimsPrincipalExtensions
             ? throw new ArgumentNullException(nameof(principal))
             : principal.FindFirst(claimType)?.Value;
 
+    public static string? GetSessionId(this ClaimsPrincipal principal) =>
+        principal?.FindFirstValue(ClaimTypeConstants.TokenId);
+
     public static string? GetUserId(this ClaimsPrincipal principal) =>
         principal?.FindFirstValue(ClaimTypeConstants.UserId);
 

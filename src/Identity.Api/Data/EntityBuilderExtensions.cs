@@ -14,6 +14,8 @@ internal static class EntityBuilderExtensions
         {
             entity.ToTable(name: Tables.Users);
 
+            entity.HasIndex(x => x.Created);
+
             // Configure a relationship where the ActiveStatus is owned by (or part of) User.
             entity.OwnsOne(o => o.Status).Property(p => p.Value).HasColumnName("Status");
             entity.Navigation(emp => emp.Status).IsRequired();

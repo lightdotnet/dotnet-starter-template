@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using StarterKit.Identity.Api.Data;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Shared.Constants;
 using System.Security.Claims;
@@ -7,40 +8,33 @@ namespace StarterKit.Identity.Api.Jwt;
 
 internal class JwtTokenIssuer(
     UserManager<User> userManager,
-    RoleManager<Role> roleManager)
+    IdentityDbContext context,
+    JwtSigningService jwtSigningService)
 {
     public virtual async Task<string> IssueAsync(
         User user, string tokenId,
-        string issuer, string secretKey,
         DateTime tokenExpiresAt)
     {
         var claims = await GetUserClaimsAsync(user);
 
         claims.Add(new Claim(ClaimTypeConstants.TokenId, tokenId));
 
-        return JwtHelper.GenerateToken(
-            issuer,
-            claims,
-            tokenExpiresAt,
-            secretKey);
+        return jwtSigningService.Generate(claims, tokenExpiresAt);
     }
 
     private async Task<IList<Claim>> GetUserClaimsAsync(User user)
     {
         var userRoles = await userManager.GetRolesAsync(user);
 
-        var permissionClaims = new List<Claim>();
+        var roleIds = await context.Roles
+            .Where(r => r.Name != null && userRoles.Contains(r.Name))
+            .Select(r => r.Id)
+            .ToListAsync();
 
-        foreach (var userRole in userRoles)
-        {
-            var role = await roleManager.FindByNameAsync(userRole);
-            if (role is null)
-                continue;
-
-            var roleClaims = await roleManager.GetClaimsAsync(role);
-
-            permissionClaims.AddRange(roleClaims);
-        }
+        var permissionClaims = await context.RoleClaims
+            .Where(rc => roleIds.Contains(rc.RoleId))
+            .Select(rc => new Claim(rc.ClaimType!, rc.ClaimValue!))
+            .ToListAsync();
 
         var claims = new List<Claim>
         {

@@ -2,6 +2,8 @@ namespace StarterKit.Shared;
 
 public interface ICurrentUser
 {
+    string? SessionId { get; }
+
     string? UserId { get; }
 
     string? Username { get; }

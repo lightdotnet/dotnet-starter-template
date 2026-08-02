@@ -5,13 +5,15 @@ namespace StarterKit.Persistence.Extensions;
 
 public static class QueryableResultExtensions
 {
+    public const int MaxPageSize = 100;
+
     public static async Task<Paged<T>> ToPagedAsync<T>(this IQueryable<T> queryable,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default)
     {
         pageNumber = pageNumber <= 0 ? 1 : pageNumber;
-        pageSize = pageSize <= 0 ? 10 : pageSize;
+        pageSize = pageSize <= 0 ? 10 : Math.Min(pageSize, MaxPageSize);
         var count = await queryable.CountAsync(cancellationToken);
         var items = await queryable.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 

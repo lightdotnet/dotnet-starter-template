@@ -2,20 +2,22 @@ using Light.Exceptions;
 using StarterKit.Identity.Api.Data;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Identity.Contracts;
+using StarterKit.Shared;
 
 namespace StarterKit.Identity.Api.Jwt;
 
 internal class UserSessionService(
     JwtTokenIssuer tokenIssuer,
     IdentityDbContext context,
-    TimeProvider timeProvider) : IUserSessionService
+    IDateTime dateTime) : IUserSessionService
 {
     public virtual async Task<TokenDto> GenerateTokenAsync(
         User user,
-        string issuer, string secretKey,
         DateTime tokenExpiresAt, DateTime refreshTokenExpiresAt,
         DeviceDto? device = null)
     {
+        var now = dateTime.UtcNow;
+
         var newToken = new UserSession
         {
             UserId = user.Id,
@@ -28,36 +30,35 @@ internal class UserSessionService(
             PhysicalAddress = device?.PhysicalAddress,
         };
 
-        var jwtToken = await tokenIssuer.IssueAsync(user, newToken.Id, issuer, secretKey, tokenExpiresAt);
+        var jwtToken = await tokenIssuer.IssueAsync(user, newToken.Id, tokenExpiresAt);
 
         newToken.Token = jwtToken;
 
         await context.UserSessions.AddAsync(newToken);
         await context.SaveChangesAsync();
 
-        return new TokenDto(jwtToken, newToken.TokenExpiresInSeconds, newToken.RefreshToken);
+        return new TokenDto(jwtToken, newToken.GetTokenExpiresInSeconds(now), newToken.RefreshToken);
     }
 
     public virtual async Task<TokenDto> RefreshTokenAsync(
         User user,
         string refreshToken,
-        string issuer, string secretKey,
         DateTime tokenExpiresAt, DateTime refreshTokenExpiresAt,
         DeviceDto? device = null)
     {
-        var now = timeProvider.GetUtcNow();
-        
+        var now = dateTime.UtcNow;
+
         // check refresh token is exist and not out of lifetime
         var userToken = await context.UserSessions
             .Where(x =>
                 x.UserId == user.Id
                 && x.RefreshToken == refreshToken
-                && x.RefreshTokenExpiresAt >= now.Date
+                && x.RefreshTokenExpiresAt >= now
                 && x.Revoked == false)
             .FirstOrDefaultAsync()
             ?? throw new UnauthorizedException("Refresh token invalid.");
 
-        var jwtToken = await tokenIssuer.IssueAsync(user, userToken.Id, issuer, secretKey, tokenExpiresAt);
+        var jwtToken = await tokenIssuer.IssueAsync(user, userToken.Id, tokenExpiresAt);
 
         userToken.Token = jwtToken;
         userToken.TokenExpiresAt = tokenExpiresAt;
@@ -71,12 +72,12 @@ internal class UserSessionService(
 
         await context.SaveChangesAsync();
 
-        return new TokenDto(jwtToken, userToken.TokenExpiresInSeconds, userToken.RefreshToken);
+        return new TokenDto(jwtToken, userToken.GetTokenExpiresInSeconds(now), userToken.RefreshToken);
     }
 
     public async Task<IEnumerable<UserSessionDto>> GetUserTokensAsync(string userId)
     {
-        var now = timeProvider.GetUtcNow();
+        var now = dateTime.UtcNow;
 
         var list = await context.UserSessions
             .Where(x =>
@@ -104,13 +105,13 @@ internal class UserSessionService(
         return list;
     }
 
-    public Task<bool> IsTokenValidAsync(string accessToken)
+    public Task<bool> IsTokenValidAsync(string tokenId)
     {
-        var now = timeProvider.GetUtcNow();
-        
+        var now = dateTime.UtcNow;
+
         return context.UserSessions
             .Where(x =>
-                x.Token == accessToken
+                x.Id == tokenId
                 && x.Revoked == false
                 && x.TokenExpiresAt > now)
             .AsNoTracking()

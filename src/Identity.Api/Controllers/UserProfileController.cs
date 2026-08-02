@@ -1,6 +1,5 @@
 ﻿using Light.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using StarterKit.Identity.Api.Jwt;
 using StarterKit.Identity.Contracts.Services;
 using StarterKit.Infrastructure.Endpoints;
@@ -20,8 +19,14 @@ public class UserProfileController(
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        var accessToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-        var isTokenValid = await userSessionService.IsTokenValidAsync(accessToken);
+        var sessionId = currentUser.SessionId;
+
+        if (string.IsNullOrEmpty(sessionId))
+        {
+            return Ok(Result.Unauthorized());
+        }
+
+        var isTokenValid = await userSessionService.IsTokenValidAsync(sessionId);
 
         if (isTokenValid is false)
         {

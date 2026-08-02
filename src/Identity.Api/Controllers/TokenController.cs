@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using StarterKit.Identity.Api.Jwt;
 using StarterKit.Identity.Contracts;
 using StarterKit.Infrastructure.Endpoints;

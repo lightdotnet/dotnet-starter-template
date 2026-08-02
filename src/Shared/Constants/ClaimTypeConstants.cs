@@ -23,7 +23,7 @@ public abstract class ClaimTypeConstants
 
     public const string Expiration = "exp";
 
-    public const string TokenId = "tid";
+    public const string TokenId = "jti";
 
     public const string AccessToken = "token";
 

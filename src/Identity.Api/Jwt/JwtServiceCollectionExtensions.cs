@@ -13,7 +13,7 @@ public static class JwtServiceCollectionExtensions
         var sectionName = "Jwt";
         services.AddOptions<JwtOptions>().BindConfiguration(sectionName);
         var jwtSettings = configuration.GetSection(sectionName).Get<JwtOptions>();
-        ArgumentNullException.ThrowIfNull(jwtSettings, nameof(JwtOptions));
+        ArgumentNullException.ThrowIfNull(jwtSettings, nameof(jwtSettings));
 
         // inject this for use jwt auth
         services.AddJwtAuth(
@@ -22,6 +22,7 @@ public static class JwtServiceCollectionExtensions
             ClaimTypeConstants.Role);
 
         // services
+        services.AddSingleton<JwtSigningService>();
         services.AddScoped<JwtTokenIssuer>();
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();

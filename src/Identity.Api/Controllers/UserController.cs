@@ -14,7 +14,7 @@ public class UserController(
     IUserService userService,
     IActiveDirectoryService activeDirectoryService) : VersionedApiController
 {
-    [HttpPost("search")]
+    [HttpGet("search")]
     public async Task<IActionResult> SearchAsync(
         [FromQuery] SearchUserQuery search,
         [FromQuery] PageQuery page)
