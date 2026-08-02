@@ -13,6 +13,8 @@ public class IdentityModule : AppModule
 
         services.AddJwtAuthentication(configuration);
 
+        services.AddSingleton<IPermissionDefinitionProvider, IdentityPermissionProvider>();
+
         ShowModuleInfo();
     }
 }
