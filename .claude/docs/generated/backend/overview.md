@@ -2,13 +2,16 @@
 
 ## Purpose
 
-ASP.NET Core (C#) Modular Monolith backend for the StarterKit template. The pre-module shared kernel (`src/Shared`, `src/Infrastructure`) has since gained `src/Persistence` (EF Core concerns split out of `Infrastructure`), the first real business module — `Identity` (`src/Identity.Api` + `src/Identity.Contracts`) — and a working composition-root host, `src/StarterKit.WebApi` (`Program.cs`).
+ASP.NET Core (C#) Modular Monolith backend for the StarterKit template. The pre-module shared kernel (`src/Shared`, `src/Infrastructure`) has since gained `src/Persistence` (EF Core concerns split out of `Infrastructure`), two business modules — `Identity` (`src/Identity.Api` + `src/Identity.Contracts`) and `Notifications` (`src/Notifications.Api` + `src/Notifications.Contracts`) — and a working composition-root host, `src/StarterKit.WebApi` (`Program.cs`).
+
+Each module now has its own deep-dive doc under `modules/<ModuleName>.md` — this file and the other solution-wide docs keep only a summary; see the linked module doc for full detail (layering, public contract, data access, dependencies, conventions).
 
 ## Modules
 
 | Module | Path | Responsibility | Status |
 |---|---|---|---|
-| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance, plus a permission catalog (`PermissionsController`, `GET permissions`). Single-project module (`Entities/`, `Data/`, `Application/`, `Services/`, `Jwt/`, `Controllers/` folders in `Identity.Api`) plus a `Contracts` seam project (DTOs, `IUserService`/`IRoleService`/`IServiceClaimService`, and now `Authorization/IdentityPermissionProvider` — an `IPermissionDefinitionProvider` implementation listing the module's definable permissions). `.Api` suffix kept deliberately — anticipated candidate for future extraction into an independent identity service. | Built, but internal layering is still informal — CQRS commands and traditional service classes coexist for what should be one pattern. Now has automated test coverage via `tests/Identity.Tests` (98 tests: `Extensions/`, `Jwt/`, `Entities/`, `Services/`, `Controllers/`) — `Identity.Api.csproj` grants it `InternalsVisibleTo` to reach the module's `internal` JWT orchestration classes. |
+| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance, plus a permission catalog (`PermissionsController`, `GET permissions`). See [modules/Identity.md](modules/Identity.md). | Built, tested (`tests/Identity.Tests`, 98 tests). Internal layering still informal — CQRS commands and traditional service classes coexist for what should be one pattern. |
+| Notifications | `src/Notifications.Api/Notifications.Api.csproj` + `src/Notifications.Contracts/Notifications.Contracts.csproj` | Notification storage + real-time push over SignalR; admin "browse + send" surface (permission-gated) and a self-service "my notifications" surface (auto-scoped, no permission). See [modules/Notifications.md](modules/Notifications.md). | Built. No automated test coverage yet. Two known gaps: no "mark all read" endpoint, no path ever sets `Archived` status. |
 
 ## Shared/Host Projects
 
@@ -30,7 +33,12 @@ Identity.Contracts -> Shared
 Identity.Api -> Identity.Contracts
 Identity.Api -> Infrastructure
 Identity.Api -> Persistence
+Notifications.Contracts -> Shared
+Notifications.Api -> Notifications.Contracts
+Notifications.Api -> Infrastructure
+Notifications.Api -> Persistence
 StarterKit.WebApi -> Identity.Api
+StarterKit.WebApi -> Notifications.Api
 StarterKit.WebApi -> Infrastructure
 StarterKit.WebApi -> Shared
 Framework.Tests (tests/) -> Shared
@@ -40,7 +48,7 @@ Identity.Tests (tests/) -> Identity.Api
 Identity.Tests (tests/) -> Shared
 ```
 
-`Shared` remains a leaf. `Identity.Contracts` — the first real example of the per-module `Contracts` seam — is **no longer a leaf**: it gained a `ProjectReference` to `Shared` alongside `IdentityPermissionProvider` (see Data Access/External Dependencies below), and this reference exists purely to reach `Shared`'s transitive `Lightsoft.AspNetCore.Authorization` package — `Identity.Contracts.csproj` declares no `PackageReference` of its own for it (see `dependency-graph.md`'s "Undeclared transitive dependency" note). No cross-module boundary violations found — `Identity` is still the only module, so the "modules reference only each other's `Contracts`" rule is unverified in practice (no second module exists to test it against). `Identity.Tests` is a second, separate test project (alongside `Framework.Tests`) that now covers the Identity module.
+`Shared` remains a leaf. `Notifications.Contracts` is a true leaf (only references `Shared`). `Identity.Contracts` is **not** a leaf — it also references `Shared`, purely to reach its transitive `Lightsoft.AspNetCore.Authorization` package (see `modules/Identity.md`). No cross-module boundary violations found — neither module references the other's internals, and `Notifications` doesn't reference `Identity` at all (opaque user-id strings, no FK/cross-module call). `Identity.Tests` is a second, separate test project (alongside `Framework.Tests`) covering the Identity module; `Notifications` has no dedicated test project yet.
 
 ## Entry Points
 
@@ -52,7 +60,8 @@ One `DbContext` per module is the intended default.
 
 | Module | DbContext | Provider | Notes |
 |---|---|---|---|
-| Identity | `IdentityDbContext` (`src/Identity.Api/Data/IdentityDbContext.cs`, renamed from `AppIdentityDbContext`) | Configured via `Persistence.DbContextExtensions.AddConfiguredDbContext`/`GetDbProvider` (`InMemory`/`PostgreSQL`/`MSSQL`/`Sqlite`, selected via `IConfiguration["DbProvider"]`; default in `appsettings.json` is `MSSQL`, pointing at a local `(localdb)\mssqllocaldb` instance) | Extends ASP.NET Identity's `IdentityDbContext<...>` directly (can't also extend `Persistence/Context/BaseDbContext.cs` — single inheritance), so it re-applies the Sqlite `DateTimeOffset` fix manually. Soft-delete is still passed as `enableSoftDelete: false` despite `User` implementing `ISoftDelete` — flagged as a likely bug (D2) in `reviews/2026-07-30-backend-project-analysis.md`. `User` now has an index on `Created` and `UserSessions` an index on `UserId` (`EntityBuilderExtensions.BuildEntities`) — MSSQL migrations were reset to a fresh baseline this session (`src/Migrations/MSSQL/Identity/20260801104131_CreateIdentitySchema.cs`); Sqlite/PostgreSQL got an incremental `AddUserCreatedIndex` migration on top of their existing baseline. |
+| Identity | `IdentityDbContext` | Same provider selection as below. | Extends ASP.NET Identity's `IdentityDbContext<...>` directly. See [modules/Identity.md § Data Access](modules/Identity.md#data-access) for full detail (soft-delete deviation, indexes, migration history). |
+| Notifications | `NotificationDbContext` | Configured via `Persistence.DbContextExtensions.AddConfiguredDbContext`/`GetDbProvider` (`InMemory`/`PostgreSQL`/`MSSQL`/`Sqlite`, selected via `IConfiguration["DbProvider"]`) | Extends `Persistence/Context/BaseDbContext.cs` (unlike Identity). Shares the same physical database/connection string as `Identity` (`DbConnectionNames.Identity` aliases `DbConnectionNames.Default`), separated by schema (`system`) + table only. See [modules/Notifications.md § Data Access](modules/Notifications.md#data-access) for full detail (indexing gap, column lengths). |
 
 ## External Dependencies
 
@@ -63,14 +72,15 @@ One `DbContext` per module is the intended default.
 - **`Mapster`** (`Shared`) — object mapping; configured in `Infrastructure/Mappings/MapsterSettings.cs`.
 - **`AspNetCore.HealthChecks.UI.Client`** (`Infrastructure`, host) — health check endpoint response formatting.
 - **`Spectre.Console`** (host) — startup console banner (`Program.cs`).
+- **`Microsoft.AspNetCore.SignalR`** (`Notifications.Api`) — ASP.NET Core shared framework, not a separate NuGet package; backs the module's real-time push hub. See [modules/Notifications.md](modules/Notifications.md).
 
 ## Client Integration
 
-`clients/admin/` (a Next.js admin dashboard app) has since been scaffolded, but its actual API integration was not inspected as part of this backend-only sync — see `.claude/docs/generated/clients/admin/` (once generated) for that side.
+`clients/admin/` (a Next.js admin dashboard app) consumes both modules: `Identity` (users/roles/auth) and `Notifications` (`notification`/`user_notification` REST endpoints plus a direct WebSocket connection to `/signalr-hub`, proxied same-origin via the admin app's `next.config.ts` `rewrites()`). See `.claude/docs/generated/clients/admin/overview.md` for the frontend-side detail.
 
 ## Notes
 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added `PermissionsController`/`IdentityPermissionProvider` permission catalog; `Identity.Contracts` is no longer a leaf project) — scope: backend solution — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — added `Notifications` module; split per-module deep-dive detail out to `modules/Identity.md` and `modules/Notifications.md`) — scope: backend solution — see .claude/CLAUDE.md for update rules._

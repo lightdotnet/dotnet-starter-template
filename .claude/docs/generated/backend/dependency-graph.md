@@ -6,11 +6,16 @@
 |---|---|---|
 | `src/Infrastructure/Infrastructure.csproj` | `src/Shared/Shared.csproj` | Only project reference in `Infrastructure`. |
 | `src/Persistence/Persistence.csproj` | `src/Shared/Shared.csproj` | Only project reference in `Persistence`. |
-| `src/Identity.Contracts/Identity.Contracts.csproj` | `src/Shared/Shared.csproj` | New — added to reach `Shared`'s transitive `Lightsoft.AspNetCore.Authorization` package for `IdentityPermissionProvider`; `Identity.Contracts.csproj` declares no direct `PackageReference` for it (see "Undeclared transitive dependency" below). |
+| `src/Identity.Contracts/Identity.Contracts.csproj` | `src/Shared/Shared.csproj` | Added to reach `Shared`'s transitive `Lightsoft.AspNetCore.Authorization` package for `IdentityPermissionProvider`; `Identity.Contracts.csproj` declares no direct `PackageReference` for it (see "Undeclared transitive dependency" below; full detail in `modules/Identity.md`). |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Identity.Contracts/Identity.Contracts.csproj` | |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Infrastructure/Infrastructure.csproj` | |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Persistence/Persistence.csproj` | |
+| `src/Notifications.Contracts/Notifications.Contracts.csproj` | `src/Shared/Shared.csproj` | Only project reference in `Notifications.Contracts` — a true leaf, unlike `Identity.Contracts`. |
+| `src/Notifications.Api/Notifications.Api.csproj` | `src/Notifications.Contracts/Notifications.Contracts.csproj` | |
+| `src/Notifications.Api/Notifications.Api.csproj` | `src/Infrastructure/Infrastructure.csproj` | |
+| `src/Notifications.Api/Notifications.Api.csproj` | `src/Persistence/Persistence.csproj` | |
 | `src/StarterKit.WebApi/StarterKit.WebApi.csproj` | `src/Identity.Api/Identity.Api.csproj` | Composition-root host. |
+| `src/StarterKit.WebApi/StarterKit.WebApi.csproj` | `src/Notifications.Api/Notifications.Api.csproj` | Composition-root host. |
 | `src/StarterKit.WebApi/StarterKit.WebApi.csproj` | `src/Infrastructure/Infrastructure.csproj` | |
 | `src/StarterKit.WebApi/StarterKit.WebApi.csproj` | `src/Shared/Shared.csproj` | |
 | `tests/Framework.Tests/Framework.Tests.csproj` | `src/Shared/Shared.csproj` | |
@@ -19,7 +24,7 @@
 | `tests/Identity.Tests/Identity.Tests.csproj` | `src/Identity.Api/Identity.Api.csproj` | |
 | `tests/Identity.Tests/Identity.Tests.csproj` | `src/Shared/Shared.csproj` | |
 
-`src/Shared/Shared.csproj` has no project references (leaf). `src/Identity.Contracts/Identity.Contracts.csproj` is **no longer a leaf** — it now references `Shared` (see row above); its role as the module's cross-boundary seam is unaffected (still the only project other modules/the host may reference), but the "true leaf" claim from earlier syncs no longer holds. `Identity.Api.csproj` also declares `<InternalsVisibleTo Include="Identity.Tests" />` (mirroring the pattern `Shared`/`Infrastructure`/`Persistence` use for `Framework.Tests`), giving `Identity.Tests` access to the module's `internal` JWT orchestration classes (`AuthenticationService`, `UserSessionService`, `JwtTokenIssuer`, `JwtSigningService`).
+`src/Shared/Shared.csproj` and `src/Notifications.Contracts/Notifications.Contracts.csproj` have no project references beyond `Shared` itself (both leaves in the "only depends on `Shared`" sense — `Shared` has none at all). `src/Identity.Contracts/Identity.Contracts.csproj` is **not a leaf** — it references `Shared` purely to reach one transitive package (see row above; full detail in `modules/Identity.md`). `Identity.Api.csproj` declares `<InternalsVisibleTo Include="Identity.Tests" />` (mirroring the pattern `Shared`/`Infrastructure`/`Persistence` use for `Framework.Tests`), giving `Identity.Tests` access to the module's `internal` JWT orchestration classes. `Notifications.Api` has no equivalent test project or `InternalsVisibleTo` entry yet.
 
 ## Package References
 
@@ -62,9 +67,13 @@
 
 `SQLitePCLRaw.bundle_e_sqlite3` (3.0.5, Sqlite native bundle) is centrally pinned in `Directory.Packages.props` but not directly referenced by any `<PackageReference>` observed in this pass (likely a transitive dependency of `Microsoft.EntityFrameworkCore.Sqlite`).
 
-**Undeclared transitive dependency**: `UserService.SearchAsync` (`src/Identity.Api/Services/UserService.cs`) uses `Light.EntityFrameworkCore.Extensions`' `WhereIf` — supplied by the `Lightsoft.EntityFrameworkCore` package, which `Identity.Api.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the `ProjectReference` to `Persistence` (which does declare it). Works today because `CentralPackageTransitivePinningEnabled=false` doesn't block it, but it's an implicit coupling — if `Persistence` ever drops that package, `Identity.Api` would silently break.
+`Notifications.Api.csproj` and `Notifications.Contracts.csproj` declare **no direct `<PackageReference>` of their own** — every vendor type they use (`Light.AspNetCore.Authorization`, `Light.EntityFrameworkCore.Extensions`, `Light.Specification`, `Mapster`, `Microsoft.AspNetCore.SignalR` — the last a shared-framework reference, not a package) rides in transitively via `ProjectReference`s to `Shared`/`Infrastructure`/`Persistence`. See below.
 
-**Same pattern, new instance**: `Identity.Contracts.Authorization.IdentityPermissionProvider` uses `Light.AspNetCore.Authorization`'s `IPermissionDefinitionProvider`/`PermissionDefinition` — supplied by `Lightsoft.AspNetCore.Authorization`, which `Identity.Contracts.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the new `ProjectReference` to `Shared` (which does declare it). This is also why `Identity.Contracts` is no longer a leaf project — the `ProjectReference` to `Shared` appears to exist solely to reach this one package.
+**Undeclared transitive dependency**: `UserService.SearchAsync` (`src/Identity.Api/Services/UserService.cs`) uses `Light.EntityFrameworkCore.Extensions`' `WhereIf` — supplied by the `Lightsoft.EntityFrameworkCore` package, which `Identity.Api.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the `ProjectReference` to `Persistence` (which does declare it). Works today because `CentralPackageTransitivePinningEnabled=false` doesn't block it, but it's an implicit coupling — if `Persistence` ever drops that package, `Identity.Api` would silently break. `Notifications.Api`'s `NotificationService` uses the same `WhereIf` helper the same way, transitively via its own `ProjectReference` to `Persistence`.
+
+**Same pattern, instance 2**: `Identity.Contracts.Authorization.IdentityPermissionProvider` uses `Light.AspNetCore.Authorization`'s `IPermissionDefinitionProvider`/`PermissionDefinition` — supplied by `Lightsoft.AspNetCore.Authorization`, which `Identity.Contracts.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the `ProjectReference` to `Shared` (which does declare it). This is also why `Identity.Contracts` is not a leaf project — the `ProjectReference` to `Shared` appears to exist solely to reach this one package.
+
+**Same pattern, instance 3**: `Notifications.Contracts.Authorization.NotificationPermissionProvider` uses the same `Light.AspNetCore.Authorization` types the same way — transitively via `Notifications.Contracts`'s `ProjectReference` to `Shared`, which is `Notifications.Contracts`'s *only* project reference (so unlike `Identity.Contracts`, it doesn't cost `Notifications.Contracts` its leaf status relative to other modules — it was always going to reference `Shared`).
 
 ## Circular References
 
@@ -76,11 +85,11 @@ None — all packages are centrally managed via `Directory.Packages.props` (`Fra
 
 ## Cross-Module Boundary Violations (backend only)
 
-None found. `Identity.Api` references only `Identity.Contracts`, `Infrastructure`, and `Persistence` — no reach into another module's internals. Still unverified in the strict sense that `Identity` is the only module, so there's no second module's `Domain`/`Infrastructure`/`Api` project it could improperly reference.
+None found. `Identity.Api` references only `Identity.Contracts`, `Infrastructure`, and `Persistence`; `Notifications.Api` references only `Notifications.Contracts`, `Infrastructure`, and `Persistence` — neither reaches into the other's internals, and neither references the other's `Contracts` either (no coupling at all between the two business modules). **Now verified with a second module**, not just structurally assumed.
 
 ## Notes
 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — `Identity.Contracts -> Shared` project reference added, `Lightsoft.AspNetCore.Authorization` bumped to preview2) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — added `Notifications`/`Notifications.Contracts` project and package references; cross-module boundary check now verified against a second module) — scope: Backend — see .claude/CLAUDE.md for update rules._

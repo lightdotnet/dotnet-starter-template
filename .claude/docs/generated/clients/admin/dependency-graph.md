@@ -15,7 +15,7 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `app/(dashboard)/identity/users/page.tsx` | `features/users` (barrel) | Re-export only |
 | `app/(dashboard)/identity/roles/page.tsx` | `features/roles` (barrel) | Re-export only — new route this sync |
 | `components/layout/app-shell.tsx` | `hooks/use-sidebar.tsx`, `components/layout/{sidebar,topbar}.tsx`, `types/session.ts` (`ProfileData`) | Takes `{ permissions, userName, user, children }`; `<main>` now uses `bg-sidebar` plus a `mx-auto max-w-7xl` content wrapper |
-| `components/layout/topbar.tsx` | `lib/shared/utils.ts`, `hooks/{use-scrolled,use-sidebar}.ts(x)`, `components/ui/{button,badge}.tsx`, `components/layout/{breadcrumbs,brand,user-menu}.tsx`, `components/shared/search-box.tsx`, `components/theme` (barrel: `ThemeToggle`, `AccentColorPicker`) | |
+| `components/layout/topbar.tsx` | `lib/shared/utils.ts`, `hooks/{use-scrolled,use-sidebar}.ts(x)`, `components/ui/{button,badge}.tsx`, `components/layout/{breadcrumbs,brand,user-menu}.tsx`, `components/shared/search-box.tsx`, `components/theme` (barrel: `ThemeToggle`, `AccentColorPicker`), `features/notifications/components/notification-bell.tsx` (direct file, not the barrel — third barrel-bypass exception, see architecture.md) | |
 | `components/layout/sidebar.tsx` | `lib/shared/utils.ts`, `hooks/use-sidebar.tsx`, `components/layout/sidebar-nav-item.tsx`, `constants/nav-items.ts` (`NAV_ITEMS`, direct import — deliberate barrel-bypass exception, see architecture.md), `lib/shared/menu.ts` (`buildVisibleMenu`), `lib/shared/authorization.ts` (`hasPermission`), `components/ui/sheet.tsx` | Takes `{ permissions, userName }`; computes the visible menu via `useMemo(() => buildVisibleMenu(NAV_ITEMS, can), [permissions, userName])`. Desktop `<aside>` no longer has a right border |
 | `components/layout/sidebar-nav-item.tsx` | `lib/shared/utils.ts`, `hooks/use-sidebar.tsx`, `types/nav.ts` | Recursive |
 | `components/layout/breadcrumbs.tsx` | `components/ui/breadcrumb.tsx`, `constants/nav-items.ts`, `types/nav.ts` | |
@@ -63,6 +63,24 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `features/roles/api/get-permissions.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/permission-definition.ts` | New |
 | `features/roles/api/get-all-roles.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | **Fixed this sync**: was `guardRawCall` assuming a bare array; the endpoint wraps its response in the app's envelope like every other endpoint |
 | `features/roles/api/{get-role-by-id,create-role,update-role,delete-role}.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | |
+| `features/notifications/index.ts` | `./components/{notification-bell,notifications-page}.tsx`, `./hooks/use-notifications.ts`, `./constants/{permissions,nav-item}.ts`, `./types/notification.ts` | New — barrel |
+| `features/notifications/constants/nav-item.ts` | `lucide-react` (`Bell`), `./permissions.ts` (`NOTIFICATIONS_PERMISSIONS`), `types/nav.ts` | New — `NOTIFICATIONS_NAV_ITEM` (label "Notifications", href "/notifications", permission `NOTIFICATIONS_PERMISSIONS.Read`) |
+| `features/notifications/hooks/use-notifications.ts` | `@microsoft/signalr`, `features/notifications/api/{get-my-notifications-action,get-unread-count-action,mark-notification-read-action,get-signalr-token-action}.ts`, `features/notifications/types/notification.ts` | New — opens the `HubConnection`, refetches on `SystemMessage` push |
+| `features/notifications/components/notification-bell.tsx` | `components/ui/{badge,button,dropdown-menu,empty,tabs}.tsx`, `lib/shared/utils.ts`, `features/notifications/hooks/use-notifications.ts`, `features/notifications/types/notification.ts` | New — imported by `components/layout/topbar.tsx` via direct file path |
+| `features/notifications/components/notifications-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/users` (barrel — `getAllUsers`, new cross-feature edge), `features/notifications/api/get-notifications.ts`, `features/notifications/components/notifications-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `features/notifications/constants/permissions.ts`, `next/navigation` (`redirect`) | New — Async Server Component; gates on `NOTIFICATIONS_PERMISSIONS.Read`/`.Send` |
+| `features/notifications/components/notifications-data-table.tsx` | `components/shared/data-table` (barrel), `components/ui/select.tsx`, `features/notifications/components/{send-notification-dialog,user-select}.tsx`, `lib/shared/user-display.ts`, `features/notifications/types/notification.ts`, `types/user.ts` | New — status + recipient filter dropdowns wired to URL params |
+| `features/notifications/components/send-notification-dialog.tsx` | `components/ui/{alert,button,dialog,input,label,textarea}.tsx`, `components/toast` (barrel — `notifySuccess`), `features/notifications/api/send-notification-action.ts`, `features/notifications/components/user-select.tsx`, `types/user.ts` | New |
+| `features/notifications/components/user-select.tsx` | `components/ui/{input,select}.tsx`, `lib/shared/user-display.ts`, `types/user.ts` | New — searchable user picker, feature-owned (not promoted to `components/shared/`); consumed by both `notifications-data-table.tsx` and `send-notification-dialog.tsx` |
+| `features/notifications/api/get-notifications.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/api.ts`, `features/notifications/types/notification.ts` | New |
+| `features/notifications/api/get-my-notifications.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/api.ts`, `features/notifications/types/notification.ts` | New |
+| `features/notifications/api/get-my-notifications-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/notifications/api/get-my-notifications.ts` | New — `"use server"` |
+| `features/notifications/api/get-unread-count.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/api.ts` | New |
+| `features/notifications/api/get-unread-count-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/notifications/api/get-unread-count.ts` | New — `"use server"`; swallows failure to `0` |
+| `features/notifications/api/mark-notification-read.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/api.ts`, `features/notifications/types/notification.ts` | New |
+| `features/notifications/api/mark-notification-read-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/notifications/api/mark-notification-read.ts` | New — `"use server"`; returns `boolean` |
+| `features/notifications/api/send-notification.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/api.ts` | New |
+| `features/notifications/api/send-notification-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/notifications/api/send-notification.ts`, `lib/shared/user-display.ts` (`getDisplayName`) | New — `"use server"` |
+| `features/notifications/api/get-signalr-token-action.ts` | `features/user-profile` (barrel — `resolveSession`) | New — `"use server"`; token-handoff shape for the SignalR handshake |
 | `components/shared/data-table/data-table.tsx` | `components/ui/{table,skeleton,empty,alert}.tsx`, `./data-table-toolbar.tsx`, `./data-table-pagination.tsx`, `./types.ts`, `lucide-react` (`ArrowUp`/`ArrowDown`/`ArrowUpDown`, new) | Exported via `./index.ts` barrel. **New this sync**: optional per-column client-side sort (`sortState`/`toggleSort`/a `sortedData` `useMemo`) |
 | `components/shared/data-table/types.ts` | `lucide-react`, `components/ui/button.tsx` (type only) | `DataTableColumn` gained optional `sortable`/`sortValue` (new) |
 | `components/shared/data-table/data-table-toolbar.tsx` | `components/ui/{button,dropdown-menu}.tsx`, `lib/shared/utils.ts`, `./types.ts` | Debounced (400ms) search input |
@@ -87,6 +105,7 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `lib/shared/menu.ts` | `types/nav.ts` (`NavItem`) | New — pure recursive `buildVisibleMenu(items, can)` |
 | `components/ui/*` | `lib/shared/utils.ts`, `radix-ui`, `class-variance-authority`, `lucide-react` | `button.tsx` additionally imports `components/ui/spinner.tsx` |
 | `hooks/use-sidebar.tsx` | `next/navigation` (`usePathname`) | |
+| `constants/nav-items.ts` | `features/dashboard/constants/nav-item.ts` (`DASHBOARD_NAV_ITEM`), `features/users/constants/nav-item.ts` (`USERS_NAV_ITEM`), `features/roles/constants/nav-item.ts` (`ROLES_NAV_ITEM`), `features/notifications/constants/nav-item.ts` (`NOTIFICATIONS_NAV_ITEM`) | All four imported by direct file path, not via each feature's barrel — see architecture.md. Assembles `NAV_ITEMS`, also declaring the "Identity" group and "Settings" leaf directly |
 
 ## Package References
 
@@ -107,6 +126,7 @@ From `clients/admin/package.json` (`dependencies`):
 | `sonner` | `^2.0.7` | Toast notifications, wrapped by `components/toast/` (not imported directly by feature code) |
 | `shadcn` | `^4.16.0` | CLI that generated `components/ui/*`; also imported at runtime (`shadcn/tailwind.css`) |
 | `tw-animate-css` | `^1.4.0` | Animation utility classes |
+| `@microsoft/signalr` | `^10.0.0` | New — real-time push client; used only by `features/notifications/hooks/use-notifications.ts` |
 
 `devDependencies`:
 
@@ -128,7 +148,7 @@ Package manager: pnpm (`pnpm-lock.yaml`). A `pnpm-workspace.yaml` exists but onl
 
 ## Circular References
 
-None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`, `features/users` → `features/user-profile`, `features/users` → `features/roles`) go one direction only, through the target feature's barrel (with two narrow, reasoned exceptions — `constants/nav-items.ts` and `components/layout/user-menu.tsx` — that import a single plain-data/single-function file directly instead; see architecture.md). `components/shared/data-table/*`, `components/shared/object-viewer/*`, and `components/toast/*` are consumed by feature code but import nothing from `features/*` themselves, so no cycle there either. One dependency-direction reversal is worth flagging (not a cycle, but atypical): `lib/server/refresh-session.ts` imports `features/auth/api/refresh-token.ts` directly — `lib/server/*` normally sits *below* `features/*`, but here it reaches up into one feature's `api/` file. No cycle results since `features/auth` doesn't import back from `lib/server/refresh-session.ts`.
+None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`, `features/users` → `features/user-profile`, `features/users` → `features/roles`, `features/notifications` → `features/user-profile`, `features/notifications` → `features/users`) go one direction only, through the target feature's barrel (with three narrow, reasoned exceptions — `constants/nav-items.ts`, `components/layout/user-menu.tsx`, and `components/layout/topbar.tsx` — that import a single plain-data/single-component file directly instead; see architecture.md). `components/shared/data-table/*`, `components/shared/object-viewer/*`, and `components/toast/*` are consumed by feature code but import nothing from `features/*` themselves, so no cycle there either. One dependency-direction reversal is worth flagging (not a cycle, but atypical): `lib/server/refresh-session.ts` imports `features/auth/api/refresh-token.ts` directly — `lib/server/*` normally sits *below* `features/*`, but here it reaches up into one feature's `api/` file. No cycle results since `features/auth` doesn't import back from `lib/server/refresh-session.ts`.
 
 ## Version Mismatches
 
@@ -143,4 +163,4 @@ Not applicable — this is a client-app dependency graph, not backend.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — added `features/notifications` import rows, `@microsoft/signalr` package, `constants/nav-items.ts` row, third barrel-bypass exception) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._

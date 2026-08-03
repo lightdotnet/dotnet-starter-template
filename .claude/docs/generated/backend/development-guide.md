@@ -26,7 +26,7 @@ dotnet test tests/Framework.Tests/Framework.Tests.csproj
 dotnet test tests/Identity.Tests/Identity.Tests.csproj
 ```
 
-No special setup needed — all current tests are unit tests using EF Core's InMemory/Sqlite providers directly (no external database/services required). `Framework.Tests` covers `Shared`, `Infrastructure`, and `Persistence`; `Identity.Tests` covers the `Identity` module (`Identity.Api`) — 98 tests spanning extensions, JWT orchestration, entities, services, and controllers.
+No special setup needed — all current tests are unit tests using EF Core's InMemory/Sqlite providers directly (no external database/services required). `Framework.Tests` covers `Shared`, `Infrastructure`, and `Persistence`; `Identity.Tests` covers the `Identity` module (`Identity.Api`) — 98 tests spanning extensions, JWT orchestration, entities, services, and controllers. `Notifications` has no dedicated test project yet.
 
 ## Local Setup
 
@@ -48,13 +48,14 @@ No special setup needed — all current tests are unit tests using EF Core's InM
 - Shared abstractions/base types (`ICurrentUser`, `IDateTime`, `Status`, `BaseDto`, entity wrappers, authorization): `src/Shared/`.
 - Cross-cutting infrastructure (CORS, health checks, Serilog bootstrap logging, Mapster config, module/endpoint base classes): `src/Infrastructure/`.
 - EF Core provider config, DbContext base class, audit/soft-delete tracking, domain-event dispatch: `src/Persistence/`.
-- Identity module (users, roles, claims, JWT auth): `src/Identity.Api/` (entities in `Entities/`, DbContext in `Data/`, services in `Services/` + `Jwt/`, controllers in `Controllers/`); public DTOs/service interfaces in `src/Identity.Contracts/`.
+- Identity module (users, roles, claims, JWT auth): `src/Identity.Api/` (entities in `Entities/`, DbContext in `Data/`, services in `Services/` + `Jwt/`, controllers in `Controllers/`); public DTOs/service interfaces in `src/Identity.Contracts/`. Deep-dive doc: [modules/Identity.md](modules/Identity.md).
+- Notifications module (notification storage + real-time push): `src/Notifications.Api/` (entities in `Entities/`, DbContext in `Data/`, service in `Services/`, controllers in `Controllers/`, SignalR hub in `SignalR/`); public DTOs/service interface/permissions in `src/Notifications.Contracts/`. Deep-dive doc: [modules/Notifications.md](modules/Notifications.md).
 - Host wiring/startup (`Program.cs`, `appsettings*.json`): `src/StarterKit.WebApi/`.
-- Tests: `tests/Framework.Tests/<ProjectName>/...` (mirrors `Shared/`, `Infrastructure/`, `Persistence/`) and `tests/Identity.Tests/<Area>/...` (mirrors `Identity.Api`'s own `Extensions/`, `Jwt/`, `Entities/`, `Services/`, `Controllers/` folders, plus a `TestSupport/` folder for shared test infrastructure).
+- Tests: `tests/Framework.Tests/<ProjectName>/...` (mirrors `Shared/`, `Infrastructure/`, `Persistence/`) and `tests/Identity.Tests/<Area>/...` (mirrors `Identity.Api`'s own `Extensions/`, `Jwt/`, `Entities/`, `Services/`, `Controllers/` folders, plus a `TestSupport/` folder for shared test infrastructure). No test project yet for `Notifications`.
 
 ## Notes
 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-02 (resynced — added `tests/Identity.Tests` run command and layout) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — added `Notifications` module pointer) — scope: Backend — see .claude/CLAUDE.md for update rules._
