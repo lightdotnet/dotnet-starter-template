@@ -12,7 +12,8 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `app/(dashboard)/layout.tsx` | `components/layout/app-shell.tsx`, `features/user-profile` (barrel) | Calls `resolveSession()` before rendering `AppShell` |
 | `app/(dashboard)/page.tsx` | `features/dashboard` (barrel) | Re-export only |
 | `app/(dashboard)/user-profile/page.tsx` | `features/user-profile` (barrel) | Re-export only |
-| `app/(dashboard)/identity/users/page.tsx` | `features/users` (barrel) | Re-export only — new route |
+| `app/(dashboard)/identity/users/page.tsx` | `features/users` (barrel) | Re-export only |
+| `app/(dashboard)/identity/roles/page.tsx` | `features/roles` (barrel) | Re-export only — new route this sync |
 | `components/layout/app-shell.tsx` | `hooks/use-sidebar.tsx`, `components/layout/{sidebar,topbar}.tsx` | Extracted out of the former `app/(dashboard)/layout.tsx` |
 | `components/layout/topbar.tsx` | `lib/shared/utils.ts`, `hooks/{use-scrolled,use-sidebar}.ts(x)`, `components/ui/{button,badge}.tsx`, `components/layout/{breadcrumbs,brand,user-menu}.tsx`, `components/shared/search-box.tsx`, `components/theme` (barrel: `ThemeToggle`, `AccentColorPicker`) | |
 | `components/layout/sidebar.tsx` | `lib/shared/utils.ts`, `hooks/use-sidebar.tsx`, `components/layout/sidebar-nav-item.tsx`, `constants/nav-items.ts`, `components/ui/sheet.tsx` | |
@@ -36,15 +37,27 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `features/dashboard/index.ts` | `./components/dashboard-page.tsx` | Barrel |
 | `features/dashboard/components/dashboard-page.tsx` | `components/ui/card.tsx`, `./stat-card.tsx`, `./users-table.tsx`, `features/dashboard/api/sample-data.ts` | |
 | `features/dashboard/components/{stat-card,users-table}.tsx` | `components/ui/*`, `lib/shared/utils.ts`, `features/dashboard/api/sample-data.ts` | Mock data — no backend call |
-| `features/users/index.ts` | `./components/users-page.tsx`, `./api/{search-users,get-all-users,get-user-by-id,get-user-by-username,create-user,update-user,delete-user,force-password}.ts` | Barrel; now imported by `app/(dashboard)/identity/users/page.tsx` — first UI consumer |
-| `features/users/components/users-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/search-users.ts`, `features/users/components/users-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `constants/permissions.ts`, `components/ui/empty.tsx`, `next/navigation` (`redirect`) | New — async Server Component; gates on `Users.View`/`Users.Create` |
-| `features/users/components/users-data-table.tsx` | `components/shared/data-table` (barrel — `DataTable` + types), `components/ui/{avatar,badge}.tsx`, `features/users/components/create-user-dialog.tsx`, `features/user-profile/components/user-status-badge.tsx`, `lib/shared/user-display.ts`, `types/user.ts`, `next/navigation` (`useRouter`/`usePathname`/`useSearchParams`) | New — thin `DataTable` wrapper; drives URL-param search/pagination |
-| `features/users/components/create-user-dialog.tsx` | `components/ui/{alert,button,dialog,input,label}.tsx`, `components/toast` (barrel — `notifySuccess`), `features/users/api/create-user-action.ts` | New |
-| `features/users/api/create-user-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/create-user.ts`, `types/user.ts` | New — `"use server"` |
-| `features/users/api/search-users.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,user}.ts` | **Fixed this sync**: `method` changed `POST` → `GET`, matching `UserController`'s `[HttpGet("search")]` |
+| `features/users/index.ts` | `./components/users-page.tsx`, `./api/{search-users,get-all-users,get-user-by-id,get-user-by-username,create-user,update-user,delete-user,force-password}.ts`, `./constants/permissions.ts` | Barrel; imported by `app/(dashboard)/identity/users/page.tsx` |
+| `features/users/components/users-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/search-users.ts`, `features/roles` (barrel — `getAllRoles`, fetched only when the viewer can update users), `features/users/components/users-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `features/users/constants/permissions.ts`, `components/ui/empty.tsx`, `next/navigation` (`redirect`) | Async Server Component; gates on `USERS_PERMISSIONS.View`/`.Create`/`.Update`/`.Delete` |
+| `features/users/components/users-data-table.tsx` | `components/shared/data-table` (barrel — `DataTable` + types), `components/ui/{avatar,badge,button,dropdown-menu}.tsx`, `features/users/components/{create,edit,delete}-user-dialog.tsx`, `features/user-profile/components/user-status-badge.tsx`, `lib/shared/user-display.ts`, `features/roles/types/role.ts` (`RoleDto`), `types/user.ts`, `next/navigation` (`useRouter`/`usePathname`/`useSearchParams`) | Thin `DataTable` wrapper; drives URL-param search/pagination; owns row-actions dropdown + all 3 dialogs' open/key state |
+| `features/users/components/create-user-dialog.tsx` | `components/ui/{alert,button,dialog,input,label}.tsx`, `components/toast` (barrel — `notifySuccess`), `features/users/api/create-user-action.ts` | |
+| `features/users/components/edit-user-dialog.tsx` | `components/ui/{alert,button,checkbox,dialog,input,label,select,spinner,tabs}.tsx`, `components/toast` (barrel — `notifySuccess`), `features/users/api/{get-user-detail-action,update-user-action,force-password-action}.ts`, `features/roles/types/role.ts` (`RoleDto`), `types/user.ts` | New — fetches full user detail on open (see [architecture.md](./architecture.md#key-design-patterns)) |
+| `features/users/components/delete-user-dialog.tsx` | `components/ui/{button,dialog}.tsx`, `components/toast` (barrel), `features/users/api/delete-user-action.ts`, `types/user.ts` | New |
+| `features/users/api/create-user-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/create-user.ts`, `types/user.ts` | `"use server"` |
+| `features/users/api/{update-user-action,force-password-action,delete-user-action}.ts` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/{update-user,force-password,delete-user}.ts` respectively, `types/user.ts` | New — `"use server"` |
+| `features/users/api/get-user-detail-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/get-user-by-id.ts`, `types/user.ts` | New — `"use server"`; on-demand detail read, not a mutation |
 | `features/users/api/*.ts` (7 remaining files) | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,user}.ts` | |
-| `features/roles/index.ts` | `./api/{get-all-roles,get-role-by-id,create-role,update-role,delete-role}.ts`, `./types/role.ts` | Barrel; not imported outside this feature — unchanged this sync |
-| `features/roles/api/*.ts` (5 files) | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | |
+| `features/roles/index.ts` | `./components/roles-page.tsx`, `./api/{get-all-roles,get-role-by-id,get-permissions,create-role,update-role,delete-role}.ts`, `./constants/permissions.ts`, `./types/{role,permission-definition}.ts` | Barrel; now imported by `app/(dashboard)/identity/roles/page.tsx` and `features/users/components/users-page.tsx` — first cross-feature/UI consumers |
+| `features/roles/components/roles-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/roles/api/{get-all-roles,get-permissions}.ts`, `features/roles/components/roles-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `features/roles/constants/permissions.ts`, `components/ui/empty.tsx` | New — async Server Component; gates on `ROLES_PERMISSIONS.View`/`.Manage`; no `searchParams` (no backend search endpoint) |
+| `features/roles/components/roles-data-table.tsx` | `components/shared/data-table` (barrel), `components/ui/{button,dropdown-menu}.tsx`, `features/roles/components/{create,edit,delete}-role-dialog.tsx`, `features/roles/types/{role,permission-definition}.ts` | New — search via local `useState` + `.filter()`, not URL params |
+| `features/roles/components/create-role-dialog.tsx` | `components/ui/{alert,button,dialog,input,label}.tsx`, `components/toast` (barrel), `features/roles/api/create-role-action.ts` | New — name/description only, no claims step |
+| `features/roles/components/edit-role-dialog.tsx` | `components/ui/{alert,button,checkbox,dialog,input,label,spinner}.tsx`, `components/toast` (barrel), `features/roles/api/{get-role-detail-action,update-role-action}.ts`, `features/roles/types/{role,permission-definition}.ts` | New — fetches full role detail on open |
+| `features/roles/components/delete-role-dialog.tsx` | `components/ui/{button,dialog}.tsx`, `components/toast` (barrel), `features/roles/api/delete-role-action.ts`, `features/roles/types/role.ts` | New |
+| `features/roles/api/{create-role-action,update-role-action,delete-role-action}.ts` | `features/user-profile` (barrel — `resolveSession`), `features/roles/api/{create-role,update-role,delete-role}.ts` respectively | New — `"use server"`; `update-role-action` additionally reads `get-role-by-id.ts` first to preserve non-`"permission"`-typed claims |
+| `features/roles/api/get-role-detail-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/roles/api/get-role-by-id.ts` | New — `"use server"`; on-demand detail read |
+| `features/roles/api/get-permissions.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/permission-definition.ts` | New |
+| `features/roles/api/get-all-roles.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | **Fixed this sync**: was `guardRawCall` assuming a bare array; the endpoint wraps its response in the app's envelope like every other endpoint |
+| `features/roles/api/{get-role-by-id,create-role,update-role,delete-role}.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | |
 | `components/shared/data-table/data-table.tsx` | `components/ui/{table,skeleton,empty,alert}.tsx`, `./data-table-toolbar.tsx`, `./data-table-pagination.tsx`, `./types.ts` | New; exported via `./index.ts` barrel |
 | `components/shared/data-table/data-table-toolbar.tsx` | `components/ui/{button,dropdown-menu}.tsx`, `lib/shared/utils.ts`, `./types.ts` | New — debounced (400ms) search input |
 | `components/shared/data-table/data-table-pagination.tsx` | `components/ui/{input,pagination}.tsx` | New — exports `getPageWindow()` helper |
@@ -97,7 +110,7 @@ Package manager: pnpm (`pnpm-lock.yaml`). A `pnpm-workspace.yaml` exists but onl
 
 ## Circular References
 
-None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`, `features/users` → `features/user-profile`) go one direction only, through the target feature's barrel. `components/shared/data-table/*` and `components/toast/*` are consumed by `features/users` but import nothing from `features/*` themselves, so no cycle there either.
+None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`, `features/users` → `features/user-profile`, `features/users` → `features/roles` — new this sync) go one direction only, through the target feature's barrel. `components/shared/data-table/*` and `components/toast/*` are consumed by both `features/users` and `features/roles` but import nothing from `features/*` themselves, so no cycle there either.
 
 ## Version Mismatches
 
@@ -112,4 +125,4 @@ Not applicable — this is a client-app dependency graph, not backend.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-02 — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 — scope: client app "admin" — see .claude/CLAUDE.md for update rules._

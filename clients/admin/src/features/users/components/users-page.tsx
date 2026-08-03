@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import { ShieldOff } from "lucide-react";
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
+import { getAllRoles } from "@/features/roles/api/get-all-roles";
 import { searchUsers } from "@/features/users/api/search-users";
 import { UsersDataTable } from "@/features/users/components/users-data-table";
 import { hasPermission } from "@/lib/server/authorization";
-import { IDENTITY_PERMISSIONS } from "@/constants/permissions";
+import { USERS_PERMISSIONS } from "@/features/users/constants/permissions";
 
 const PAGE_SIZE = 10;
 
@@ -19,7 +20,7 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
     redirect("/login");
   }
 
-  if (!hasPermission(session, session.profile?.userName, IDENTITY_PERMISSIONS.Users.View)) {
+  if (!hasPermission(session, session.profile?.userName, USERS_PERMISSIONS.View)) {
     return (
       <Empty>
         <EmptyMedia variant="icon">
@@ -27,7 +28,7 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
         </EmptyMedia>
         <EmptyTitle>Access denied</EmptyTitle>
         <EmptyDescription>
-          You don&apos;t have the {IDENTITY_PERMISSIONS.Users.View} permission.
+          You don&apos;t have the {USERS_PERMISSIONS.View} permission.
         </EmptyDescription>
       </Empty>
     );
@@ -36,23 +37,37 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
   const canCreate = hasPermission(
     session,
     session.profile?.userName,
-    IDENTITY_PERMISSIONS.Users.Create,
+    USERS_PERMISSIONS.Create,
+  );
+  const canUpdate = hasPermission(
+    session,
+    session.profile?.userName,
+    USERS_PERMISSIONS.Update,
+  );
+  const canDelete = hasPermission(
+    session,
+    session.profile?.userName,
+    USERS_PERMISSIONS.Delete,
   );
 
   const { q, page } = await searchParams;
   const pageNumber = Math.max(Number(page) || 1, 1);
 
-  const result = await searchUsers(session.accessToken, {
-    searchValue: q,
-    pageNumber,
-    pageSize: PAGE_SIZE,
-  });
+  const [result, rolesResult] = await Promise.all([
+    searchUsers(session.accessToken, {
+      searchValue: q,
+      pageNumber,
+      pageSize: PAGE_SIZE,
+    }),
+    canUpdate ? getAllRoles(session.accessToken) : null,
+  ]);
 
   const error =
     !result.isSuccess || !result.data
       ? { title: "Unable to load users", description: result.message || "Please try again." }
       : undefined;
   const paged = result.data;
+  const roles = (rolesResult?.isSuccess ? rolesResult.data : null) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,6 +87,9 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
         totalRecords={paged?.totalRecords ?? 0}
         error={error}
         canCreate={canCreate}
+        canUpdate={canUpdate}
+        canDelete={canDelete}
+        roles={roles}
       />
     </div>
   );

@@ -80,6 +80,9 @@ export function DataTable<TData>({
 
   const visibleColumns = columns.filter((column) => !hiddenColumnIds.has(column.id));
   const isEmpty = !isLoading && data.length === 0;
+  // While a fresh request is in flight, prefer the table's own loading state
+  // (skeleton rows) over a stale error left over from the previous render.
+  const showError = !!error && !isLoading;
 
   return (
     <div className="flex flex-col gap-4">
@@ -96,7 +99,7 @@ export function DataTable<TData>({
         isLoading={isLoading}
       />
 
-      {error ? (
+      {showError ? (
         <Alert variant="destructive">
           <AlertTitle>{error.title}</AlertTitle>
           {error.description && <AlertDescription>{error.description}</AlertDescription>}
@@ -146,7 +149,7 @@ export function DataTable<TData>({
         </Table>
       )}
 
-      {!error && (
+      {!showError && (
         <DataTablePagination
           pageNumber={pageNumber}
           totalPages={totalPages}

@@ -1,0 +1,39 @@
+"use server";
+
+import { resolveSession } from "@/features/user-profile";
+import { createRole } from "@/features/roles/api/create-role";
+import type { CreateRoleRequest } from "@/features/roles/types/role";
+
+export interface CreateRoleFormState {
+  error?: string;
+  success?: boolean;
+}
+
+export async function createRoleAction(
+  _prevState: CreateRoleFormState,
+  formData: FormData,
+): Promise<CreateRoleFormState> {
+  const session = await resolveSession();
+  if (!session) {
+    return { error: "Your session has expired. Please sign in again." };
+  }
+
+  const name = String(formData.get("name") ?? "").trim();
+
+  if (!name) {
+    return { error: "Name is required." };
+  }
+
+  const request: CreateRoleRequest = {
+    name,
+    description: String(formData.get("description") ?? "") || undefined,
+  };
+
+  const result = await createRole(session.accessToken, request);
+
+  if (!result.isSuccess) {
+    return { error: result.message || "Failed to create role." };
+  }
+
+  return { success: true };
+}

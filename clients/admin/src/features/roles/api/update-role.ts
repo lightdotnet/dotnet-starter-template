@@ -5,6 +5,10 @@ import type { RoleDto } from "@/features/roles/types/role";
 
 export function updateRole(accessToken: string, role: RoleDto) {
   return guardResponseCall(() =>
-    requestJson<ApiResponse>("role", { method: "PUT", accessToken, body: role }),
+    requestJson<ApiResponse>("role", {
+      method: "PUT",
+      accessToken,
+      body: role,
+    }),
   );
 }

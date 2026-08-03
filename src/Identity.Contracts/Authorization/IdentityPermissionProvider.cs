@@ -8,26 +8,32 @@ public class IdentityPermissionProvider : IPermissionDefinitionProvider
     {
         yield return new(
             IdentityPermissions.Roles.View,
-            "View Roles");
+            "View Roles",
+            "roles");
 
         yield return new(
             IdentityPermissions.Roles.Manage,
-            "Manage Roles");
+            "Manage Roles",
+            "roles");
 
         yield return new(
             IdentityPermissions.Users.View,
-            "View Users");
+            "View Users",
+            "users");
 
         yield return new(
             IdentityPermissions.Users.Create,
-            "Create Users");
+            "Create Users",
+            "users");
 
         yield return new(
             IdentityPermissions.Users.Update,
-            "Update Users");
+            "Update Users",
+            "users");
 
         yield return new(
             IdentityPermissions.Users.Delete,
-            "Delete Users");
+            "Delete Users",
+            "users");
     }
 }

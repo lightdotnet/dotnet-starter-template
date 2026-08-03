@@ -2,9 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Users as UsersIcon, UserPlus } from "lucide-react";
+import { MoreHorizontal, Users as UsersIcon, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   DataTable,
   type DataTableAction,
@@ -12,8 +19,11 @@ import {
   type DataTableErrorState,
 } from "@/components/shared/data-table";
 import { CreateUserDialog } from "@/features/users/components/create-user-dialog";
+import { DeleteUserDialog } from "@/features/users/components/delete-user-dialog";
+import { EditUserDialog } from "@/features/users/components/edit-user-dialog";
 import { UserStatusBadge } from "@/features/user-profile/components/user-status-badge";
 import { getDisplayName, getInitials } from "@/lib/shared/user-display";
+import type { RoleDto } from "@/features/roles/types/role";
 import type { UserDto } from "@/types/user";
 
 interface UsersDataTableProps {
@@ -25,9 +35,12 @@ interface UsersDataTableProps {
   totalRecords: number;
   error?: DataTableErrorState;
   canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+  roles: RoleDto[];
 }
 
-const columns: DataTableColumn<UserDto>[] = [
+const baseColumns: DataTableColumn<UserDto>[] = [
   {
     id: "user",
     header: "User",
@@ -47,12 +60,12 @@ const columns: DataTableColumn<UserDto>[] = [
   {
     id: "email",
     header: "Email",
-    cell: (user) => user.email ?? "—",
+    cell: (user) => user.email ?? "",
   },
   {
     id: "phone",
     header: "Phone",
-    cell: (user) => user.phoneNumber ?? "—",
+    cell: (user) => user.phoneNumber ?? "",
   },
   {
     id: "status",
@@ -72,7 +85,7 @@ const columns: DataTableColumn<UserDto>[] = [
           ))}
         </div>
       ) : (
-        "—"
+        ""
       ),
   },
 ];
@@ -86,15 +99,22 @@ export function UsersDataTable({
   totalRecords,
   error,
   canCreate,
+  canUpdate,
+  canDelete,
+  roles,
 }: UsersDataTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [createOpen, setCreateOpen] = useState(false);
-  // Bumped every time the dialog opens, forcing a fresh CreateUserDialog instance —
-  // useActionState's error state has no direct reset, so remounting is what clears it.
+  // Bumped every time a dialog opens, forcing a fresh instance — useActionState's
+  // error state has no direct reset, so remounting is what clears it.
   const [createDialogKey, setCreateDialogKey] = useState(0);
+  const [editDialogKey, setEditDialogKey] = useState(0);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
 
   function navigate(nextParams: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -122,6 +142,51 @@ export function UsersDataTable({
       ]
     : undefined;
 
+  const columns: DataTableColumn<UserDto>[] =
+    canUpdate || canDelete
+      ? [
+          ...baseColumns,
+          {
+            id: "actions",
+            header: "",
+            hideable: false,
+            cell: (user) => (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button aria-label="Row actions" size="icon" variant="ghost">
+                    <MoreHorizontal />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canUpdate && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setEditDialogKey((key) => key + 1);
+                        setEditOpen(true);
+                      }}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setDeleteOpen(true);
+                      }}
+                      variant="destructive"
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ),
+          },
+        ]
+      : baseColumns;
+
   return (
     <>
       <DataTable
@@ -147,10 +212,24 @@ export function UsersDataTable({
         }}
       />
       <CreateUserDialog
-        key={createDialogKey}
+        key={`create-${createDialogKey}`}
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={() => router.refresh()}
+      />
+      <EditUserDialog
+        key={`edit-${editDialogKey}`}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        user={selectedUser}
+        roles={roles}
+        onUpdated={() => router.refresh()}
+      />
+      <DeleteUserDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        user={selectedUser}
+        onDeleted={() => router.refresh()}
       />
     </>
   );
