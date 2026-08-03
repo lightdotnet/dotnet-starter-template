@@ -31,8 +31,6 @@ Solid boxes/arrows are built today; dashed ones are the intended shape once modu
 
 ```mermaid
 graph TD
-    Vendor["Lightsoft.* vendor packages<br/>(Light.Domain, Light.Mediator, Light.Result, ...)"]
-
     Shared["src/Shared<br/>shared kernel"]
     Infra["src/Infrastructure<br/>cross-cutting infra"]
     Tests["tests/Framework.Tests<br/>xUnit v3"]
@@ -41,9 +39,7 @@ graph TD
     Host["Host — Program.cs<br/>(not yet built)"]
     Clients["clients/*<br/>(not yet built)"]
 
-    Shared --> Vendor
     Infra --> Shared
-    Infra --> Vendor
     Tests --> Shared
     Tests --> Infra
 
@@ -54,7 +50,7 @@ graph TD
 
     classDef built fill:#2f6f4f,stroke:#1e4a34,color:#fff;
     classDef planned fill:none,stroke:#999,stroke-dasharray: 4 3,color:#888;
-    class Shared,Infra,Tests,Vendor built;
+    class Shared,Infra,Tests built;
     class Modules,Host,Clients planned;
 ```
 
