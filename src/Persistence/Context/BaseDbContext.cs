@@ -11,5 +11,5 @@ public abstract class BaseDbContext(DbContextOptions options) : DbContext(option
         Database.FixSqliteDateTimeOffset(modelBuilder);
     }
 
-    protected virtual void ConfigureModel(ModelBuilder modelBuilder) { }
+    protected virtual void ConfigureModel(ModelBuilder builder) { }
 }

@@ -17,7 +17,9 @@ public static class DependencyInjection
     {
         AddActiveDirectory(services, configuration);
 
-        services.AddConfiguredDbContext<IdentityDbContext>(configuration, DbConnectionNames.Identity);
+        services.AddConfiguredDbContext<IdentityDbContext>(
+            configuration,
+            DbConnectionNames.Identity);
 
         var identityBuilder = services
             .AddIdentityCore<User>(options =>

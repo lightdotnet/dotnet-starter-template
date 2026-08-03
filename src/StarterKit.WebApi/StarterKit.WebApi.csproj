@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Identity.Api\Identity.Api.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Notifications.Api\Notifications.Api.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 

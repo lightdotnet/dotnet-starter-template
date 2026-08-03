@@ -7,6 +7,8 @@
     <Project Path="src/Identity.Api/Identity.Api.csproj" />
     <Project Path="src/Identity.Contracts/Identity.Contracts.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="src/Notifications.Api/Notifications.Api.csproj" />
+    <Project Path="src/Notifications.Contracts/Notifications.Contracts.csproj" />
     <Project Path="src/Persistence/Persistence.csproj" />
     <Project Path="src/Shared/Shared.csproj" />
     <Project Path="src/StarterKit.WebApi/StarterKit.WebApi.csproj" />

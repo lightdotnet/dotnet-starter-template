@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Infrastructure;
+using StarterKit.Notifications.Api.Data;
 using StarterKit.Persistence;
 using StarterKit.Persistence.MigrationSupport;
 using System.Reflection;
@@ -18,6 +19,8 @@ public static class DependencyInjection
         services.AddMigrationsServices();
 
         services.AddIdentity(configuration);
+
+        services.AddNotification(configuration);
 
         return services;
     }
@@ -59,5 +62,18 @@ public static class DependencyInjection
         services.AddScoped<IdentityContextInitialiser>();
 
         return services;
+    }
+
+    private static void AddNotification(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString(DbConnectionNames.Identity);
+
+        services.AddDbContext<NotificationDbContext>(options =>
+            options
+                .UseSqlServer(connectionString, o =>
+                {
+                    o.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
+                })
+                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
     }
 }

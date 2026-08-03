@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Identity.Api\Identity.Api.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Notifications.Api\Notifications.Api.csproj" />
     <ProjectReference Include="..\..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>
@@ -38,6 +39,10 @@
 	<Content Update="@(Content)">
 		<Visible Condition="'%(NuGetItemType)' == 'Content'">false</Visible>
 	</Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Notifications\" />
   </ItemGroup>
 
 </Project>

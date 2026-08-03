@@ -10,6 +10,7 @@ using StarterKit.Infrastructure.Cors;
 using StarterKit.Infrastructure.HealthChecks;
 using StarterKit.Infrastructure.Modularity;
 using StarterKit.Infrastructure.Services;
+using StarterKit.Notifications.Api;
 using StarterKit.Shared;
 using StarterKit.Shared.Authorization;
 using System.Reflection;
@@ -20,8 +21,9 @@ public static class ConfigureExtensions
 {
     private static readonly Assembly[] assemblies =
         [
-            typeof(Program).Assembly, // inject this to import Identity Module
+            Assembly.GetExecutingAssembly(),
             typeof(IdentityModule).Assembly,
+            typeof(NotificationModule).Assembly,
         ];
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
