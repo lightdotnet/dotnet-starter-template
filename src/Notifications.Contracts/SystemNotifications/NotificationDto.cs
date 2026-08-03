@@ -16,9 +16,7 @@ public class NotificationDto
 
     public string? Url { get; set; }
 
-    public bool ReadStatus { get; set; }
-
-    public bool RemindRead { get; set; }
+    public NotificationStatus Status { get; set; }
 
     public DateTimeOffset Created { get; set; }
 }

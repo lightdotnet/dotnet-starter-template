@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Light.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StarterKit.Identity.Contracts.Services;
 using StarterKit.Infrastructure.Endpoints;
 using StarterKit.Notifications.Api.SignalR;
+using StarterKit.Notifications.Contracts.Authorization;
 using StarterKit.Notifications.Contracts.Services;
 using StarterKit.Notifications.Contracts.SystemNotifications;
 
@@ -10,11 +10,11 @@ namespace StarterKit.Notifications.Api.Controllers;
 
 [ApiExplorerSettings(GroupName = "push")]
 public class NotificationController(
-    IUserService userService,
     IHubService hub,
     INotificationService notificationService) : VersionedApiController
 {
     [HttpGet]
+    [MustHavePermission(NotificationPermissions.Read)]
     public async Task<IActionResult> GetAsync([FromQuery] NotificationLookup request)
     {
         var res = await notificationService.GetAsync(request);
@@ -22,6 +22,7 @@ public class NotificationController(
     }
 
     [HttpPost]
+    [MustHavePermission(NotificationPermissions.Send)]
     public async Task<IActionResult> SendToUserId(
         string fromUserId,
         string? fromName,
@@ -37,28 +38,8 @@ public class NotificationController(
         return Ok();
     }
 
-    [AllowAnonymous]
-    [BasicAuth]
-    [HttpPost("send_by_user_claim")]
-    public async Task<IActionResult> SendByUserClaim(
-        [FromQuery] string claimType,
-        [FromQuery] string claimValue,
-        [FromBody] SystemMessage request)
-    {
-        var getUsers = await userService.GetUsersHasClaimAsync(claimType, claimValue);
-
-        foreach (var user in getUsers)
-        {
-            await notificationService.SaveAsync("system", "system", user.Id, request);
-
-            // send notify after save record for load notification entries from API when receive
-            await hub.SendAsync(request, user.Id);
-        }
-
-        return Ok();
-    }
-
     [HttpPost("force_logout")]
+    [MustHavePermission(NotificationPermissions.Send)]
     public async Task<IActionResult> ForceLogout([FromBody] ForceLogoutMessage request)
     {
         await hub.SendAsync(request, request.UserId);

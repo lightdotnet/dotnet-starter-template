@@ -16,7 +16,7 @@ export function AccentColorPicker() {
   const { accentColor, setAccentColor } = useAccentColor();
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Change accent color">
           <Palette />

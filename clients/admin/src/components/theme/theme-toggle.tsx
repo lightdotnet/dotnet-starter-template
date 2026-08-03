@@ -26,7 +26,7 @@ export function ThemeToggle() {
     OPTIONS.find((option) => option.value === theme)?.icon ?? Laptop;
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Toggle theme">
           {mounted ? <ActiveIcon /> : <Laptop />}

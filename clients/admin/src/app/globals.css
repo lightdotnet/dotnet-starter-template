@@ -240,6 +240,36 @@
   }
 }
 
+/* Periodic bell wiggle while there's an unread notification (features/notifications). Mostly at
+   rest so it reads as an occasional "ring" rather than a continuous animation. */
+@keyframes bell-ring {
+  0%,
+  82%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  84% {
+    transform: rotate(12deg);
+  }
+
+  87% {
+    transform: rotate(-10deg);
+  }
+
+  90% {
+    transform: rotate(8deg);
+  }
+
+  93% {
+    transform: rotate(-6deg);
+  }
+
+  96% {
+    transform: rotate(3deg);
+  }
+}
+
 /* Hide native up/down spinner arrows on number inputs. */
 @layer base {
   input[type="number"] {

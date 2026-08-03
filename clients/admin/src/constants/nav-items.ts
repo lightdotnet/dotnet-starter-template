@@ -6,6 +6,7 @@ import { Settings, ShieldCheck } from "lucide-react";
 import { DASHBOARD_NAV_ITEM } from "@/features/dashboard/constants/nav-item";
 import { USERS_NAV_ITEM } from "@/features/users/constants/nav-item";
 import { ROLES_NAV_ITEM } from "@/features/roles/constants/nav-item";
+import { NOTIFICATIONS_NAV_ITEM } from "@/features/notifications/constants/nav-item";
 import type { NavItem } from "@/types/nav";
 
 export const NAV_ITEMS: NavItem[] = [
@@ -16,6 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: ShieldCheck,
     children: [USERS_NAV_ITEM, ROLES_NAV_ITEM],
   },
+  NOTIFICATIONS_NAV_ITEM,
   {
     label: "Settings",
     href: "/settings",

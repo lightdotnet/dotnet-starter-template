@@ -1,20 +1,17 @@
 "use client";
 
-import { Bell, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/shared/utils";
 import { useScrolled } from "@/hooks/use-scrolled";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Brand } from "@/components/layout/brand";
 import { SearchBox } from "@/components/shared/search-box";
 import { ThemeToggle, AccentColorPicker } from "@/components/theme";
 import { UserMenu } from "@/components/layout/user-menu";
+import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import type { ProfileData } from "@/types/session";
-
-// Placeholder count — no notifications backend wired up in this UI shell.
-const MOCK_NOTIFICATION_COUNT = 3;
 
 export function TopBar({ user }: { user: ProfileData | null }) {
   const scrolled = useScrolled();
@@ -60,22 +57,7 @@ export function TopBar({ user }: { user: ProfileData | null }) {
         <AccentColorPicker />
         <ThemeToggle />
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notifications"
-        >
-          <Bell />
-          {MOCK_NOTIFICATION_COUNT > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.65rem]"
-            >
-              {MOCK_NOTIFICATION_COUNT}
-            </Badge>
-          )}
-        </Button>
+        <NotificationBell />
 
         <UserMenu user={user} />
       </div>

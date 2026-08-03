@@ -1,0 +1,141 @@
+"use client";
+
+import { useActionState, useEffect, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { notifySuccess } from "@/components/toast";
+import {
+  sendNotificationAction,
+  type SendNotificationFormState,
+} from "@/features/notifications/api/send-notification-action";
+import { UserSelect } from "@/features/notifications/components/user-select";
+import type { UserDto } from "@/types/user";
+
+const initialState: SendNotificationFormState = {};
+
+interface FormValues {
+  toUserId: string;
+  title: string;
+  message: string;
+  url: string;
+}
+
+const initialValues: FormValues = { toUserId: "", title: "", message: "", url: "" };
+
+interface SendNotificationDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  users: UserDto[];
+  onSent: () => void;
+}
+
+export function SendNotificationDialog({
+  open,
+  onOpenChange,
+  users,
+  onSent,
+}: SendNotificationDialogProps) {
+  const [state, formAction, pending] = useActionState(sendNotificationAction, initialState);
+  const [values, setValues] = useState<FormValues>(initialValues);
+
+  function setField(field: keyof FormValues) {
+    return (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setValues((previous) => ({ ...previous, [field]: event.target.value }));
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen) setValues(initialValues);
+    onOpenChange(nextOpen);
+  }
+
+  useEffect(() => {
+    if (!state.success) return;
+    onSent();
+    notifySuccess("Notification sent.");
+    onOpenChange(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting the form after a completed send action, not deriving state from a prop
+    setValues(initialValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to a fresh success result
+  }, [state.success]);
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent onPointerDownOutside={(event) => event.preventDefault()}>
+        <form action={formAction} className="flex flex-col gap-4">
+          <DialogHeader>
+            <DialogTitle>Send notification</DialogTitle>
+          </DialogHeader>
+
+          {state.error && (
+            <Alert variant="destructive">
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="toUserId">Recipient</Label>
+            <UserSelect
+              id="toUserId"
+              name="toUserId"
+              users={users}
+              value={values.toUserId}
+              onValueChange={(value) =>
+                setValues((previous) => ({ ...previous, toUserId: value }))
+              }
+              triggerClassName="w-full"
+              placeholder="Select a user"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              name="title"
+              value={values.title}
+              onChange={setField("title")}
+              required
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="message">Message</Label>
+            <Textarea
+              id="message"
+              name="message"
+              value={values.message}
+              onChange={setField("message")}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="url">Link URL</Label>
+            <Input id="url" name="url" value={values.url} onChange={setField("url")} />
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit" loading={pending} disabled={!values.toUserId}>
+              Send
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
