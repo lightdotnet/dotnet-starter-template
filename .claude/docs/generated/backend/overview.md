@@ -8,7 +8,7 @@ ASP.NET Core (C#) Modular Monolith backend for the StarterKit template. The pre-
 
 | Module | Path | Responsibility | Status |
 |---|---|---|---|
-| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance. Single-project module (`Entities/`, `Data/`, `Application/`, `Services/`, `Jwt/`, `Controllers/` folders in `Identity.Api`) plus a `Contracts` seam project (DTOs, `IUserService`/`IRoleService`/`IServiceClaimService`). `.Api` suffix kept deliberately — anticipated candidate for future extraction into an independent identity service. | Built, but internal layering is still informal — CQRS commands and traditional service classes coexist for what should be one pattern. Now has automated test coverage via `tests/Identity.Tests` (98 tests: `Extensions/`, `Jwt/`, `Entities/`, `Services/`, `Controllers/`) — `Identity.Api.csproj` grants it `InternalsVisibleTo` to reach the module's `internal` JWT orchestration classes. |
+| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance, plus a permission catalog (`PermissionsController`, `GET permissions`). Single-project module (`Entities/`, `Data/`, `Application/`, `Services/`, `Jwt/`, `Controllers/` folders in `Identity.Api`) plus a `Contracts` seam project (DTOs, `IUserService`/`IRoleService`/`IServiceClaimService`, and now `Authorization/IdentityPermissionProvider` — an `IPermissionDefinitionProvider` implementation listing the module's definable permissions). `.Api` suffix kept deliberately — anticipated candidate for future extraction into an independent identity service. | Built, but internal layering is still informal — CQRS commands and traditional service classes coexist for what should be one pattern. Now has automated test coverage via `tests/Identity.Tests` (98 tests: `Extensions/`, `Jwt/`, `Entities/`, `Services/`, `Controllers/`) — `Identity.Api.csproj` grants it `InternalsVisibleTo` to reach the module's `internal` JWT orchestration classes. |
 
 ## Shared/Host Projects
 
@@ -26,7 +26,7 @@ Verified from actual `.csproj` `ProjectReference` entries:
 ```text
 Infrastructure -> Shared
 Persistence -> Shared
-Identity.Contracts (leaf, no ProjectReferences)
+Identity.Contracts -> Shared
 Identity.Api -> Identity.Contracts
 Identity.Api -> Infrastructure
 Identity.Api -> Persistence
@@ -40,7 +40,7 @@ Identity.Tests (tests/) -> Identity.Api
 Identity.Tests (tests/) -> Shared
 ```
 
-`Shared` and `Identity.Contracts` are both leaves — `Identity.Contracts` is the first real example of the per-module `Contracts` seam and is confirmed to hold no `ProjectReference`s. No cross-module boundary violations found — `Identity` is still the only module, so the "modules reference only each other's `Contracts`" rule is unverified in practice (no second module exists to test it against). `Identity.Tests` is a second, separate test project (alongside `Framework.Tests`) that now covers the Identity module.
+`Shared` remains a leaf. `Identity.Contracts` — the first real example of the per-module `Contracts` seam — is **no longer a leaf**: it gained a `ProjectReference` to `Shared` alongside `IdentityPermissionProvider` (see Data Access/External Dependencies below), and this reference exists purely to reach `Shared`'s transitive `Lightsoft.AspNetCore.Authorization` package — `Identity.Contracts.csproj` declares no `PackageReference` of its own for it (see `dependency-graph.md`'s "Undeclared transitive dependency" note). No cross-module boundary violations found — `Identity` is still the only module, so the "modules reference only each other's `Contracts`" rule is unverified in practice (no second module exists to test it against). `Identity.Tests` is a second, separate test project (alongside `Framework.Tests`) that now covers the Identity module.
 
 ## Entry Points
 
@@ -73,4 +73,4 @@ One `DbContext` per module is the intended default.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-02 (resynced — added `tests/Identity.Tests`, closing the Identity module's test-coverage gap) — scope: backend solution — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — added `PermissionsController`/`IdentityPermissionProvider` permission catalog; `Identity.Contracts` is no longer a leaf project) — scope: backend solution — see .claude/CLAUDE.md for update rules._

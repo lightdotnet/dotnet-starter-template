@@ -6,6 +6,7 @@
 |---|---|---|
 | `src/Infrastructure/Infrastructure.csproj` | `src/Shared/Shared.csproj` | Only project reference in `Infrastructure`. |
 | `src/Persistence/Persistence.csproj` | `src/Shared/Shared.csproj` | Only project reference in `Persistence`. |
+| `src/Identity.Contracts/Identity.Contracts.csproj` | `src/Shared/Shared.csproj` | New — added to reach `Shared`'s transitive `Lightsoft.AspNetCore.Authorization` package for `IdentityPermissionProvider`; `Identity.Contracts.csproj` declares no direct `PackageReference` for it (see "Undeclared transitive dependency" below). |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Identity.Contracts/Identity.Contracts.csproj` | |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Infrastructure/Infrastructure.csproj` | |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Persistence/Persistence.csproj` | |
@@ -18,14 +19,14 @@
 | `tests/Identity.Tests/Identity.Tests.csproj` | `src/Identity.Api/Identity.Api.csproj` | |
 | `tests/Identity.Tests/Identity.Tests.csproj` | `src/Shared/Shared.csproj` | |
 
-`src/Shared/Shared.csproj` and `src/Identity.Contracts/Identity.Contracts.csproj` both have no project references (leaves). `Identity.Contracts` being a confirmed leaf is what makes it usable as the module's cross-boundary seam. `Identity.Api.csproj` also declares `<InternalsVisibleTo Include="Identity.Tests" />` (mirroring the pattern `Shared`/`Infrastructure`/`Persistence` use for `Framework.Tests`), giving `Identity.Tests` access to the module's `internal` JWT orchestration classes (`AuthenticationService`, `UserSessionService`, `JwtTokenIssuer`, `JwtSigningService`).
+`src/Shared/Shared.csproj` has no project references (leaf). `src/Identity.Contracts/Identity.Contracts.csproj` is **no longer a leaf** — it now references `Shared` (see row above); its role as the module's cross-boundary seam is unaffected (still the only project other modules/the host may reference), but the "true leaf" claim from earlier syncs no longer holds. `Identity.Api.csproj` also declares `<InternalsVisibleTo Include="Identity.Tests" />` (mirroring the pattern `Shared`/`Infrastructure`/`Persistence` use for `Framework.Tests`), giving `Identity.Tests` access to the module's `internal` JWT orchestration classes (`AuthenticationService`, `UserSessionService`, `JwtTokenIssuer`, `JwtSigningService`).
 
 ## Package References
 
 | Project | Package | Version | Notes |
 |---|---|---|---|
 | Shared | FluentValidation | 12.1.1 | Backs `ValidationBehaviour<,>`. |
-| Shared | Lightsoft.AspNetCore.Authorization | 10.2.1-preview1 | Permission policy provider/handler base classes. |
+| Shared | Lightsoft.AspNetCore.Authorization | 10.2.1-preview2 | Permission policy provider/handler base classes; preview2 added `IPermissionDefinitionProvider`/`PermissionDefinition`, now used by `Identity.Contracts.Authorization.IdentityPermissionProvider`. |
 | Shared | Lightsoft.EventBus | 0.2.1 | Referenced, not yet used anywhere in `Shared`. |
 | Shared | Lightsoft.Extensions | 1.10.1-preview1 | `Light.Extensions.DependencyInjection` helpers. |
 | Shared | Lightsoft.Mediator | 1.2.1 | `IRequest<T>`, `IPipelineBehavior<,>`, `RequestHandlerDelegate<>`. |
@@ -63,6 +64,8 @@
 
 **Undeclared transitive dependency**: `UserService.SearchAsync` (`src/Identity.Api/Services/UserService.cs`) uses `Light.EntityFrameworkCore.Extensions`' `WhereIf` — supplied by the `Lightsoft.EntityFrameworkCore` package, which `Identity.Api.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the `ProjectReference` to `Persistence` (which does declare it). Works today because `CentralPackageTransitivePinningEnabled=false` doesn't block it, but it's an implicit coupling — if `Persistence` ever drops that package, `Identity.Api` would silently break.
 
+**Same pattern, new instance**: `Identity.Contracts.Authorization.IdentityPermissionProvider` uses `Light.AspNetCore.Authorization`'s `IPermissionDefinitionProvider`/`PermissionDefinition` — supplied by `Lightsoft.AspNetCore.Authorization`, which `Identity.Contracts.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the new `ProjectReference` to `Shared` (which does declare it). This is also why `Identity.Contracts` is no longer a leaf project — the `ProjectReference` to `Shared` appears to exist solely to reach this one package.
+
 ## Circular References
 
 None found.
@@ -80,4 +83,4 @@ None found. `Identity.Api` references only `Identity.Contracts`, `Infrastructure
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-02 (resynced — added `tests/Identity.Tests` project references/packages, `Identity.Api`'s new `InternalsVisibleTo`) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — `Identity.Contracts -> Shared` project reference added, `Lightsoft.AspNetCore.Authorization` bumped to preview2) — scope: Backend — see .claude/CLAUDE.md for update rules._

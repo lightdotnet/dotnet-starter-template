@@ -22,7 +22,7 @@
 - Error handling/result pattern: vendor `Light.Contracts.Result`/`Result<T>`/`PagedResult<T>` for expected-failure outcomes; `Light.Exceptions.ValidationException` (thrown by `ValidationBehaviour<,>`) for validation failures.
 - Logging: `AppLogging` static Serilog logger for bootstrap/startup messages (`Information`/`Warning`); standard `ILogger<T>` DI for request/runtime logging elsewhere.
 - Module layering conventions: only one module (`Identity`) exists so far, and it doesn't yet fully conform to the flat-project + `Contracts`-seam convention adopted 2026-07-30 — see `.claude/ARCHITECTURE-BACKEND.md`. Not yet verified as a repo-wide convention across multiple modules.
-- Every module — single or split — gets a `<Module>.Contracts` project as its only externally-referenceable seam; confirmed as a true leaf (no `ProjectReference`s) for `Identity.Contracts`.
+- Every module — single or split — gets a `<Module>.Contracts` project as its only externally-referenceable seam. `Identity.Contracts` was a confirmed true leaf through the previous sync; it now has one `ProjectReference` (`Shared`) — see the transitive-dependency deviation below — so "seam project" no longer implies "leaf project" as a hard rule.
 
 ## Testing Conventions
 
@@ -38,10 +38,11 @@
 - `UserProfileController`'s route is explicitly overridden to `api/v{version:apiVersion}/user_profile` rather than relying on the default `[controller]`-token convention the other Identity controllers use — confirmed deliberate (for readability), not an inconsistency to fix.
 - `UserController` now exposes both an unbounded `GET user` and a paginated `GET user/search` for the same read use case — organic drift, not a resolved decision (finding D4).
 - `Identity.Api` uses `Light.EntityFrameworkCore.Extensions.WhereIf` (`UserService.SearchAsync`) without declaring the backing `Lightsoft.EntityFrameworkCore` package itself — it rides in transitively via the `ProjectReference` to `Persistence`. See `.claude/docs/generated/backend/dependency-graph.md` for detail; avoid repeating this pattern in future modules — declare packages a project actually uses directly.
+- Same pattern repeated: `Identity.Contracts`'s new `IdentityPermissionProvider` uses `Light.AspNetCore.Authorization` types without `Identity.Contracts.csproj` declaring `Lightsoft.AspNetCore.Authorization` as a direct `PackageReference` — it rides in transitively via a new `ProjectReference` to `Shared`, which is also why `Identity.Contracts` is no longer a leaf project. See `dependency-graph.md`.
 
 ## Notes
 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-02 (resynced — `tests/Identity.Tests` added, closing the Identity test-coverage gap) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — `Identity.Contracts` no longer a confirmed leaf; new undeclared-transitive-dependency instance via `IdentityPermissionProvider`) — scope: Backend — see .claude/CLAUDE.md for update rules._
