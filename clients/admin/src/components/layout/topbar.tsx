@@ -50,7 +50,9 @@ export function TopBar({ user }: { user: ProfileData | null }) {
 
       <Brand />
 
-      <Breadcrumbs />
+      <div className="max-lg:hidden">
+        <Breadcrumbs />
+      </div>
 
       <div className="ml-auto flex items-center gap-2">
         <SearchBox />

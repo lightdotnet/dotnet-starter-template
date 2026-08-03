@@ -20,7 +20,7 @@ export function AppShell({
         <TopBar user={user} />
         <div className="flex flex-1">
           <Sidebar permissions={permissions} userName={userName} />
-          <main className="flex-1 bg-sidebar p-4 sm:p-6">
+          <main className="min-w-0 flex-1 bg-sidebar p-4 sm:p-6">
             <div className="mx-auto max-w-7xl">{children}</div>
           </main>
         </div>
