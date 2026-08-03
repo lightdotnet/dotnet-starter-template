@@ -6,7 +6,7 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 
 | From | To | Notes |
 |---|---|---|
-| `proxy.ts` | `lib/server/session-cookie.ts` | Constant-only import — keeps the edge-runtime `proxy.ts` free of `next/headers` |
+| `proxy.ts` | `features/user-profile/api/get-current-user.ts` (direct file, not the barrel), `lib/server/token-cipher.ts` (`encrypt`), `lib/server/build-session-claims.ts`, `lib/server/refresh-session.ts`, `lib/server/parse-session.ts`, `lib/server/session-cookie.ts` (`SESSION_COOKIE_NAME`, `REFRESH_LEAD_MS`), `types/session.ts` | Rewritten this sync — decrypts/validates the cookie, proactively refreshes the token near expiry, refetches profile/claims on hard navigations, re-encrypts on the way out. Uses Node's `crypto` transitively (via `token-cipher.ts`) with no explicit `export const runtime` pin — see [architecture.md](./architecture.md#known-architectural-risks--debt) |
 | `app/layout.tsx` | `components/theme` (barrel), `components/toast` (barrel — `AppToaster`), `components/ui/tooltip.tsx` | Root layout |
 | `app/login/page.tsx` | `features/auth` (barrel) | Re-export only |
 | `app/(dashboard)/layout.tsx` | `components/layout/app-shell.tsx`, `features/user-profile` (barrel) | Calls `resolveSession()` before rendering `AppShell` |
@@ -14,30 +14,34 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `app/(dashboard)/user-profile/page.tsx` | `features/user-profile` (barrel) | Re-export only |
 | `app/(dashboard)/identity/users/page.tsx` | `features/users` (barrel) | Re-export only |
 | `app/(dashboard)/identity/roles/page.tsx` | `features/roles` (barrel) | Re-export only — new route this sync |
-| `components/layout/app-shell.tsx` | `hooks/use-sidebar.tsx`, `components/layout/{sidebar,topbar}.tsx` | Extracted out of the former `app/(dashboard)/layout.tsx` |
+| `components/layout/app-shell.tsx` | `hooks/use-sidebar.tsx`, `components/layout/{sidebar,topbar}.tsx`, `types/session.ts` (`ProfileData`) | Takes `{ permissions, userName, user, children }`; `<main>` now uses `bg-sidebar` plus a `mx-auto max-w-7xl` content wrapper |
 | `components/layout/topbar.tsx` | `lib/shared/utils.ts`, `hooks/{use-scrolled,use-sidebar}.ts(x)`, `components/ui/{button,badge}.tsx`, `components/layout/{breadcrumbs,brand,user-menu}.tsx`, `components/shared/search-box.tsx`, `components/theme` (barrel: `ThemeToggle`, `AccentColorPicker`) | |
-| `components/layout/sidebar.tsx` | `lib/shared/utils.ts`, `hooks/use-sidebar.tsx`, `components/layout/sidebar-nav-item.tsx`, `constants/nav-items.ts`, `components/ui/sheet.tsx` | |
+| `components/layout/sidebar.tsx` | `lib/shared/utils.ts`, `hooks/use-sidebar.tsx`, `components/layout/sidebar-nav-item.tsx`, `constants/nav-items.ts` (`NAV_ITEMS`, direct import — deliberate barrel-bypass exception, see architecture.md), `lib/shared/menu.ts` (`buildVisibleMenu`), `lib/shared/authorization.ts` (`hasPermission`), `components/ui/sheet.tsx` | Takes `{ permissions, userName }`; computes the visible menu via `useMemo(() => buildVisibleMenu(NAV_ITEMS, can), [permissions, userName])`. Desktop `<aside>` no longer has a right border |
 | `components/layout/sidebar-nav-item.tsx` | `lib/shared/utils.ts`, `hooks/use-sidebar.tsx`, `types/nav.ts` | Recursive |
 | `components/layout/breadcrumbs.tsx` | `components/ui/breadcrumb.tsx`, `constants/nav-items.ts`, `types/nav.ts` | |
-| `components/layout/user-menu.tsx` | `components/ui/{avatar,button,dropdown-menu}.tsx`, `lib/shared/user-display.ts`, `types/user.ts` | Now takes a `user: UserDto \| null` prop — no more hardcoded `MOCK_USER` |
+| `components/layout/user-menu.tsx` | `components/ui/{avatar,button,dropdown-menu}.tsx`, `lib/shared/user-display.ts`, `features/auth/api/logout-action.ts` (direct file, not the barrel — the barrel does not export `logoutAction`), `types/session.ts` (`ProfileData`) | Takes a `user: ProfileData \| null` prop; "Log out" now calls `logoutAction(currentPath)` where `currentPath` comes from `usePathname()`/`useSearchParams()` |
 | `components/layout/brand.tsx` | `next/link` only | No hooks — server-renderable |
 | `components/theme/theme-toggle.tsx` | `next-themes`, `./use-has-mounted.ts`, `components/ui/{button,dropdown-menu}.tsx` | |
 | `components/theme/accent-color-picker.tsx` | `components/ui/{button,dropdown-menu}.tsx`, `./accent-color-provider.tsx` | |
-| `features/auth/index.ts` | `./components/login-page.tsx`, `./api/login.ts`, `./api/refresh-token.ts` | Barrel |
-| `features/auth/components/login-page.tsx` | `components/ui/card.tsx`, `./login-form.tsx` | |
-| `features/auth/components/login-form.tsx` | `components/ui/{button,input,label,alert}.tsx`, `features/auth/api/login-action.ts` | |
-| `features/auth/api/login-action.ts` | `features/auth/api/login.ts`, `features/user-profile` (barrel — `getCurrentUser`), `lib/shared/dedupe-claims.ts`, `lib/server/session-cookie.ts`, `types/session.ts` | `"use server"` |
-| `features/auth/api/{login,refresh-token}.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,token}.ts` | |
+| `features/auth/index.ts` | `./components/login-page.tsx`, `./api/login.ts`, `./api/refresh-token.ts` | Barrel — does **not** export `logoutAction` (see `components/layout/user-menu.tsx` above) |
+| `features/auth/components/login-page.tsx` | `components/ui/card.tsx`, `./login-form.tsx` | Async; reads `searchParams: Promise<{ redirect?: string }>` |
+| `features/auth/components/login-form.tsx` | `components/ui/{button,input,label,alert}.tsx`, `features/auth/api/login-action.ts` | Takes `{ redirect? }`, renders a hidden `<input name="redirect">` when present |
+| `features/auth/api/login-action.ts` | `features/auth/api/login.ts`, `features/user-profile` (barrel — `getCurrentUser`), `lib/server/jwt.ts` (`extractPermissions`/`extractRoles`), `lib/server/build-session-claims.ts`, `lib/server/token-cipher.ts` (`encrypt`), `lib/server/session-cookie.ts` (`SESSION_COOKIE_NAME`, `SESSION_TTL_MS`, `buildSessionCookieOptions`), `types/session.ts` | `"use server"`; permissions/roles now decoded from the JWT, not the profile API; reads a `redirect` form field and redirects there (open-redirect guarded) on success |
+| `features/auth/api/logout-action.ts` | `lib/server/session-cookie.ts` (`SESSION_COOKIE_NAME`), `next/headers` (`cookies`), `next/navigation` (`redirect`) | New — `"use server"`; `(redirectTo?: string) => Promise<void>`; deletes the cookie, redirects to `/login?redirect=<path>` (guarded) or plain `/login`. Closes the previously-documented "sign-out has no implementation" gap |
+| `features/auth/api/login.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,token}.ts` | |
+| `features/auth/api/refresh-token.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,token}.ts` | Now has a real caller: `lib/server/refresh-session.ts` (previously unwired) |
 | `features/user-profile/index.ts` | `./components/user-profile-page.tsx`, `./api/{resolve-session,get-current-user,list-sessions,revoke-session}.ts`, `./types/user-session.ts` | Barrel |
 | `features/user-profile/components/user-profile-page.tsx` | `components/ui/{card,badge,separator,avatar,alert}.tsx`, `qrcode`, `features/user-profile/api/resolve-session.ts`, `lib/shared/{dedupe-claims,user-display}.ts` | |
-| `features/user-profile/api/resolve-session.ts` | `lib/server/session.ts` (`getSession`), `features/user-profile/api/get-current-user.ts`, `types/{api,session,user}.ts` | |
+| `features/user-profile/api/resolve-session.ts` | `lib/server/session.ts` (`getSession`), `types/session.ts` | Now a thin passthrough to `getSession()` — no longer calls `getCurrentUser` itself; `proxy.ts` keeps the cookie's profile/claims fresh instead |
 | `features/user-profile/api/get-current-user.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,user}.ts` | |
 | `features/user-profile/api/list-sessions.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/user-profile/types/user-session.ts` | |
 | `features/user-profile/api/revoke-session.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts` | |
-| `features/dashboard/index.ts` | `./components/dashboard-page.tsx` | Barrel |
+| `features/dashboard/index.ts` | `./components/dashboard-page.tsx`, `./constants/nav-item.ts` (`DASHBOARD_NAV_ITEM`) | Barrel |
 | `features/dashboard/components/dashboard-page.tsx` | `components/ui/card.tsx`, `./stat-card.tsx`, `./users-table.tsx`, `features/dashboard/api/sample-data.ts` | |
 | `features/dashboard/components/{stat-card,users-table}.tsx` | `components/ui/*`, `lib/shared/utils.ts`, `features/dashboard/api/sample-data.ts` | Mock data — no backend call |
-| `features/users/index.ts` | `./components/users-page.tsx`, `./api/{search-users,get-all-users,get-user-by-id,get-user-by-username,create-user,update-user,delete-user,force-password}.ts`, `./constants/permissions.ts` | Barrel; imported by `app/(dashboard)/identity/users/page.tsx` |
+| `features/dashboard/constants/nav-item.ts` | `lucide-react` (`LayoutDashboard`), `types/nav.ts` | New — `DASHBOARD_NAV_ITEM` (label "Dashboard", href "/", no permission) |
+| `features/users/index.ts` | `./components/users-page.tsx`, `./api/{search-users,get-all-users,get-user-by-id,get-user-by-username,create-user,update-user,delete-user,force-password}.ts`, `./constants/permissions.ts`, `./constants/nav-item.ts` (`USERS_NAV_ITEM`) | Barrel; imported by `app/(dashboard)/identity/users/page.tsx` |
+| `features/users/constants/nav-item.ts` | `lucide-react` (`Users`), `./permissions.ts` (`USERS_PERMISSIONS`), `types/nav.ts` | New — `USERS_NAV_ITEM` (label "Users", href "/identity/users", permission `USERS_PERMISSIONS.View`) |
 | `features/users/components/users-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/search-users.ts`, `features/roles` (barrel — `getAllRoles`, fetched only when the viewer can update users), `features/users/components/users-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `features/users/constants/permissions.ts`, `components/ui/empty.tsx`, `next/navigation` (`redirect`) | Async Server Component; gates on `USERS_PERMISSIONS.View`/`.Create`/`.Update`/`.Delete` |
 | `features/users/components/users-data-table.tsx` | `components/shared/data-table` (barrel — `DataTable` + types), `components/ui/{avatar,badge,button,dropdown-menu}.tsx`, `features/users/components/{create,edit,delete}-user-dialog.tsx`, `features/user-profile/components/user-status-badge.tsx`, `lib/shared/user-display.ts`, `features/roles/types/role.ts` (`RoleDto`), `types/user.ts`, `next/navigation` (`useRouter`/`usePathname`/`useSearchParams`) | Thin `DataTable` wrapper; drives URL-param search/pagination; owns row-actions dropdown + all 3 dialogs' open/key state |
 | `features/users/components/create-user-dialog.tsx` | `components/ui/{alert,button,dialog,input,label}.tsx`, `components/toast` (barrel — `notifySuccess`), `features/users/api/create-user-action.ts` | |
@@ -47,9 +51,10 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `features/users/api/{update-user-action,force-password-action,delete-user-action}.ts` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/{update-user,force-password,delete-user}.ts` respectively, `types/user.ts` | New — `"use server"` |
 | `features/users/api/get-user-detail-action.ts` | `features/user-profile` (barrel — `resolveSession`), `features/users/api/get-user-by-id.ts`, `types/user.ts` | New — `"use server"`; on-demand detail read, not a mutation |
 | `features/users/api/*.ts` (7 remaining files) | `lib/server/http.ts`, `lib/server/call-guard.ts`, `types/{api,user}.ts` | |
-| `features/roles/index.ts` | `./components/roles-page.tsx`, `./api/{get-all-roles,get-role-by-id,get-permissions,create-role,update-role,delete-role}.ts`, `./constants/permissions.ts`, `./types/{role,permission-definition}.ts` | Barrel; now imported by `app/(dashboard)/identity/roles/page.tsx` and `features/users/components/users-page.tsx` — first cross-feature/UI consumers |
-| `features/roles/components/roles-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/roles/api/{get-all-roles,get-permissions}.ts`, `features/roles/components/roles-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `features/roles/constants/permissions.ts`, `components/ui/empty.tsx` | New — async Server Component; gates on `ROLES_PERMISSIONS.View`/`.Manage`; no `searchParams` (no backend search endpoint) |
-| `features/roles/components/roles-data-table.tsx` | `components/shared/data-table` (barrel), `components/ui/{button,dropdown-menu}.tsx`, `features/roles/components/{create,edit,delete}-role-dialog.tsx`, `features/roles/types/{role,permission-definition}.ts` | New — search via local `useState` + `.filter()`, not URL params |
+| `features/roles/index.ts` | `./components/roles-page.tsx`, `./api/{get-all-roles,get-role-by-id,get-permissions,create-role,update-role,delete-role}.ts`, `./constants/permissions.ts`, `./constants/nav-item.ts` (`ROLES_NAV_ITEM`), `./types/{role,permission-definition}.ts` | Barrel; imported by `app/(dashboard)/identity/roles/page.tsx` and `features/users/components/users-page.tsx` |
+| `features/roles/constants/nav-item.ts` | `lucide-react` (`KeyRound`), `./permissions.ts` (`ROLES_PERMISSIONS`), `types/nav.ts` | New — `ROLES_NAV_ITEM` (label "Roles", href "/identity/roles", permission `ROLES_PERMISSIONS.View`) |
+| `features/roles/components/roles-page.tsx` | `features/user-profile` (barrel — `resolveSession`), `features/roles/api/{get-all-roles,get-permissions}.ts`, `features/roles/components/roles-data-table.tsx`, `lib/server/authorization.ts` (`hasPermission`), `features/roles/constants/permissions.ts`, `components/ui/empty.tsx` | Async Server Component; gates on `ROLES_PERMISSIONS.View`/`.Manage`; no `searchParams` (no backend search endpoint) |
+| `features/roles/components/roles-data-table.tsx` | `components/shared/data-table` (barrel), `components/ui/{button,dropdown-menu}.tsx`, `features/roles/components/{create,edit,delete}-role-dialog.tsx`, `features/roles/types/{role,permission-definition}.ts` | Search via local `useState` + `.filter()`, not URL params. **New this sync**: `name`/`description` columns set `sortable: true`/`sortValue` on the shared `DataTable` (meaningful here since the full list is fetched upfront) |
 | `features/roles/components/create-role-dialog.tsx` | `components/ui/{alert,button,dialog,input,label}.tsx`, `components/toast` (barrel), `features/roles/api/create-role-action.ts` | New — name/description only, no claims step |
 | `features/roles/components/edit-role-dialog.tsx` | `components/ui/{alert,button,checkbox,dialog,input,label,spinner}.tsx`, `components/toast` (barrel), `features/roles/api/{get-role-detail-action,update-role-action}.ts`, `features/roles/types/{role,permission-definition}.ts` | New — fetches full role detail on open |
 | `features/roles/components/delete-role-dialog.tsx` | `components/ui/{button,dialog}.tsx`, `components/toast` (barrel), `features/roles/api/delete-role-action.ts`, `features/roles/types/role.ts` | New |
@@ -58,15 +63,28 @@ Verified via actual `import` statements (see [architecture.md](./architecture.md
 | `features/roles/api/get-permissions.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/permission-definition.ts` | New |
 | `features/roles/api/get-all-roles.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | **Fixed this sync**: was `guardRawCall` assuming a bare array; the endpoint wraps its response in the app's envelope like every other endpoint |
 | `features/roles/api/{get-role-by-id,create-role,update-role,delete-role}.ts` | `lib/server/http.ts`, `lib/server/call-guard.ts`, `features/roles/types/role.ts` | |
-| `components/shared/data-table/data-table.tsx` | `components/ui/{table,skeleton,empty,alert}.tsx`, `./data-table-toolbar.tsx`, `./data-table-pagination.tsx`, `./types.ts` | New; exported via `./index.ts` barrel |
-| `components/shared/data-table/data-table-toolbar.tsx` | `components/ui/{button,dropdown-menu}.tsx`, `lib/shared/utils.ts`, `./types.ts` | New — debounced (400ms) search input |
-| `components/shared/data-table/data-table-pagination.tsx` | `components/ui/{input,pagination}.tsx` | New — exports `getPageWindow()` helper |
-| `components/toast/toaster.tsx` | `next-themes`, `sonner`, `./toast-theme.ts` | New |
-| `components/toast/notify.ts` | `sonner` | New |
-| `components/toast/toast-theme.ts` | `sonner` (types only) | New |
-| `lib/server/session.ts` | `next/headers` (`cookies`), `lib/server/session-cookie.ts`, `types/session.ts` | |
-| `lib/server/http.ts` | `lib/server/config.ts` (`getApiBaseUrl`) | `send()` gained `extractErrorMessage()` — reads non-2xx response bodies for a real error message |
-| `lib/server/authorization.ts` | `types/session.ts` (`SessionData`) | Pre-existing file, gained its first real consumer this sync (`features/users/components/users-page.tsx`) |
+| `components/shared/data-table/data-table.tsx` | `components/ui/{table,skeleton,empty,alert}.tsx`, `./data-table-toolbar.tsx`, `./data-table-pagination.tsx`, `./types.ts`, `lucide-react` (`ArrowUp`/`ArrowDown`/`ArrowUpDown`, new) | Exported via `./index.ts` barrel. **New this sync**: optional per-column client-side sort (`sortState`/`toggleSort`/a `sortedData` `useMemo`) |
+| `components/shared/data-table/types.ts` | `lucide-react`, `components/ui/button.tsx` (type only) | `DataTableColumn` gained optional `sortable`/`sortValue` (new) |
+| `components/shared/data-table/data-table-toolbar.tsx` | `components/ui/{button,dropdown-menu}.tsx`, `lib/shared/utils.ts`, `./types.ts` | Debounced (400ms) search input |
+| `components/shared/data-table/data-table-pagination.tsx` | `components/ui/{input,pagination}.tsx` | Exports `getPageWindow()` helper |
+| `components/shared/object-viewer/object-viewer.tsx` | `components/ui/table.tsx` (`Table`, `TableHeader`, `TableRow`, `TableHead`, `TableBody`, `TableCell`, `TableCaption`), `./object-viewer-row.tsx`, `./object-viewer-layout-context.tsx`, `./utils.ts` | New, additive — no current importer (not wired into any page) |
+| `components/shared/object-viewer/object-viewer-row.tsx` | `components/ui/input.tsx`, `./utils.ts` | New |
+| `components/shared/object-viewer/column-resize-handle.tsx` | `./object-viewer-layout-context.tsx` | New — pointer/keyboard-driven resize handle |
+| `components/shared/object-viewer/{object-viewer-layout-context,utils}.ts(x)` | none (or React context only) | New |
+| `components/shared/object-viewer/index.ts` | `./object-viewer.tsx` | New — barrel (`export { ObjectViewer }`) |
+| `components/toast/toaster.tsx` | `next-themes`, `sonner`, `./toast-theme.ts` | |
+| `components/toast/notify.ts` | `sonner` | |
+| `components/toast/toast-theme.ts` | `sonner` (types only) | |
+| `lib/server/session.ts` | `next/headers` (`cookies`), `lib/server/parse-session.ts`, `lib/server/session-cookie.ts`, `types/session.ts` | `getSession()` now decrypts via `parse-session.ts` rather than plain `JSON.parse` |
+| `lib/server/parse-session.ts` | `lib/server/token-cipher.ts` (`decrypt`), `types/session.ts` | New — validates the decrypted shape, returns `null` on anything malformed |
+| `lib/server/refresh-session.ts` | `features/auth/api/refresh-token.ts` (direct file, not the `@/features/auth` barrel), `lib/server/jwt.ts`, `types/session.ts` | New — the token-refresh flow; called from `src/proxy.ts`. A failed refresh returns `null`, not treated as a dead session |
+| `lib/server/token-cipher.ts` | `node:crypto`, `lib/server/config.ts` (`getTokenEncryptionKey`) | New — AES-256-GCM `encrypt`/`decrypt`, `"iv.authTag.ciphertext"` (base64) format |
+| `lib/server/jwt.ts` | `types/user.ts` (`ClaimDto`) | New — decodes a JWT payload without verifying its signature (safe: token was just issued by this app's own backend); `extractPermissions`/`extractRoles`/`extractAllClaims` |
+| `lib/server/build-session-claims.ts` | `lib/server/jwt.ts` (`extractAllClaims`), `lib/shared/dedupe-claims.ts`, `types/user.ts` | New — unions JWT claims with the profile API's raw claims |
+| `lib/server/http.ts` | `lib/server/config.ts` (`getApiBaseUrl`) | `send()` has `extractErrorMessage()` — reads non-2xx response bodies for a real error message |
+| `lib/server/authorization.ts` | `lib/shared/authorization.ts` (delegates to it), `types/session.ts` (`SessionData`) | Now a thin wrapper preserving the original `(session, userName, permission)` call signature |
+| `lib/shared/authorization.ts` | none (plain module) | New — `SUPER_ADMIN_USERNAMES`, `isSuperAdminUser`, `hasPermission`/`hasAnyPermission`/`hasAllPermissions`, all taking `permissions: string[]`/`userName` directly (client-safe, usable from `Sidebar`) |
+| `lib/shared/menu.ts` | `types/nav.ts` (`NavItem`) | New — pure recursive `buildVisibleMenu(items, can)` |
 | `components/ui/*` | `lib/shared/utils.ts`, `radix-ui`, `class-variance-authority`, `lucide-react` | `button.tsx` additionally imports `components/ui/spinner.tsx` |
 | `hooks/use-sidebar.tsx` | `next/navigation` (`usePathname`) | |
 
@@ -86,7 +104,7 @@ From `clients/admin/package.json` (`dependencies`):
 | `lucide-react` | `^1.28.0` | Icon set |
 | `next-themes` | `^0.4.6` | Theme (light/dark/system) switching; also drives `components/toast/toaster.tsx`'s light/dark toast theme |
 | `qrcode` | `^1.5.4` | QR code generation for `/user-profile`'s user-ID code |
-| `sonner` | `^2.0.7` | **New** — toast notifications, wrapped by `components/toast/` (not imported directly by feature code) |
+| `sonner` | `^2.0.7` | Toast notifications, wrapped by `components/toast/` (not imported directly by feature code) |
 | `shadcn` | `^4.16.0` | CLI that generated `components/ui/*`; also imported at runtime (`shadcn/tailwind.css`) |
 | `tw-animate-css` | `^1.4.0` | Animation utility classes |
 
@@ -110,7 +128,7 @@ Package manager: pnpm (`pnpm-lock.yaml`). A `pnpm-workspace.yaml` exists but onl
 
 ## Circular References
 
-None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`, `features/users` → `features/user-profile`, `features/users` → `features/roles` — new this sync) go one direction only, through the target feature's barrel. `components/shared/data-table/*` and `components/toast/*` are consumed by both `features/users` and `features/roles` but import nothing from `features/*` themselves, so no cycle there either.
+None found among internal module imports — `components/ui/*` remains a strict leaf layer, and cross-feature imports observed so far (`features/auth` → `features/user-profile`, `features/users` → `features/user-profile`, `features/users` → `features/roles`) go one direction only, through the target feature's barrel (with two narrow, reasoned exceptions — `constants/nav-items.ts` and `components/layout/user-menu.tsx` — that import a single plain-data/single-function file directly instead; see architecture.md). `components/shared/data-table/*`, `components/shared/object-viewer/*`, and `components/toast/*` are consumed by feature code but import nothing from `features/*` themselves, so no cycle there either. One dependency-direction reversal is worth flagging (not a cycle, but atypical): `lib/server/refresh-session.ts` imports `features/auth/api/refresh-token.ts` directly — `lib/server/*` normally sits *below* `features/*`, but here it reaches up into one feature's `api/` file. No cycle results since `features/auth` doesn't import back from `lib/server/refresh-session.ts`.
 
 ## Version Mismatches
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Inbox } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Inbox } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,12 +15,18 @@ import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DataTableToolbar } from "@/components/shared/data-table/data-table-toolbar";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
+import { cn } from "@/lib/shared/utils";
 import type {
   DataTableAction,
   DataTableColumn,
   DataTableEmptyState,
   DataTableErrorState,
 } from "@/components/shared/data-table/types";
+
+interface SortState {
+  columnId: string;
+  direction: "asc" | "desc";
+}
 
 const SKELETON_ROWS = 5;
 
@@ -68,6 +74,7 @@ export function DataTable<TData>({
   error,
 }: DataTableProps<TData>) {
   const [hiddenColumnIds, setHiddenColumnIds] = useState<Set<string>>(new Set());
+  const [sortState, setSortState] = useState<SortState | null>(null);
 
   function toggleColumn(columnId: string) {
     setHiddenColumnIds((previous) => {
@@ -78,11 +85,39 @@ export function DataTable<TData>({
     });
   }
 
+  function toggleSort(columnId: string) {
+    setSortState((previous) => {
+      if (!previous || previous.columnId !== columnId) return { columnId, direction: "asc" };
+      if (previous.direction === "asc") return { columnId, direction: "desc" };
+      return null;
+    });
+  }
+
   const visibleColumns = columns.filter((column) => !hiddenColumnIds.has(column.id));
   const isEmpty = !isLoading && data.length === 0;
   // While a fresh request is in flight, prefer the table's own loading state
   // (skeleton rows) over a stale error left over from the previous render.
   const showError = !!error && !isLoading;
+
+  const sortColumn = sortState
+    ? columns.find((column) => column.id === sortState.columnId)
+    : undefined;
+
+  // Sorts only the `data` that was passed in — meaningless for callers that
+  // paginate server-side and hand DataTable a single page at a time.
+  const sortedData = useMemo(() => {
+    if (!sortState || !sortColumn?.sortValue) return data;
+
+    const { direction } = sortState;
+    const { sortValue } = sortColumn;
+    return [...data].sort((a, b) => {
+      const aValue = sortValue(a);
+      const bValue = sortValue(b);
+      if (aValue < bValue) return direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [data, sortState, sortColumn]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -116,11 +151,33 @@ export function DataTable<TData>({
         </Empty>
       ) : (
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted">
             <TableRow>
               {visibleColumns.map((column) => (
-                <TableHead key={column.id} className={column.className}>
-                  {column.header}
+                <TableHead
+                  key={column.id}
+                  className={cn("text-muted-foreground", column.className)}
+                >
+                  {column.sortable && column.sortValue ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleSort(column.id)}
+                      className="inline-flex items-center gap-1 hover:text-foreground"
+                    >
+                      {column.header}
+                      {sortState?.columnId === column.id ? (
+                        sortState.direction === "asc" ? (
+                          <ArrowUp className="size-3.5" />
+                        ) : (
+                          <ArrowDown className="size-3.5" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="size-3.5 opacity-50" />
+                      )}
+                    </button>
+                  ) : (
+                    column.header
+                  )}
                 </TableHead>
               ))}
             </TableRow>
@@ -136,7 +193,7 @@ export function DataTable<TData>({
                     ))}
                   </TableRow>
                 ))
-              : data.map((row) => (
+              : sortedData.map((row) => (
                   <TableRow key={rowKey(row)}>
                     {visibleColumns.map((column) => (
                       <TableCell key={column.id} className={column.className}>
@@ -150,12 +207,14 @@ export function DataTable<TData>({
       )}
 
       {!showError && (
-        <DataTablePagination
-          pageNumber={pageNumber}
-          totalPages={totalPages}
-          totalRecords={totalRecords}
-          onPageChange={onPageChange}
-        />
+        <div className="border-t pt-4">
+          <DataTablePagination
+            pageNumber={pageNumber}
+            totalPages={totalPages}
+            totalRecords={totalRecords}
+            onPageChange={onPageChange}
+          />
+        </div>
       )}
     </div>
   );

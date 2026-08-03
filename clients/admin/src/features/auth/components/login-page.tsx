@@ -10,9 +10,9 @@ import { LoginForm } from "@/features/auth/components/login-form";
 export async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ redirect?: string }>;
 }) {
-  const { from } = await searchParams;
+  const { redirect } = await searchParams;
 
   return (
     <div className="flex min-h-full flex-1 items-center justify-center p-4">
@@ -24,7 +24,7 @@ export async function LoginPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <LoginForm from={from} />
+          <LoginForm redirect={redirect} />
         </CardContent>
       </Card>
     </div>

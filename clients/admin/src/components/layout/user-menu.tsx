@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,9 @@ import type { ProfileData } from "@/types/session";
 
 export function UserMenu({ user }: { user: ProfileData | null }) {
   const name = user ? getDisplayName(user) : "Unknown user";
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   return (
     <DropdownMenu>
@@ -56,7 +60,7 @@ export function UserMenu({ user }: { user: ProfileData | null }) {
           Settings
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={() => void logoutAction()}>
+        <DropdownMenuItem variant="destructive" onClick={() => void logoutAction(currentPath)}>
           <LogOut />
           Log out
         </DropdownMenuItem>

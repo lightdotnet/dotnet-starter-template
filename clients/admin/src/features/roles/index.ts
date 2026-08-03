@@ -6,5 +6,6 @@ export { createRole } from "./api/create-role";
 export { updateRole } from "./api/update-role";
 export { deleteRole } from "./api/delete-role";
 export { ROLES_PERMISSIONS } from "./constants/permissions";
+export { ROLES_NAV_ITEM } from "./constants/nav-item";
 export type { RoleDto, CreateRoleRequest } from "./types/role";
 export type { PermissionDefinition } from "./types/permission-definition";

@@ -1,18 +1,15 @@
+import * as shared from "@/lib/shared/authorization";
 import type { SessionData } from "@/types/session";
 
-// Update this list for the new project — usernames here bypass every permission check.
-export const SUPER_ADMIN_USERNAMES: string[] = ["super"];
-
-export function isSuperAdminUser(userName: string | null | undefined): boolean {
-  return !!userName && SUPER_ADMIN_USERNAMES.includes(userName);
-}
+export const SUPER_ADMIN_USERNAMES = shared.SUPER_ADMIN_USERNAMES;
+export const isSuperAdminUser = shared.isSuperAdminUser;
 
 export function hasPermission(
   session: Pick<SessionData, "permissions">,
   userName: string | null | undefined,
   permission: string,
 ): boolean {
-  return isSuperAdminUser(userName) || session.permissions.includes(permission);
+  return shared.hasPermission(session.permissions, userName, permission);
 }
 
 export function hasAnyPermission(
@@ -20,9 +17,7 @@ export function hasAnyPermission(
   userName: string | null | undefined,
   permissions: string[],
 ): boolean {
-  return (
-    isSuperAdminUser(userName) || permissions.some((p) => session.permissions.includes(p))
-  );
+  return shared.hasAnyPermission(session.permissions, userName, permissions);
 }
 
 export function hasAllPermissions(
@@ -30,7 +25,5 @@ export function hasAllPermissions(
   userName: string | null | undefined,
   permissions: string[],
 ): boolean {
-  return (
-    isSuperAdminUser(userName) || permissions.every((p) => session.permissions.includes(p))
-  );
+  return shared.hasAllPermissions(session.permissions, userName, permissions);
 }

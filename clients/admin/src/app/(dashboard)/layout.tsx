@@ -8,5 +8,13 @@ export default async function DashboardLayout({
 }>) {
   const session = await resolveSession();
 
-  return <AppShell user={session?.profile ?? null}>{children}</AppShell>;
+  return (
+    <AppShell
+      permissions={session?.permissions ?? []}
+      userName={session?.profile?.userName ?? null}
+      user={session?.profile ?? null}
+    >
+      {children}
+    </AppShell>
+  );
 }

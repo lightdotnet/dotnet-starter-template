@@ -9,7 +9,7 @@ import { loginAction, type LoginFormState } from "@/features/auth/api/login-acti
 
 const initialState: LoginFormState = {};
 
-export function LoginForm({ from }: { from?: string }) {
+export function LoginForm({ redirect }: { redirect?: string }) {
   const [state, formAction, pending] = useActionState(
     loginAction,
     initialState,
@@ -17,7 +17,7 @@ export function LoginForm({ from }: { from?: string }) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      {from && <input type="hidden" name="from" value={from} />}
+      {redirect && <input type="hidden" name="redirect" value={redirect} />}
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>

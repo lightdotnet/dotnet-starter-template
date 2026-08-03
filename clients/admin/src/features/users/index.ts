@@ -8,3 +8,4 @@ export { updateUser } from "./api/update-user";
 export { deleteUser } from "./api/delete-user";
 export { forcePassword } from "./api/force-password";
 export { USERS_PERMISSIONS } from "./constants/permissions";
+export { USERS_NAV_ITEM } from "./constants/nav-item";

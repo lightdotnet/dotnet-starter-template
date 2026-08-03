@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { ShieldOff } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Empty,
   EmptyDescription,
@@ -66,12 +67,16 @@ export async function RolesPage() {
         </p>
       </div>
 
-      <RolesDataTable
-        roles={roles}
-        error={error}
-        canManage={canManage}
-        permissions={permissions}
-      />
+      <Card>
+        <CardContent>
+          <RolesDataTable
+            roles={roles}
+            error={error}
+            canManage={canManage}
+            permissions={permissions}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

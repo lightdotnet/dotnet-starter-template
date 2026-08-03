@@ -12,7 +12,10 @@ const LOGIN_PATH = "/login";
 
 function loginRedirect(request: NextRequest): NextResponse {
   const loginUrl = new URL(LOGIN_PATH, request.url);
-  loginUrl.searchParams.set("from", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  loginUrl.searchParams.set(
+    "redirect",
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+  );
   return NextResponse.redirect(loginUrl);
 }
 

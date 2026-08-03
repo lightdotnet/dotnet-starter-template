@@ -4,9 +4,13 @@ import { TopBar } from "@/components/layout/topbar";
 import type { ProfileData } from "@/types/session";
 
 export function AppShell({
+  permissions,
+  userName,
   user,
   children,
 }: {
+  permissions: string[];
+  userName: string | null;
   user: ProfileData | null;
   children: React.ReactNode;
 }) {
@@ -15,8 +19,10 @@ export function AppShell({
       <div className="flex min-h-full flex-col">
         <TopBar user={user} />
         <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+          <Sidebar permissions={permissions} userName={userName} />
+          <main className="flex-1 bg-sidebar p-4 sm:p-6">
+            <div className="mx-auto max-w-7xl">{children}</div>
+          </main>
         </div>
       </div>
     </SidebarProvider>

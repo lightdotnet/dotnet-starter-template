@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { ShieldOff } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
 import { getAllRoles } from "@/features/roles/api/get-all-roles";
@@ -78,19 +79,23 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
         </p>
       </div>
 
-      <UsersDataTable
-        records={paged?.records ?? []}
-        searchValue={q ?? ""}
-        pageNumber={paged?.pageNumber ?? pageNumber}
-        pageSize={paged?.pageSize ?? PAGE_SIZE}
-        totalPages={paged?.totalPages ?? 1}
-        totalRecords={paged?.totalRecords ?? 0}
-        error={error}
-        canCreate={canCreate}
-        canUpdate={canUpdate}
-        canDelete={canDelete}
-        roles={roles}
-      />
+      <Card>
+        <CardContent>
+          <UsersDataTable
+            records={paged?.records ?? []}
+            searchValue={q ?? ""}
+            pageNumber={paged?.pageNumber ?? pageNumber}
+            pageSize={paged?.pageSize ?? PAGE_SIZE}
+            totalPages={paged?.totalPages ?? 1}
+            totalRecords={paged?.totalRecords ?? 0}
+            error={error}
+            canCreate={canCreate}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
+            roles={roles}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -81,9 +81,10 @@ export async function loginAction(
     buildSessionCookieOptions(sessionExpiresAt),
   );
 
-  const from = String(formData.get("from") ?? "");
+  const redirectTo = String(formData.get("redirect") ?? "");
   // Only allow same-site relative paths — reject "//host/..." to avoid an open redirect.
-  const destination = from.startsWith("/") && !from.startsWith("//") ? from : "/";
+  const destination =
+    redirectTo.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : "/";
 
   redirect(destination);
 }

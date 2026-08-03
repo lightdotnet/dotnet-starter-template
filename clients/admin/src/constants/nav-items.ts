@@ -1,26 +1,20 @@
-import {
-  LayoutDashboard,
-  Users,
-  ShieldCheck,
-  KeyRound,
-  Settings,
-} from "lucide-react";
+import { Settings, ShieldCheck } from "lucide-react";
+// Imported directly (not via each feature's barrel): the barrels also re-export
+// server-only code (Server Components, session-backed API calls), and this file
+// is reachable from the client-side Sidebar — pulling in the full barrel would
+// drag that server-only chain into the client bundle.
+import { DASHBOARD_NAV_ITEM } from "@/features/dashboard/constants/nav-item";
+import { USERS_NAV_ITEM } from "@/features/users/constants/nav-item";
+import { ROLES_NAV_ITEM } from "@/features/roles/constants/nav-item";
 import type { NavItem } from "@/types/nav";
 
 export const NAV_ITEMS: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
+  DASHBOARD_NAV_ITEM,
   {
     label: "Identity",
     href: "/identity",
     icon: ShieldCheck,
-    children: [
-      { label: "Users", href: "/identity/users", icon: Users },
-      { label: "Roles", href: "/identity/roles", icon: KeyRound },
-    ],
+    children: [USERS_NAV_ITEM, ROLES_NAV_ITEM],
   },
   {
     label: "Settings",

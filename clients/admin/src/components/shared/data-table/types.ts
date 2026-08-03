@@ -9,6 +9,14 @@ export interface DataTableColumn<TData> {
   className?: string;
   /** Whether this column can be hidden via the columns menu. Defaults to `true`. */
   hideable?: boolean;
+  /**
+   * Enables client-side sorting on this column. Only sorts the `data` array
+   * that was passed in, so only meaningful when the caller already holds the
+   * full result set (no server-side pagination) — requires `sortValue`.
+   */
+  sortable?: boolean;
+  /** Comparable value used to sort this column when `sortable` is set. */
+  sortValue?: (row: TData) => string | number;
 }
 
 export interface DataTableAction {

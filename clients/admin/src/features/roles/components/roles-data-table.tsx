@@ -34,11 +34,15 @@ const baseColumns: DataTableColumn<RoleDto>[] = [
     id: "name",
     header: "Name",
     hideable: false,
+    sortable: true,
+    sortValue: (role) => role.name.toLowerCase(),
     cell: (role) => role.name,
   },
   {
     id: "description",
     header: "Description",
+    sortable: true,
+    sortValue: (role) => (role.description ?? "").toLowerCase(),
     cell: (role) => role.description ?? "",
   },
 ];
