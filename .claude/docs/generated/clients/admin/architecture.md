@@ -29,14 +29,30 @@ src/
                              notifications-page,notifications-data-table,send-notification-dialog,user-select}.tsx,
                              constants/{permissions,nav-item}.ts, types/notification.ts, index.ts
   components/
-    ui/                     shadcn-CLI-generated primitives (24 files)
+    ui/                     shadcn-CLI-generated primitives (23 files) plus one hand-written addition,
+                             native-select.tsx (wraps a real `<select>`; not shadcn CLI output — see Key
+                             Design Patterns); select.tsx (the former Radix `Select` wrapper) is gone,
+                             migrated to components/select/*
+    foundation/             (new) use-floating-popover.ts, use-listbox.ts, use-async-options.ts,
+                             use-virtual-list.ts, options-list.tsx, floating-overlay.tsx, types.ts —
+                             shared Floating-UI-based primitives underlying components/select/* and
+                             components/command/* (see Key Design Patterns)
+    select/                 (new) entity-select.tsx, search-select.tsx, async-select.tsx, multi-select.tsx,
+                             index.ts (barrel)
+    command/                (new) command-palette.tsx, command-palette-provider.tsx, types.ts, index.ts;
+                             Cmd/Ctrl+K overlay — built, but no consumer wired into the app yet
     layout/                 topbar, sidebar, sidebar-nav-item, brand, breadcrumbs, user-menu, app-shell
     theme/                  theme-provider, accent-color-provider, theme-toggle, accent-color-picker, use-has-mounted, index.ts (barrel)
     shared/
       search-box.tsx
-      data-table/           types.ts, data-table-toolbar.tsx, data-table-pagination.tsx, data-table.tsx, index.ts (barrel);
-                             generic reusable list-table building block, no data-fetching of its own; `types.ts`/`data-table.tsx`
-                             gained optional per-column client-side sorting (`sortable`/`sortValue`)
+      data-table/           types.ts, data-table-toolbar.tsx, data-table-pagination.tsx, data-table.tsx,
+                             data-table-virtual-body.tsx (new), index.ts (barrel); generic reusable
+                             list-table building block, no data-fetching of its own; `types.ts`/`data-table.tsx`
+                             gained optional per-column client-side sorting (`sortable`/`sortValue`) in a
+                             prior sync, and (new this sync) an optional `mode` prop
+                             (`"paginated"` default / `"virtualized"` / `"infinite"`, the latter two
+                             rendered via `data-table-virtual-body.tsx`) plus `onSortChange` for
+                             server-driven sort — both additive, fully backward-compatible
       object-viewer/         (new, additive — not yet used by any page) utils.ts, object-viewer-layout-context.tsx,
                              column-resize-handle.tsx, object-viewer-row.tsx, object-viewer.tsx, index.ts;
                              built on `components/ui/table` + `components/ui/input`, no `features/*` dependency
@@ -152,7 +168,9 @@ features/users/components/users-data-table.tsx -> components/shared/data-table (
                                         features/roles/types/role (RoleDto), types/user
 features/users/components/create-user-dialog.tsx -> components/ui/{alert,button,dialog,input,label}, components/toast (notifySuccess),
                                         features/users/api/create-user-action
-features/users/components/edit-user-dialog.tsx -> components/ui/{alert,button,checkbox,dialog,input,label,select,spinner,tabs},
+features/users/components/edit-user-dialog.tsx -> components/ui/{alert,button,checkbox,dialog,input,label,spinner,tabs},
+                                        components/select (EntitySelect — status/authProvider; replaced components/ui/select,
+                                        the former Radix wrapper, this sync),
                                         components/toast (notifySuccess), features/users/api/get-user-detail-action,
                                         features/users/api/update-user-action, features/users/api/force-password-action,
                                         features/roles/types/role (RoleDto), types/user
@@ -213,15 +231,23 @@ features/notifications/components/notifications-page.tsx -> features/user-profil
                                         lib/server/authorization (hasPermission), features/notifications/constants/permissions,
                                         features/notifications/types/notification
 features/notifications/components/notifications-data-table.tsx -> components/shared/data-table (DataTable + types),
-                                        components/ui/select, features/notifications/components/{send-notification-dialog,user-select},
+                                        components/ui/native-select (status filter — replaced components/ui/select plus an
+                                        embedded "all" pseudo-option this sync; now a real, always-reselectable placeholder),
+                                        features/notifications/components/{send-notification-dialog,user-select},
                                         lib/shared/user-display, features/notifications/types/notification, types/user
 features/notifications/components/send-notification-dialog.tsx -> components/ui/{alert,button,dialog,input,label,textarea},
                                         components/toast (notifySuccess), features/notifications/api/send-notification-action,
                                         features/notifications/components/user-select, types/user
-features/notifications/components/user-select.tsx -> components/ui/{input,select}, lib/shared/user-display, types/user
-                                        (new — reusable searchable user picker, consumed by both notifications-data-table.tsx
+features/notifications/components/user-select.tsx -> components/select (SearchSelect), lib/shared/user-display, types/user
+                                        (reusable searchable user picker, consumed by both notifications-data-table.tsx
                                         and send-notification-dialog.tsx within this same feature; not promoted to
-                                        components/shared/, consistent with "only promote once 2+ features need it")
+                                        components/shared/, consistent with "only promote once 2+ features need it".
+                                        Rewritten this sync on top of the new SearchSelect — previously stuffed a search
+                                        `<Input>` inside a Radix `SelectContent` to work around `onOpenAutoFocus` not
+                                        being exposed on Radix's Select.Content; that workaround is gone. Also dropped
+                                        its `allOption` prop/pattern — the notifications page's "no filter" state is now
+                                        SearchSelect's own placeholder, not an injected fake option, and an optional
+                                        `onClear` prop shows a real clear (X) button)
 features/notifications/api/get-notifications.ts -> lib/server/http, lib/server/call-guard, types/api, features/notifications/types/notification
 features/notifications/api/get-my-notifications.ts -> lib/server/http, lib/server/call-guard, types/api, features/notifications/types/notification
 features/notifications/api/get-my-notifications-action.ts -> "use server"; features/user-profile (resolveSession),
@@ -240,7 +266,41 @@ features/notifications/api/get-signalr-token-action.ts -> "use server"; features
                                         hands the browser a short-lived access token specifically for the SignalR handshake,
                                         the one deliberate place the token leaves the httpOnly cookie boundary
 
-components/shared/data-table/data-table.tsx -> components/ui/{table,skeleton,empty,alert}, ./data-table-toolbar, ./data-table-pagination, ./types
+components/foundation/use-floating-popover.ts  -> @floating-ui/react (useFloating, useClick, useDismiss, useRole,
+                                        flip/shift/offset/size middleware, autoUpdate) — no internal dependency (new)
+components/foundation/use-listbox.ts     -> @floating-ui/react (useListNavigation, useTypeahead) — `enableTypeahead`
+                                        option lets text-input callers disable it (see Key Design Patterns) (new)
+components/foundation/use-async-options.ts -> components/foundation/types (SelectOption) — debounced fetch +
+                                        AbortController cancellation, no Floating UI dependency (new)
+components/foundation/use-virtual-list.ts -> @tanstack/react-virtual (useVirtualizer) (new)
+components/foundation/options-list.tsx   -> lucide-react, lib/shared/utils, components/foundation/{use-virtual-list,types} —
+                                        shared listbox row renderer (virtualizes past 50 options) (new)
+components/foundation/floating-overlay.tsx -> @floating-ui/react (FloatingPortal, FloatingOverlay, FloatingFocusManager),
+                                        lib/shared/utils — modal backdrop + focus trap with `lockScroll={false}` (new)
+components/select/entity-select.tsx      -> @floating-ui/react (FloatingPortal, useInteractions), lucide-react,
+                                        lib/shared/utils, components/foundation/{use-floating-popover,use-listbox,
+                                        options-list,types} — button-triggered, non-searchable single-select (new)
+components/select/search-select.tsx      -> same components/foundation/* set as entity-select.tsx, plus lucide-react
+                                        (Search/ChevronDown/X icons) — text-input-triggered filterable combobox;
+                                        `enableClick: false`/`enableTypeahead: false` on its foundation hooks (see Key
+                                        Design Patterns for why) (new)
+components/select/async-select.tsx        -> components/foundation/use-async-options plus the same set as
+                                        search-select.tsx — remote-search combobox; no current UI consumer (new)
+components/select/multi-select.tsx        -> same foundation set as search-select.tsx — chip-based multi-select (new)
+components/select/index.ts                -> re-exports EntitySelect/SearchSelect/AsyncSelect/MultiSelect + foundation
+                                        SelectOption/RenderOption types (new — barrel)
+components/command/command-palette.tsx    -> @floating-ui/react (useFloating, useDismiss, useRole, useInteractions),
+                                        lucide-react, lib/shared/utils, components/foundation/{floating-overlay,
+                                        use-listbox,use-virtual-list} — Cmd/Ctrl+K overlay; no UI consumer yet (new)
+components/command/command-palette-provider.tsx -> components/command/command-palette — owns the global
+                                        Cmd/Ctrl+K keydown listener + open state via React Context (new)
+components/command/index.ts               -> re-exports CommandPalette/CommandPaletteProvider/useCommandPalette + types (new)
+
+components/shared/data-table/data-table.tsx -> components/ui/{table,skeleton,empty,alert}, ./data-table-toolbar,
+                                        ./data-table-pagination, ./data-table-virtual-body (new), ./types
+components/shared/data-table/data-table-virtual-body.tsx -> lib/shared/utils, components/foundation/use-virtual-list,
+                                        ./types — row renderer for `mode="virtualized"`/`"infinite"`; switches to an
+                                        ARIA-grid div layout since a native `<table>` can't virtualize rows cleanly (new)
 components/shared/data-table/data-table-toolbar.tsx -> components/ui/{button,dropdown-menu}, lib/shared/utils, ./types
 components/shared/data-table/data-table-pagination.tsx -> components/ui/{input,pagination}
 
@@ -266,10 +326,13 @@ lib/shared/authorization.ts         -> no internal dependency (SUPER_ADMIN_USERN
                                         `SessionData`-shaped object, which is what makes it usable from Sidebar)
 lib/shared/menu.ts                  -> types/nav (NavItem) — new; pure recursive `buildVisibleMenu(items, can)`
 components/ui/*                     -> lib/shared/utils, radix-ui, class-variance-authority, lucide-react
-                                        (button.tsx additionally -> components/ui/spinner)
+                                        (button.tsx additionally -> components/ui/spinner). Exception:
+                                        native-select.tsx -> lib/shared/utils, components/ui/{label,spinner},
+                                        lucide-react only — no radix-ui dependency, hand-written rather than
+                                        shadcn-CLI-generated (new)
 ```
 
-Direction is still one-way: `components/ui/*` never imports from `components/layout/*`, `components/theme/*`, or `features/*`. Cross-feature imports go through a feature's `index.ts` barrel, not its internals — e.g. `features/auth/api/login-action.ts` and `features/users/components/users-page.tsx`/`api/create-user-action.ts` all import `resolveSession`/`getCurrentUser` from `@/features/user-profile` (the barrel), not from its internals directly; `features/users/components/users-page.tsx` similarly imports `getAllRoles` from `@/features/roles`'s barrel, not `@/features/roles/api/get-all-roles` directly. `features/dashboard` is still not imported by any other feature. `features/roles` gained a cross-feature importer in a prior sync (`features/users/components/users-page.tsx`, for the role catalog) in addition to its own route. `features/users` and `features/roles` are each imported by their own `app/**/page.tsx` (routing, not another feature). `components/shared/data-table/*`, `components/shared/object-viewer/*`, and `components/toast/*` sit below `features/*` in the same leaf-adjacent tier as `components/ui/*` — they're imported by feature code but import nothing from `features/*` themselves (`object-viewer/*` currently has no importer at all — purely additive).
+Direction is still one-way: `components/ui/*` never imports from `components/layout/*`, `components/theme/*`, or `features/*`. Cross-feature imports go through a feature's `index.ts` barrel, not its internals — e.g. `features/auth/api/login-action.ts` and `features/users/components/users-page.tsx`/`api/create-user-action.ts` all import `resolveSession`/`getCurrentUser` from `@/features/user-profile` (the barrel), not from its internals directly; `features/users/components/users-page.tsx` similarly imports `getAllRoles` from `@/features/roles`'s barrel, not `@/features/roles/api/get-all-roles` directly. `features/dashboard` is still not imported by any other feature. `features/roles` gained a cross-feature importer in a prior sync (`features/users/components/users-page.tsx`, for the role catalog) in addition to its own route. `features/users` and `features/roles` are each imported by their own `app/**/page.tsx` (routing, not another feature). `components/shared/data-table/*`, `components/shared/object-viewer/*`, and `components/toast/*` sit below `features/*` in the same leaf-adjacent tier as `components/ui/*` — they're imported by feature code but import nothing from `features/*` themselves (`object-viewer/*` currently has no importer at all — purely additive). `components/foundation/*`, `components/select/*`, and `components/command/*` (new this sync) sit at that same tier too — `foundation/*` imports only `@floating-ui/react`/`@tanstack/react-virtual`/`lucide-react`, `select/*` and `command/*` import only `foundation/*` plus those same libraries, and none of the three import from `features/*`. `AsyncSelect` and `command/*` currently have no importer at all outside this library itself — purely additive, same as `object-viewer/*`.
 
 Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by the RSC client/server boundary rather than an oversight: `constants/nav-items.ts` imports `DASHBOARD_NAV_ITEM`/`USERS_NAV_ITEM`/`ROLES_NAV_ITEM`/`NOTIFICATIONS_NAV_ITEM` by direct file path (`@/features/dashboard/constants/nav-item`, etc.) rather than via each feature's barrel; `components/layout/user-menu.tsx` imports `logoutAction` directly from `@/features/auth/api/logout-action` rather than from `@/features/auth`'s barrel (which, notably, does not currently re-export `logoutAction` at all); and `components/layout/topbar.tsx` imports `NotificationBell` directly from `@/features/notifications/components/notification-bell` rather than from `@/features/notifications`'s barrel — here the barrel *does* also export `NotificationBell`, but it additionally re-exports `NotificationsPage`, an async Server Component (`resolveSession()`, `next/headers`), so importing the barrel from this Client Component reproduced the same "next/headers only available in Server Components" build error the `nav-items.ts` exception was already working around. See Key Design Patterns for the reasoning.
 
@@ -284,11 +347,12 @@ Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by
 - **Session encryption via a dedicated `lib/server/token-cipher.ts`** (new): `encrypt()`/`decrypt()` wrap Node's `crypto` module (AES-256-GCM, keyed by `TOKEN_ENCRYPTION_KEY`), producing an `"iv.authTag.ciphertext"` (all base64) string; `decrypt()` returns `null` rather than throwing on any malformed/tampered input, which `parse-session.ts` treats the same as "no session". `lib/server/config.ts`'s `getTokenEncryptionKey()` throws if the env var is unset — the cookie's "plaintext for now" state from the previous sync is fully resolved.
 - **Permissions/roles decoded from the JWT, never trusted from the profile API** (new): `lib/server/jwt.ts` decodes the access token's payload (no signature verification — safe here since the token was just issued by this app's own backend) and extracts the `permission`/`role` claim types; `lib/server/build-session-claims.ts` unions those with the profile API's own claims for display purposes only. Both `loginAction` and `refreshSession()` independently re-derive `permissions`/`roles` this way on every token issuance.
 - **Context-provider-per-concern for client state**: `SidebarProvider`/`useSidebar`, `AccentColorProvider`/`useAccentColor`, and `next-themes`' provider (wrapped in `components/theme/theme-provider.tsx`) each own one slice of persisted UI state via a throwing custom hook — unchanged pattern, relocated files.
-- **Owned, CLI-generated UI primitives**: `components/ui/*` (24 files, style `"radix-nova"`) still follows the `data-slot="<name>"` + `cva()` convention. `button.tsx` retains its hand-modification beyond CLI output: a `loading` prop (renders `Spinner`, sets `aria-busy`/`disabled`) plus a `cursor-pointer` utility baked into `buttonVariants`.
+- **Owned, CLI-generated UI primitives**: `components/ui/*` (23 shadcn-CLI-generated files, style `"radix-nova"`) still follows the `data-slot="<name>"` + `cva()` convention. `button.tsx` retains its hand-modification beyond CLI output: a `loading` prop (renders `Spinner`, sets `aria-busy`/`disabled`) plus a `cursor-pointer` utility baked into `buttonVariants`. `native-select.tsx` is the one hand-written exception in this folder — see the next pattern for why it and the rest of the new select family aren't CLI/Radix-based.
+- **Internal select/overlay component library on Floating UI, not Radix** (new this sync): `components/foundation/*` (`useFloatingPopover`, `useListbox`, `useAsyncOptions`, `useVirtualList`, `OptionsList`, `FloatingModalOverlay`) is the one shared investment every new select-family component and the Command Palette build on — positioning/interaction hooks, keyboard navigation, async fetch/debounce, virtualization, and listbox row rendering are each written once. `EntitySelect` (button trigger, closed listbox) is the direct Radix `Select` replacement for non-searchable cases; `SearchSelect`/`AsyncSelect`/`MultiSelect` (text-input triggers) layer a combobox on the same primitives; `CommandPalette` reuses `floating-overlay.tsx` for its modal rather than the Radix `Dialog` used elsewhere in `ui/`, specifically because Radix `Dialog` locks body scroll by default and this library's overlay explicitly must not (`FloatingOverlay`'s `lockScroll={false}`, kept explicit as documentation). Two bugs found and fixed while building this are worth remembering for any future component added on this foundation: (1) `useListbox`'s `useTypeahead` calls `stopEvent()`/`preventDefault()` on every character keydown while open — correct for a closed listbox trigger, but it silently blocks all typing if wired to a real `<input>`; every text-input-triggered component here passes `enableTypeahead: false` to `useListbox`, and only the button-triggered `EntitySelect` keeps it on. (2) `useFloatingPopover`'s `useClick` toggles open on click; a text-input trigger that also opens via `onFocus` (as all of them do) will see focus-then-click double-toggle the panel closed on the very first interaction unless `enableClick: false` is passed and opening is driven by `onFocus`/`onClick` handlers explicitly instead. `react-hooks/refs` (the React Compiler ESLint rule) is disabled specifically for `components/foundation/select/command` in `eslint.config.mjs` — a known false-positive category, since Floating UI's `context`/`refs` objects are read throughout render by design, not a `.current`-during-render hazard the rule is meant to catch.
 - **Single-CSS-variable theming** and **runtime accent swap via DOM attribute + localStorage**: unchanged from before — `--primary` drives themed surfaces, `AccentColorProvider` sets `data-accent` on `<html>`.
 - **Hydration-safe browser-state restoration**: unchanged pattern (`hydrated` flag + `useEffect`, `eslint-disable react-hooks/set-state-in-effect`) in `SidebarProvider` and `AccentColorProvider`; `components/theme/use-has-mounted.ts` (`useSyncExternalStore`) still guards `ThemeToggle`.
 - **Mobile drawer closes on route change via render-time state adjustment**: unchanged, still in `hooks/use-sidebar.tsx`.
-- **Generic, presentational `DataTable<TData>` building block**: `components/shared/data-table/` composes a toolbar (actions + debounced search + export/refresh/columns-visibility), a table body (skeleton-loading rows, an `Empty` state, or an `Alert`-based error state that replaces the body and hides pagination), and a windowed-pagination footer (`getPageWindow()` always keeps page 1/last visible plus siblings around the current page). It takes no dependency on any feature or data-fetching library — fully controlled via props (`data`, `columns`, `isLoading`, `error`, callbacks); both `UsersDataTable` (server-driven search via URL params) and `RolesDataTable` (local client-side filtering — there's no backend search endpoint for roles) reuse it as-is with different search wiring. `isLoading` takes priority over a stale `error` — an in-flight refetch (e.g. clicking Refresh) always shows the table's own skeleton-row loading state rather than a leftover error from a previous failed load. **New this sync**: optional per-column client-side sorting (`DataTableColumn.sortable`/`sortValue`) — a sortable header renders as a `<button>` cycling asc → desc → unsorted with `ArrowUp`/`ArrowDown`/`ArrowUpDown` icons, and the table body sorts a `useMemo`-derived copy of `data`. Explicitly scoped to callers holding the full result set client-side — `RolesDataTable` uses it (name/description columns), `UsersDataTable` deliberately does not, since it paginates via the backend and only ever holds one page of `data` at a time.
+- **Generic, presentational `DataTable<TData>` building block**: `components/shared/data-table/` composes a toolbar (actions + debounced search + export/refresh/columns-visibility), a table body (skeleton-loading rows, an `Empty` state, or an `Alert`-based error state that replaces the body and hides pagination), and a windowed-pagination footer (`getPageWindow()` always keeps page 1/last visible plus siblings around the current page). It takes no dependency on any feature or data-fetching library — fully controlled via props (`data`, `columns`, `isLoading`, `error`, callbacks); both `UsersDataTable` (server-driven search via URL params) and `RolesDataTable` (local client-side filtering — there's no backend search endpoint for roles) reuse it as-is with different search wiring. `isLoading` takes priority over a stale `error` — an in-flight refetch (e.g. clicking Refresh) always shows the table's own skeleton-row loading state rather than a leftover error from a previous failed load. **New this sync**: optional per-column client-side sorting (`DataTableColumn.sortable`/`sortValue`) — a sortable header renders as a `<button>` cycling asc → desc → unsorted with `ArrowUp`/`ArrowDown`/`ArrowUpDown` icons, and the table body sorts a `useMemo`-derived copy of `data`. Explicitly scoped to callers holding the full result set client-side — `RolesDataTable` uses it (name/description columns), `UsersDataTable` deliberately does not, since it paginates via the backend and only ever holds one page of `data` at a time. **New this sync**: an optional `mode` prop (`"paginated"` default / `"virtualized"` / `"infinite"`) switches the row/header markup to an ARIA-grid div layout rendered via the new `data-table-virtual-body.tsx` (a native `<table>` can't virtualize its rows cleanly); an optional `onSortChange` lets a caller take over sorting server-side instead of the default client-side sort, a prerequisite for `"virtualized"`/`"infinite"` modes against a large or streamed dataset. Both are additive — no existing caller (`UsersDataTable`, `RolesDataTable`, `NotificationsDataTable`) passes either, so all three keep today's exact `"paginated"` behavior.
 - **Controlled form state alongside `useActionState`, for Server Action forms that can fail**: dialogs bound to a mutation Server Action keep their own `useState<FormValues>` in parallel with `useActionState(...)`. This is deliberate, not redundant — React resets *uncontrolled* form fields once a Server Action settles, regardless of success or failure, which would silently wipe user input after a validation error; controlled state survives that reset.
 - **Force-remount via a bumped `key` to reset `useActionState`**: `useActionState` has no imperative "clear this error/state" API, so each `*DataTable` bumps a per-dialog key counter on every open (`createDialogKey`, `editDialogKey`, ...) and passes it as that dialog's React `key`, forcing a fresh component instance (fresh action state, fresh controlled form state, and — for the edit dialogs — a fresh detail-fetch) each time it's opened.
 - **Toast notifications via a themed `sonner` wrapper**: `components/toast/` never exposes `sonner`'s `toast` directly — call sites use `notifySuccess`/`notifyError` (`notify.ts`), and the visual theme (`saturatedToastOptions`, `withToastProgress()`) is centralized in `toast-theme.ts` so every toast in the app looks consistent without each call site repeating class names.
@@ -299,13 +363,14 @@ Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by
 ## Shared Kernel / Common Building Blocks Used
 
 - `components/ui/*` — the app's own primitive layer.
-- `components/shared/data-table/` — generic list-table building block (toolbar, pagination, loading/empty/error states, optional per-column sort); consumed by both `features/users` and `features/roles` (with different search/sort strategies — see Key Design Patterns), designed with no feature-specific knowledge baked in.
+- `components/foundation/`, `components/select/`, `components/command/` (new this sync) — the internal Floating-UI-based select/overlay component library (see Key Design Patterns); `EntitySelect`/`SearchSelect` are consumed by `features/users` (edit dialog) and `features/notifications` (status filter, `user-select.tsx`); `AsyncSelect`/`MultiSelect`/`CommandPalette` have no consumer yet but are part of this shared layer.
+- `components/shared/data-table/` — generic list-table building block (toolbar, pagination, loading/empty/error states, optional per-column sort, and — new this sync — optional virtualized/infinite modes via `data-table-virtual-body.tsx`); consumed by `features/users`, `features/roles`, and `features/notifications` (with different search/sort strategies — see Key Design Patterns), designed with no feature-specific knowledge baked in.
 - `components/shared/object-viewer/` — new this sync, additive; a recursive read-only object/table renderer built on `components/ui/table` + `components/ui/input`, no `features/*` dependency. Not yet consumed by any page.
 - `components/toast/` — toast notification wrapper around `sonner`; mounted once at the root layout, called from feature code via `notifySuccess`/`notifyError`.
 - `lib/shared/utils.ts` (`cn`), `lib/shared/dedupe-claims.ts`, `lib/shared/user-display.ts` — cross-cutting helpers consumed by 2+ features or by layout chrome. New this sync: `lib/shared/menu.ts` (`buildVisibleMenu`, consumed by `Sidebar`) and `lib/shared/authorization.ts` (`hasPermission`/`hasAnyPermission`/`hasAllPermissions`/`isSuperAdminUser`, safe for both server and client — consumed directly by `Sidebar` and, via `lib/server/authorization.ts`'s thin wrapper, by `UsersPage`/`RolesPage`/`NotificationsPage`).
 - `lib/server/*` — the server-only building blocks every feature's `api/` layer is built on: `http.ts`, `call-guard.ts`, `config.ts`, `session.ts`, `session-cookie.ts`, `authorization.ts` (now a thin wrapper over `lib/shared/authorization.ts`), plus the session-encryption/refresh chain — `token-cipher.ts`, `jwt.ts`, `build-session-claims.ts`, `parse-session.ts`, `refresh-session.ts` — used by `src/proxy.ts` and `features/auth/api/{login,logout}-action.ts`.
 - Permission-string constants remain **not** a shared kernel piece — per-feature `features/{users,roles,notifications}/constants/permissions.ts` (`USERS_PERMISSIONS`, `ROLES_PERMISSIONS`, `NOTIFICATIONS_PERMISSIONS`), each mirroring the backend's own permission-string constants for that module. Nav metadata follows the same per-feature-ownership move (`features/{dashboard,users,roles,notifications}/constants/nav-item.ts`), assembled (not owned) by the top-level `constants/nav-items.ts`.
-- `features/notifications/components/user-select.tsx` is a **feature-owned** reusable component (searchable user picker), not promoted to `components/shared/` — consumed by two components within the same feature, not yet by a second feature, consistent with the "only promote once 2+ features need it" pattern.
+- `features/notifications/components/user-select.tsx` is a **feature-owned** reusable component (searchable user picker, now built on the shared `SearchSelect`), not promoted to `components/shared/` — consumed by two components within the same feature, not yet by a second feature, consistent with the "only promote once 2+ features need it" pattern.
 - `hooks/*`, `components/theme/*` — cross-cutting building blocks consumed by layout components.
 - No package or code is shared with another client app — `clients/` still contains only `admin`.
 
@@ -334,6 +399,8 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 | `components/ui/button.tsx` hand-modified beyond shadcn CLI output (`loading` prop, `cursor-pointer`) | Low | Unchanged — re-running the shadcn CLI would silently drop these customizations unless done carefully. |
 | `DataTable`'s `onExport` prop has no caller yet | Low | `components/shared/data-table/data-table-toolbar.tsx` already renders an Export button when `onExport` is passed, but no current feature (including `UsersDataTable`/`RolesDataTable`) passes one — dead capability until a consumer needs it. |
 | `components/shared/object-viewer/` has no consumer yet | Low (by design) | New this sync, purely additive — ported from an external export spec and adapted to this project's design tokens/`components/ui/*` primitives, but not imported by any page or dialog. Dead code until something wires it in. |
+| `AsyncSelect` and `components/command/*` (CommandPalette) have no consumer yet | Low (by design) | New this sync, purely additive — built as part of the internal select/overlay library but nothing in the app currently renders an `AsyncSelect` or wires up `CommandPaletteProvider`. Dead code until something adopts them. |
+| `MultiSelect`'s client-side `filter` has no minimum-character gate (unlike `SearchSelect`/`AsyncSelect`) | Low | `SearchSelect`/`AsyncSelect` both narrow their option list only once the query reaches `minChars` (default 3); `MultiSelect` filters from the first character typed. Deliberate scope decision, not an oversight — worth revisiting for consistency if `MultiSelect` gets a real consumer with a large option list. |
 | The SignalR handshake token intentionally narrows the "JWT never leaves the httpOnly cookie" invariant | Low (deliberate) | `getSignalRTokenAction()` hands the browser a real, short-lived access token so `use-notifications.ts` can authenticate the WebSocket handshake — the one place in the app where the access token is readable by browser JS. A deliberate trade-off (SignalR can't attach a cookie/header the way `fetch` can), not an oversight, but worth keeping in mind if the token's blast radius ever needs to shrink further. |
 | `notifications-page.tsx` calls `getAllUsers(session.accessToken)` unpaginated to populate the recipient filter/picker | Low (same pattern used elsewhere) | Same unbounded-list pattern already used by `RolesDataTable`'s client-side filtering — fine at current scale, worth revisiting if the user list grows large. `getAllUsers` is now called unconditionally (not gated by `canSend`), since both the filter dropdown and the send dialog need it; if the caller lacks `identity.users.view` and the call 403s, `users` gracefully degrades to `[]` rather than crashing the page. |
 
@@ -342,4 +409,4 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added Notifications feature: layering, dependency direction, key patterns, route/permission boundaries, new risks) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — added internal Floating-UI-based select/overlay component library: layering, dependency direction, key patterns, new risks; removed Radix `Select`; DataTable `mode`/`onSortChange`) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._

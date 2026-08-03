@@ -15,13 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { EntitySelect } from "@/components/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notifySuccess } from "@/components/toast";
@@ -39,6 +33,11 @@ import type { ClaimDto, UserDto } from "@/types/user";
 
 const STATUS_OPTIONS = ["active", "locked"];
 const AUTH_PROVIDER_OPTIONS = ["Local", "AD"];
+const STATUS_SELECT_OPTIONS = STATUS_OPTIONS.map((option) => ({ value: option, label: option }));
+const AUTH_PROVIDER_SELECT_OPTIONS = AUTH_PROVIDER_OPTIONS.map((option) => ({
+  value: option,
+  label: option,
+}));
 
 const updateInitialState: UpdateUserFormState = {};
 const passwordInitialState: ForcePasswordFormState = {};
@@ -253,41 +252,25 @@ export function EditUserDialog({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="status">Status</Label>
-                    <Select
+                    <EntitySelect
+                      id="status"
                       name="status"
+                      className="w-full"
                       value={status}
                       onValueChange={setStatus}
-                    >
-                      <SelectTrigger id="status" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATUS_OPTIONS.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      options={STATUS_SELECT_OPTIONS}
+                    />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="authProvider">Auth provider</Label>
-                    <Select
+                    <EntitySelect
+                      id="authProvider"
                       name="authProvider"
+                      className="w-full"
                       value={authProvider}
                       onValueChange={setAuthProvider}
-                    >
-                      <SelectTrigger id="authProvider" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {AUTH_PROVIDER_OPTIONS.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      options={AUTH_PROVIDER_SELECT_OPTIONS}
+                    />
                   </div>
                 </div>
 

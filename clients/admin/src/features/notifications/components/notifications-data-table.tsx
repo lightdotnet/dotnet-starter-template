@@ -4,13 +4,7 @@ import { useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Bell as BellIcon, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import {
   DataTable,
   type DataTableAction,
@@ -36,7 +30,11 @@ interface NotificationsDataTableProps {
   status?: NotificationStatus;
 }
 
-const ALL_FILTER_VALUE = "all";
+const STATUS_FILTER_OPTIONS = [
+  { value: NotificationStatus.None, label: "Unread" },
+  { value: NotificationStatus.Read, label: "Read" },
+  { value: NotificationStatus.Archived, label: "Archived" },
+];
 
 const STATUS_LABEL: Record<NotificationStatus, string> = {
   [NotificationStatus.None]: "Unread",
@@ -122,6 +120,7 @@ export function NotificationsDataTable({
       id: "message",
       header: "Message",
       cell: (notification) => notification.message ?? "",
+      className: "max-w-sm whitespace-normal break-words",
     },
     {
       id: "status",
@@ -142,39 +141,33 @@ export function NotificationsDataTable({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 pb-4">
-        <Select
-          value={status ?? ALL_FILTER_VALUE}
-          onValueChange={(value) =>
+        <NativeSelect
+          className="w-40"
+          aria-label="Filter by status"
+          placeholder="All statuses"
+          value={status ?? ""}
+          onChange={(value) =>
             navigate({
-              status: value === ALL_FILTER_VALUE ? undefined : value,
+              status: value === "" ? undefined : value,
               page: undefined,
             })
           }
-        >
-          <SelectTrigger className="w-40" aria-label="Filter by status">
-            <SelectValue placeholder="All statuses" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value={ALL_FILTER_VALUE}>All statuses</SelectItem>
-            <SelectItem value={NotificationStatus.None}>Unread</SelectItem>
-            <SelectItem value={NotificationStatus.Read}>Read</SelectItem>
-            <SelectItem value={NotificationStatus.Archived}>Archived</SelectItem>
-          </SelectContent>
-        </Select>
+          options={STATUS_FILTER_OPTIONS}
+        />
 
         <UserSelect
           users={users}
-          value={toUserId ?? ALL_FILTER_VALUE}
+          value={toUserId ?? ""}
           onValueChange={(value) =>
             navigate({
-              toUserId: value === ALL_FILTER_VALUE ? undefined : value,
+              toUserId: value === "" ? undefined : value,
               page: undefined,
             })
           }
           triggerClassName="w-56"
           ariaLabel="Filter by recipient"
-          placeholder="All recipients"
-          allOption={{ value: ALL_FILTER_VALUE, label: "All recipients" }}
+          placeholder="Search recipients"
+          onClear={() => navigate({ toUserId: undefined, page: undefined })}
         />
       </div>
 

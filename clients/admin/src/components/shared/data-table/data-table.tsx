@@ -15,6 +15,7 @@ import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DataTableToolbar } from "@/components/shared/data-table/data-table-toolbar";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
+import { DataTableVirtualBody } from "@/components/shared/data-table/data-table-virtual-body";
 import { cn } from "@/lib/shared/utils";
 import type {
   DataTableAction,
@@ -45,11 +46,36 @@ export interface DataTableProps<TData> {
   onExport?: () => void;
   onRefresh?: () => void;
 
-  pageNumber: number;
-  pageSize: number;
-  totalPages: number;
+  /**
+   * `"paginated"` (default) keeps today's exact behavior — server-driven
+   * pagination via `pageNumber`/`totalPages`/`onPageChange`. `"virtualized"`
+   * and `"infinite"` render through DataTableVirtualBody instead, for large
+   * or open-ended result sets; both switch the row markup to an ARIA-grid
+   * div layout since a native `<table>` can't virtualize its rows cleanly.
+   */
+  mode?: "paginated" | "virtualized" | "infinite";
+  /** Row height estimate for virtualized/infinite modes. Defaults to 40px. */
+  rowHeight?: number;
+  /** Scroll-container height for virtualized/infinite modes. Defaults to 480px. */
+  virtualHeight?: number;
+  /** `"infinite"` mode only: called when the user scrolls near the end of the loaded rows. */
+  onLoadMore?: () => void;
+  /** `"infinite"` mode only: whether more rows exist beyond `data`. */
+  hasMore?: boolean;
+
+  /**
+   * When provided, column sort clicks call this instead of sorting `data`
+   * locally — required for `"virtualized"`/`"infinite"` modes with a
+   * server-paged/streamed dataset, optional for `"paginated"` callers who
+   * still want the default client-side sort of their single fetched page.
+   */
+  onSortChange?: (columnId: string, direction: "asc" | "desc" | null) => void;
+
+  pageNumber?: number;
+  pageSize?: number;
+  totalPages?: number;
   totalRecords: number;
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
 
   emptyState?: DataTableEmptyState;
   error?: DataTableErrorState;
@@ -66,6 +92,12 @@ export function DataTable<TData>({
   searchPlaceholder,
   onExport,
   onRefresh,
+  mode = "paginated",
+  rowHeight,
+  virtualHeight,
+  onLoadMore,
+  hasMore,
+  onSortChange,
   pageNumber,
   totalPages,
   totalRecords,
@@ -86,11 +118,38 @@ export function DataTable<TData>({
   }
 
   function toggleSort(columnId: string) {
-    setSortState((previous) => {
-      if (!previous || previous.columnId !== columnId) return { columnId, direction: "asc" };
-      if (previous.direction === "asc") return { columnId, direction: "desc" };
-      return null;
-    });
+    const next: SortState | null =
+      !sortState || sortState.columnId !== columnId
+        ? { columnId, direction: "asc" }
+        : sortState.direction === "asc"
+          ? { columnId, direction: "desc" }
+          : null;
+
+    setSortState(next);
+    onSortChange?.(columnId, next?.direction ?? null);
+  }
+
+  function renderHeaderContent(column: DataTableColumn<TData>) {
+    if (!column.sortable || !column.sortValue) return column.header;
+
+    return (
+      <button
+        type="button"
+        onClick={() => toggleSort(column.id)}
+        className="inline-flex items-center gap-1 hover:text-foreground"
+      >
+        {column.header}
+        {sortState?.columnId === column.id ? (
+          sortState.direction === "asc" ? (
+            <ArrowUp className="size-3.5" />
+          ) : (
+            <ArrowDown className="size-3.5" />
+          )
+        ) : (
+          <ArrowUpDown className="size-3.5 opacity-50" />
+        )}
+      </button>
+    );
   }
 
   const visibleColumns = columns.filter((column) => !hiddenColumnIds.has(column.id));
@@ -104,9 +163,10 @@ export function DataTable<TData>({
     : undefined;
 
   // Sorts only the `data` that was passed in — meaningless for callers that
-  // paginate server-side and hand DataTable a single page at a time.
+  // paginate server-side and hand DataTable a single page at a time. Skipped
+  // entirely when `onSortChange` is provided: the caller owns sorting then.
   const sortedData = useMemo(() => {
-    if (!sortState || !sortColumn?.sortValue) return data;
+    if (onSortChange || !sortState || !sortColumn?.sortValue) return data;
 
     const { direction } = sortState;
     const { sortValue } = sortColumn;
@@ -117,7 +177,7 @@ export function DataTable<TData>({
       if (aValue > bValue) return direction === "asc" ? 1 : -1;
       return 0;
     });
-  }, [data, sortState, sortColumn]);
+  }, [data, sortState, sortColumn, onSortChange]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -149,7 +209,7 @@ export function DataTable<TData>({
             <EmptyDescription>{emptyState.description}</EmptyDescription>
           )}
         </Empty>
-      ) : (
+      ) : mode === "paginated" ? (
         <Table>
           <TableHeader className="bg-muted">
             <TableRow>
@@ -158,26 +218,7 @@ export function DataTable<TData>({
                   key={column.id}
                   className={cn("text-muted-foreground", column.className)}
                 >
-                  {column.sortable && column.sortValue ? (
-                    <button
-                      type="button"
-                      onClick={() => toggleSort(column.id)}
-                      className="inline-flex items-center gap-1 hover:text-foreground"
-                    >
-                      {column.header}
-                      {sortState?.columnId === column.id ? (
-                        sortState.direction === "asc" ? (
-                          <ArrowUp className="size-3.5" />
-                        ) : (
-                          <ArrowDown className="size-3.5" />
-                        )
-                      ) : (
-                        <ArrowUpDown className="size-3.5 opacity-50" />
-                      )}
-                    </button>
-                  ) : (
-                    column.header
-                  )}
+                  {renderHeaderContent(column)}
                 </TableHead>
               ))}
             </TableRow>
@@ -204,16 +245,62 @@ export function DataTable<TData>({
                 ))}
           </TableBody>
         </Table>
+      ) : (
+        // Virtualized/infinite modes: a native <table> can't virtualize its
+        // rows cleanly, so header and body both switch to an ARIA-grid div
+        // layout together rather than mixing a real table header with a div body.
+        <div role="table" className="w-full overflow-hidden rounded-md border border-border text-sm">
+          <div role="row" className="flex bg-muted">
+            {visibleColumns.map((column) => (
+              <div
+                key={column.id}
+                role="columnheader"
+                className={cn("flex-1 px-3 py-2 text-muted-foreground", column.className)}
+              >
+                {renderHeaderContent(column)}
+              </div>
+            ))}
+          </div>
+
+          {isLoading && sortedData.length === 0 ? (
+            <div>
+              {Array.from({ length: SKELETON_ROWS }, (_, rowIndex) => (
+                <div key={`skeleton-${rowIndex}`} role="row" className="flex items-center border-b border-border">
+                  {visibleColumns.map((column) => (
+                    <div role="cell" key={column.id} className={cn("flex-1 px-3 py-2", column.className)}>
+                      <Skeleton className="h-4 w-full max-w-32" />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <DataTableVirtualBody
+              data={sortedData}
+              columns={visibleColumns}
+              rowKey={rowKey}
+              rowHeight={rowHeight}
+              height={virtualHeight}
+              onLoadMore={onLoadMore}
+              hasMore={hasMore}
+              isLoading={isLoading}
+            />
+          )}
+        </div>
       )}
 
       {!showError && (
         <div className="border-t pt-4">
-          <DataTablePagination
-            pageNumber={pageNumber}
-            totalPages={totalPages}
-            totalRecords={totalRecords}
-            onPageChange={onPageChange}
-          />
+          {mode === "paginated" ? (
+            <DataTablePagination
+              pageNumber={pageNumber ?? 1}
+              totalPages={totalPages ?? 1}
+              totalRecords={totalRecords}
+              onPageChange={onPageChange ?? (() => {})}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">{totalRecords} records</p>
+          )}
         </div>
       )}
     </div>
