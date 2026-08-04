@@ -102,24 +102,26 @@ export function NotificationsDataTable({
 
   const columns: DataTableColumn<NotificationDto>[] = [
     {
-      id: "to",
-      header: "To",
-      cell: (notification) => userLabel(notification.toUserId),
-    },
-    {
       id: "from",
       header: "From",
       cell: (notification) => notification.fromName ?? notification.fromUserId,
     },
     {
-      id: "title",
-      header: "Title",
-      cell: (notification) => notification.title,
+      id: "to",
+      header: "To",
+      cell: (notification) => userLabel(notification.toUserId),
     },
     {
       id: "message",
       header: "Message",
-      cell: (notification) => notification.message ?? "",
+      cell: (notification) => (
+        <div>
+          <p className="font-medium">{notification.title}</p>
+          <div className="mt-1 whitespace-pre-wrap text-muted-foreground">
+            {notification.message}
+          </div>
+        </div>
+      ),
       className: "max-w-sm whitespace-normal break-words",
     },
     {
