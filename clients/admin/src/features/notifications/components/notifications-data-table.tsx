@@ -42,8 +42,8 @@ const STATUS_LABEL: Record<NotificationStatus, string> = {
   [NotificationStatus.Archived]: "Archived",
 };
 
-const STATUS_VARIANT: Record<NotificationStatus, "default" | "secondary" | "outline"> = {
-  [NotificationStatus.None]: "default",
+const STATUS_VARIANT: Record<NotificationStatus, "destructive" | "secondary" | "outline"> = {
+  [NotificationStatus.None]: "destructive",
   [NotificationStatus.Read]: "secondary",
   [NotificationStatus.Archived]: "outline",
 };

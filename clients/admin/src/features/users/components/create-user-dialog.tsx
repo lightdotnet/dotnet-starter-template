@@ -76,7 +76,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreated }: CreateUserDi
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent onPointerDownOutside={(event) => event.preventDefault()}>
-        <form action={formAction} className="flex flex-col gap-4">
+        <form action={formAction} className="flex flex-col gap-4" autoComplete="off">
           <DialogHeader>
             <DialogTitle>Create user</DialogTitle>
           </DialogHeader>
@@ -91,7 +91,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreated }: CreateUserDi
             <Label htmlFor="userName">Username</Label>
             <Input
               id="userName"
-              name="userName"
+              name="new-userName"
               value={values.userName}
               onChange={setField("userName")}
               required
@@ -101,7 +101,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreated }: CreateUserDi
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
-              name="password"
+              name="new-password"
               type="password"
               value={values.password}
               onChange={setField("password")}
