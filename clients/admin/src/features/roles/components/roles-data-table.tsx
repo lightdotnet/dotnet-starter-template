@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, MoreHorizontal, ShieldPlus } from "lucide-react";
+import { KeyRound, Pencil, ShieldPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -96,8 +96,8 @@ export function RolesDataTable({
           cell: (role) => (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button aria-label="Row actions" size="icon" variant="ghost">
-                  <MoreHorizontal />
+                <Button aria-label="Row actions" size="icon" variant="outline">
+                  <Pencil />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DataTableToolbar } from "@/components/shared/data-table/data-table-toolbar";
+import { DataTableButtons } from "@/components/shared/data-table/data-table-buttons";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
 import { DataTableVirtualBody } from "@/components/shared/data-table/data-table-virtual-body";
 import { cn } from "@/lib/shared/utils";
@@ -42,6 +43,11 @@ export interface DataTableProps<TData> {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
+
+  /** Custom multi-field filter UI rendered in the search row instead of the built-in text search. */
+  customSearch?: React.ReactNode;
+  /** When set alongside `customSearch`, renders a "Search" button that applies the custom filters on click rather than as each field changes. */
+  onCustomSearch?: () => void;
 
   onExport?: () => void;
   onRefresh?: () => void;
@@ -90,6 +96,8 @@ export function DataTable<TData>({
   searchValue,
   onSearchChange,
   searchPlaceholder,
+  customSearch,
+  onCustomSearch,
   onExport,
   onRefresh,
   mode = "paginated",
@@ -153,6 +161,17 @@ export function DataTable<TData>({
   }
 
   const visibleColumns = columns.filter((column) => !hiddenColumnIds.has(column.id));
+  const hasButtons = !!(onExport || onRefresh || columns.some((column) => column.hideable !== false));
+  const buttonsNode = hasButtons ? (
+    <DataTableButtons
+      columns={columns}
+      hiddenColumnIds={hiddenColumnIds}
+      onToggleColumn={toggleColumn}
+      onExport={onExport}
+      onRefresh={onRefresh}
+      isLoading={isLoading}
+    />
+  ) : null;
   const isEmpty = !isLoading && data.length === 0;
   // While a fresh request is in flight, prefer the table's own loading state
   // (skeleton rows) over a stale error left over from the previous render.
@@ -179,118 +198,115 @@ export function DataTable<TData>({
     });
   }, [data, sortState, sortColumn, onSortChange]);
 
-  return (
-    <div className="flex flex-col gap-4">
-      <DataTableToolbar
-        actions={actions}
-        columns={columns}
-        hiddenColumnIds={hiddenColumnIds}
-        onToggleColumn={toggleColumn}
-        searchValue={searchValue}
-        onSearchChange={onSearchChange}
-        searchPlaceholder={searchPlaceholder}
-        onExport={onExport}
-        onRefresh={onRefresh}
-        isLoading={isLoading}
-      />
-
-      {showError ? (
-        <Alert variant="destructive">
-          <AlertTitle>{error.title}</AlertTitle>
-          {error.description && <AlertDescription>{error.description}</AlertDescription>}
-        </Alert>
-      ) : isEmpty ? (
-        <Empty>
-          <EmptyMedia variant="icon">
-            {emptyState?.icon ? <emptyState.icon /> : <Inbox />}
-          </EmptyMedia>
-          <EmptyTitle>{emptyState?.title ?? "No records"}</EmptyTitle>
-          {emptyState?.description && (
-            <EmptyDescription>{emptyState.description}</EmptyDescription>
-          )}
-        </Empty>
-      ) : mode === "paginated" ? (
-        <Table>
-          <TableHeader className="bg-muted">
-            <TableRow>
-              {visibleColumns.map((column) => (
-                <TableHead
-                  key={column.id}
-                  className={cn("text-muted-foreground", column.className)}
-                >
-                  {renderHeaderContent(column)}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading
-              ? Array.from({ length: SKELETON_ROWS }, (_, rowIndex) => (
-                  <TableRow key={`skeleton-${rowIndex}`}>
-                    {visibleColumns.map((column) => (
-                      <TableCell key={column.id} className={column.className}>
-                        <Skeleton className="h-4 w-full max-w-32" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              : sortedData.map((row) => (
-                  <TableRow key={rowKey(row)}>
-                    {visibleColumns.map((column) => (
-                      <TableCell key={column.id} className={column.className}>
-                        {column.cell(row)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+  const content = showError ? (
+    <Alert variant="destructive">
+      <AlertTitle>{error.title}</AlertTitle>
+      {error.description && <AlertDescription>{error.description}</AlertDescription>}
+    </Alert>
+  ) : isEmpty ? (
+    <Empty>
+      <EmptyMedia variant="icon">{emptyState?.icon ? <emptyState.icon /> : <Inbox />}</EmptyMedia>
+      <EmptyTitle>{emptyState?.title ?? "No records"}</EmptyTitle>
+      {emptyState?.description && <EmptyDescription>{emptyState.description}</EmptyDescription>}
+    </Empty>
+  ) : mode === "paginated" ? (
+    <Table>
+      <TableHeader className="bg-muted">
+        <TableRow>
+          {visibleColumns.map((column) => (
+            <TableHead key={column.id} className={cn("text-muted-foreground", column.className)}>
+              {renderHeaderContent(column)}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {isLoading
+          ? Array.from({ length: SKELETON_ROWS }, (_, rowIndex) => (
+              <TableRow key={`skeleton-${rowIndex}`}>
+                {visibleColumns.map((column) => (
+                  <TableCell key={column.id} className={column.className}>
+                    <Skeleton className="h-4 w-full max-w-32" />
+                  </TableCell>
                 ))}
-          </TableBody>
-        </Table>
-      ) : (
-        // Virtualized/infinite modes: a native <table> can't virtualize its
-        // rows cleanly, so header and body both switch to an ARIA-grid div
-        // layout together rather than mixing a real table header with a div body.
-        <div role="table" className="w-full overflow-hidden rounded-md border border-border text-sm">
-          <div role="row" className="flex bg-muted">
-            {visibleColumns.map((column) => (
-              <div
-                key={column.id}
-                role="columnheader"
-                className={cn("flex-1 px-3 py-2 text-muted-foreground", column.className)}
-              >
-                {renderHeaderContent(column)}
-              </div>
+              </TableRow>
+            ))
+          : sortedData.map((row) => (
+              <TableRow key={rowKey(row)}>
+                {visibleColumns.map((column) => (
+                  <TableCell key={column.id} className={column.className}>
+                    {column.cell(row)}
+                  </TableCell>
+                ))}
+              </TableRow>
             ))}
+      </TableBody>
+    </Table>
+  ) : (
+    // Virtualized/infinite modes: a native <table> can't virtualize its
+    // rows cleanly, so header and body both switch to an ARIA-grid div
+    // layout together rather than mixing a real table header with a div body.
+    <div role="table" className="w-full overflow-hidden rounded-md border border-border text-sm">
+      <div role="row" className="flex bg-muted">
+        {visibleColumns.map((column) => (
+          <div
+            key={column.id}
+            role="columnheader"
+            className={cn("flex-1 px-3 py-2 text-muted-foreground", column.className)}
+          >
+            {renderHeaderContent(column)}
           </div>
+        ))}
+      </div>
 
-          {isLoading && sortedData.length === 0 ? (
-            <div>
-              {Array.from({ length: SKELETON_ROWS }, (_, rowIndex) => (
-                <div key={`skeleton-${rowIndex}`} role="row" className="flex items-center border-b border-border">
-                  {visibleColumns.map((column) => (
-                    <div role="cell" key={column.id} className={cn("flex-1 px-3 py-2", column.className)}>
-                      <Skeleton className="h-4 w-full max-w-32" />
-                    </div>
-                  ))}
+      {isLoading && sortedData.length === 0 ? (
+        <div>
+          {Array.from({ length: SKELETON_ROWS }, (_, rowIndex) => (
+            <div key={`skeleton-${rowIndex}`} role="row" className="flex items-center border-b border-border">
+              {visibleColumns.map((column) => (
+                <div role="cell" key={column.id} className={cn("flex-1 px-3 py-2", column.className)}>
+                  <Skeleton className="h-4 w-full max-w-32" />
                 </div>
               ))}
             </div>
-          ) : (
-            <DataTableVirtualBody
-              data={sortedData}
-              columns={visibleColumns}
-              rowKey={rowKey}
-              rowHeight={rowHeight}
-              height={virtualHeight}
-              onLoadMore={onLoadMore}
-              hasMore={hasMore}
-              isLoading={isLoading}
-            />
-          )}
+          ))}
         </div>
+      ) : (
+        <DataTableVirtualBody
+          data={sortedData}
+          columns={visibleColumns}
+          rowKey={rowKey}
+          rowHeight={rowHeight}
+          height={virtualHeight}
+          onLoadMore={onLoadMore}
+          hasMore={hasMore}
+          isLoading={isLoading}
+        />
       )}
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col">
+      <DataTableToolbar
+        actions={actions}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        searchPlaceholder={searchPlaceholder}
+        customSearch={customSearch}
+        onCustomSearch={onCustomSearch}
+        buttons={customSearch ? undefined : buttonsNode}
+      />
+
+      <div className="mt-2 rounded-md border border-border">
+        {customSearch && hasButtons && (
+          <div className="flex justify-end px-2 pt-2 pb-1">{buttonsNode}</div>
+        )}
+        <div className={cn("p-2", customSearch && hasButtons && "pt-1")}>{content}</div>
+      </div>
 
       {!showError && (
-        <div className="border-t pt-4">
+        <div className="mt-2">
           {mode === "paginated" ? (
             <DataTablePagination
               pageNumber={pageNumber ?? 1}

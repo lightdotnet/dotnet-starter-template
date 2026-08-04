@@ -67,6 +67,23 @@ export function NotificationsDataTable({
   const [sendOpen, setSendOpen] = useState(false);
   const [sendDialogKey, setSendDialogKey] = useState(0);
 
+  // Pending filter state — only applied to the URL when "Search" is clicked,
+  // not as each field changes. Re-synced from props if the URL changes externally
+  // (e.g. browser back/forward), mirroring DataTableToolbar's own search-sync pattern.
+  const [pendingStatus, setPendingStatus] = useState(status ?? "");
+  const [lastStatus, setLastStatus] = useState(status ?? "");
+  if ((status ?? "") !== lastStatus) {
+    setLastStatus(status ?? "");
+    setPendingStatus(status ?? "");
+  }
+
+  const [pendingToUserId, setPendingToUserId] = useState(toUserId ?? "");
+  const [lastToUserId, setLastToUserId] = useState(toUserId ?? "");
+  if ((toUserId ?? "") !== lastToUserId) {
+    setLastToUserId(toUserId ?? "");
+    setPendingToUserId(toUserId ?? "");
+  }
+
   const usersById = new Map(users.map((user) => [user.id, user]));
 
   function navigate(nextParams: Record<string, string | undefined>) {
@@ -117,9 +134,15 @@ export function NotificationsDataTable({
       cell: (notification) => (
         <div>
           <p className="font-medium">{notification.title}</p>
-          <div className="mt-1 whitespace-pre-wrap text-muted-foreground">
-            {notification.message}
+          <div className="flex items-start justify-end">
+            <small className="text-muted-foreground text-right">{new Date(notification.created).toLocaleString()}</small>
           </div>
+          <textarea
+            className="mt-1 whitespace-pre-wrap text-muted-foreground w-full"
+            value={notification.message ?? ""}
+            disabled
+            rows={3}
+          />
         </div>
       ),
       className: "max-w-sm whitespace-normal break-words",
@@ -140,45 +163,45 @@ export function NotificationsDataTable({
     },
   ];
 
+  const customSearch = (
+    <>
+      <NativeSelect
+        className="w-40"
+        aria-label="Filter by status"
+        placeholder="All statuses"
+        value={pendingStatus}
+        onChange={setPendingStatus}
+        options={STATUS_FILTER_OPTIONS}
+      />
+
+      <UserSelect
+        users={users}
+        value={pendingToUserId}
+        onValueChange={setPendingToUserId}
+        triggerClassName="w-56"
+        ariaLabel="Filter by recipient"
+        placeholder="Search recipients"
+        onClear={() => setPendingToUserId("")}
+      />
+    </>
+  );
+
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 pb-4">
-        <NativeSelect
-          className="w-40"
-          aria-label="Filter by status"
-          placeholder="All statuses"
-          value={status ?? ""}
-          onChange={(value) =>
-            navigate({
-              status: value === "" ? undefined : value,
-              page: undefined,
-            })
-          }
-          options={STATUS_FILTER_OPTIONS}
-        />
-
-        <UserSelect
-          users={users}
-          value={toUserId ?? ""}
-          onValueChange={(value) =>
-            navigate({
-              toUserId: value === "" ? undefined : value,
-              page: undefined,
-            })
-          }
-          triggerClassName="w-56"
-          ariaLabel="Filter by recipient"
-          placeholder="Search recipients"
-          onClear={() => navigate({ toUserId: undefined, page: undefined })}
-        />
-      </div>
-
       <DataTable
         columns={columns}
         data={records}
         rowKey={(notification) => notification.id}
         isLoading={isPending}
         actions={actions}
+        customSearch={customSearch}
+        onCustomSearch={() =>
+          navigate({
+            status: pendingStatus === "" ? undefined : pendingStatus,
+            toUserId: pendingToUserId === "" ? undefined : pendingToUserId,
+            page: undefined,
+          })
+        }
         onRefresh={() => startTransition(() => router.refresh())}
         pageNumber={pageNumber}
         pageSize={pageSize}

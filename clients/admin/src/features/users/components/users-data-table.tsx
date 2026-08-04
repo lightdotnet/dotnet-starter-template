@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MoreHorizontal, Users as UsersIcon, UserPlus } from "lucide-react";
+import { Pencil, Users as UsersIcon, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -153,8 +153,8 @@ export function UsersDataTable({
             cell: (user) => (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button aria-label="Row actions" size="icon" variant="ghost">
-                    <MoreHorizontal />
+                  <Button aria-label="Row actions" size="icon" variant="outline">
+                    <Pencil />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
