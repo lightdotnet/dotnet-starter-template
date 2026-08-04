@@ -8,7 +8,7 @@
 
 | App | Path | Purpose | Stack | Status |
 |---|---|---|---|---|
-| admin | `clients/admin/` | Admin dashboard | Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS v4 | Scaffolded, UI-shell only — see [PROJECT-CLIENTS.md](PROJECT-CLIENTS.md) |
+| admin | `clients/admin/` | Admin dashboard | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4 | Actively developed, fully analyzed — see [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md) |
 
 ## Clients — Structure (per app)
 
@@ -16,19 +16,21 @@
 
 | App | Router | Data fetching | State management | Styling |
 |---|---|---|---|---|
-| admin | Not yet analyzed in detail | Not yet analyzed | Not yet analyzed | Tailwind CSS v4 (confirmed) |
+| admin | App Router, rooted at `src/app/` — see [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#layering) | Server-only, hand-written per endpoint (`features/*/api/*.ts` via `lib/server/http.ts`), Server Actions for writes, plus a direct SignalR WebSocket for real-time notifications — no client-side data-fetching library — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md#backend-integration) | Local component state + React Context, no global state library — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md#structure) | Tailwind CSS v4, CSS-first config (confirmed) |
 
 ## Clients — Key Areas (per app)
 
+> See [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md#key-routesareas) for the full, per-route table (kept there to avoid duplicating detail across two docs).
+
 | App | Area/Route | Path | Responsibility | Notes |
 |---|---|---|---|---|
-| _unknown_ | | | | Not yet analyzed |
+| admin | Dashboard, Users, Roles, Notifications, Profile, Auth | `src/app/**` | See generated overview's Key Routes/Areas table | Full detail lives in the generated doc, not duplicated here |
 
 ## Clients — Architectural Risks / Debt
 
 > Findings from `review-architecture`/`nextjs-architect` runs go here, tagged with date and app.
 
-- None recorded yet.
+- See [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#known-architectural-risks--debt) for the full, maintained list (e.g. `proxy.ts`'s runtime pin is unverified, no automated test suite, dashboard still mock data, `/settings` nav entry has no route). Not duplicated here to avoid drift between two copies of the same list.
 
 ---
-_Last updated: 2026-08-01 — split out of ARCHITECTURE.md into a clients-only file; content otherwise unchanged (still awaiting a full `analyze-client` pass on `clients/admin/`)._
+_Last updated: 2026-08-04 — filled in the Structure/Key Areas/Risks placeholders for `admin` with pointers to its now-detailed generated docs, rather than re-deriving the analysis here; corrected Status (no longer "Scaffolded, UI-shell only")._

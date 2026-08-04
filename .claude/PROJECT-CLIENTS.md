@@ -8,7 +8,7 @@
 
 | App | Path | Responsibility | Stack | Status |
 |---|---|---|---|---|
-| admin | `clients/admin/` | Admin dashboard — UI shell only (design-token system, dark mode, reusable component library, collapsible/responsive sidebar + full-width topbar). No calls to `src/Identity.Api` yet — all data on the one existing page (`/`) is mock data. | Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS v4, shadcn-generated primitives on `radix-ui` + `class-variance-authority`, `next-themes`, pnpm | Scaffolded — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md) |
+| admin | `clients/admin/` | Admin dashboard — real backend integration against `src/Identity.Api`: encrypted-cookie auth with proactive token refresh, full Users/Roles CRUD, real-time Notifications (SignalR) with a management page, permission-gated nav. Dashboard page (`/`) is the one remaining mock-data exception. | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn-generated primitives on `radix-ui` + `class-variance-authority`, `next-themes`, `@microsoft/signalr`, pnpm | Actively developed — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md) for full detail |
 
 ## Client Cross-Cutting Concerns
 
@@ -18,7 +18,8 @@
 
 ## Client Open Questions / Gaps
 
-- `clients/admin/` is UI-shell-only — real auth/data wiring to `src/Identity.Api` (API client layer, CORS/env config, token handling) hasn't been designed yet.
+- ~~`clients/admin/` is UI-shell-only — real auth/data wiring to `src/Identity.Api` hasn't been designed yet~~ — resolved; see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md) (Auth Flow, Backend Integration sections).
+- Remaining gaps, per [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#known-architectural-risks--debt): dashboard page still renders mock data; no automated test suite; `/settings` nav entry has no route yet.
 
 ---
-_Last updated: 2026-08-01 — split out of PROJECT.md into a clients-only file; content otherwise unchanged (`clients/admin/` still the only app, UI-shell only)._
+_Last updated: 2026-08-04 — corrected the `admin` row and Open Questions to match its current state (real auth/CRUD/notifications, not UI-shell/mock-data); pointers added to the generated admin docs rather than re-deriving detail here._

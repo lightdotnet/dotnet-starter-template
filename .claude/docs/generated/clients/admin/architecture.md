@@ -29,13 +29,19 @@ src/
                              notifications-page,notifications-data-table,send-notification-dialog,user-select}.tsx,
                              constants/{permissions,nav-item}.ts, types/notification.ts, index.ts
   components/
-    ui/                     shadcn-CLI-generated primitives (23 files) plus four hand-written additions:
-                             native-select.tsx (wraps a real `<select>`); popover.tsx (new — Radix `Popover`
-                             wrapper); command.tsx (new — `cmdk`-based filterable list); combobox.tsx (new)
+    ui/                     shadcn-CLI-generated primitives (23 files) plus five hand-written/added-this-sync
+                             additions: native-select.tsx (wraps a real `<select>`); popover.tsx (Radix
+                             `Popover` wrapper); command.tsx (`cmdk`-based filterable list); combobox.tsx
                              — `Combobox<TValue>`, composing popover.tsx + command.tsx + button.tsx, the
                              shadcn-style replacement for the now-deleted components/select/* family (see
-                             Key Design Patterns). select.tsx (the former Radix `Select` wrapper) and
-                             components/select/* (its Floating-UI-based successor) are both gone. 27 files total.
+                             Key Design Patterns); button-group.tsx (new this sync — `ButtonGroup`/
+                             `ButtonGroupSeparator`, a shadcn-style primitive that visually connects adjacent
+                             buttons via shared borders and end-only rounding, composed with separator.tsx;
+                             consumed by the new components/shared/data-table/data-table-buttons.tsx —
+                             provenance (CLI-generated vs hand-written) is `unknown`, but it follows the same
+                             `data-slot`/`cn` conventions as the rest of this folder). select.tsx (the former
+                             Radix `Select` wrapper) and components/select/* (its Floating-UI-based successor)
+                             are both gone. 28 files total.
     foundation/             use-listbox.ts, use-virtual-list.ts, floating-overlay.tsx — shrunk this sync;
                              use-floating-popover.ts, options-list.tsx, use-async-options.ts, and types.ts
                              were deleted along with components/select/*, their only consumer. The three
@@ -51,14 +57,23 @@ src/
     theme/                  theme-provider, accent-color-provider, theme-toggle, accent-color-picker, use-has-mounted, index.ts (barrel)
     shared/
       search-box.tsx
-      data-table/           types.ts, data-table-toolbar.tsx, data-table-pagination.tsx, data-table.tsx,
-                             data-table-virtual-body.tsx (new), index.ts (barrel); generic reusable
-                             list-table building block, no data-fetching of its own; `types.ts`/`data-table.tsx`
-                             gained optional per-column client-side sorting (`sortable`/`sortValue`) in a
-                             prior sync, and (new this sync) an optional `mode` prop
+      data-table/           types.ts, data-table-toolbar.tsx, data-table-buttons.tsx (new this sync),
+                             data-table-pagination.tsx, data-table.tsx, data-table-virtual-body.tsx,
+                             index.ts (barrel); generic reusable list-table building block, no data-fetching
+                             of its own; `types.ts`/`data-table.tsx` gained optional per-column client-side
+                             sorting (`sortable`/`sortValue`) in a prior sync, and an optional `mode` prop
                              (`"paginated"` default / `"virtualized"` / `"infinite"`, the latter two
                              rendered via `data-table-virtual-body.tsx`) plus `onSortChange` for
-                             server-driven sort — both additive, fully backward-compatible
+                             server-driven sort — both additive, fully backward-compatible. New this sync:
+                             `data-table-toolbar.tsx` was restructured into three stacked sections
+                             (actions / search / an inserted `Separator` between rendered sections) and
+                             gained `customSearch`/`onCustomSearch` props for a caller-supplied,
+                             apply-on-click multi-field filter UI; the Export/Refresh/Columns cluster it used
+                             to render inline was extracted into the new `data-table-buttons.tsx`
+                             (`DataTableButtons`, built on the new `components/ui/button-group.tsx`), which
+                             `data-table.tsx` now composes itself and renders either inline (via the
+                             toolbar's `buttons` prop) or inside the table's own bordered content box when
+                             `customSearch` is used
       object-viewer/         (new, additive — not yet used by any page) utils.ts, object-viewer-layout-context.tsx,
                              column-resize-handle.tsx, object-viewer-row.tsx, object-viewer.tsx, index.ts;
                              built on `components/ui/table` + `components/ui/input`, no `features/*` dependency
@@ -242,9 +257,13 @@ features/notifications/components/notifications-page.tsx -> features/user-profil
                                         features/notifications/types/notification
 features/notifications/components/notifications-data-table.tsx -> components/shared/data-table (DataTable + types),
                                         components/ui/native-select (status filter — replaced components/ui/select plus an
-                                        embedded "all" pseudo-option this sync; now a real, always-reselectable placeholder),
+                                        embedded "all" pseudo-option in a prior sync; a real, always-reselectable placeholder),
                                         features/notifications/components/{send-notification-dialog,user-select},
                                         lib/shared/user-display, features/notifications/types/notification, types/user
+                                        — status + recipient filters render via DataTable's new `customSearch` slot
+                                        (new this sync, moved out of a standalone block above `<DataTable>`) and no
+                                        longer auto-navigate per change; local "pending" state is applied to the URL
+                                        only when the customSearch "Search" button (`onCustomSearch`) is clicked
 features/notifications/components/send-notification-dialog.tsx -> components/ui/{alert,button,dialog,input,label,textarea},
                                         components/toast (notifySuccess), features/notifications/api/send-notification-action,
                                         features/notifications/components/user-select, types/user
@@ -293,12 +312,29 @@ components/command/command-palette-provider.tsx -> components/command/command-pa
 components/command/index.ts               -> re-exports CommandPalette/CommandPaletteProvider/useCommandPalette + types
 
 components/shared/data-table/data-table.tsx -> components/ui/{table,skeleton,empty,alert}, ./data-table-toolbar,
-                                        ./data-table-pagination, ./data-table-virtual-body (new), ./types
+                                        ./data-table-buttons (new this sync), ./data-table-pagination,
+                                        ./data-table-virtual-body, ./types — computes the Export/Refresh/Columns
+                                        buttons node itself via DataTableButtons and always wraps its content
+                                        (Table/Empty/Alert/virtualized body) in a `rounded-md border border-border`
+                                        box; when `customSearch` is used, that buttons node renders inside this box
+                                        (right-aligned, above the content) instead of being passed to the toolbar
+components/shared/data-table/data-table-buttons.tsx -> components/ui/{button,button-group,dropdown-menu},
+                                        lib/shared/utils, ./types — new this sync; builds the Export/Refresh/Columns
+                                        cluster (wrapped in the new components/ui/button-group.tsx), extracted out
+                                        of data-table-toolbar.tsx
 components/shared/data-table/data-table-virtual-body.tsx -> lib/shared/utils, components/foundation/use-virtual-list,
                                         ./types — row renderer for `mode="virtualized"`/`"infinite"`; switches to an
-                                        ARIA-grid div layout since a native `<table>` can't virtualize rows cleanly (new)
-components/shared/data-table/data-table-toolbar.tsx -> components/ui/{button,dropdown-menu}, lib/shared/utils, ./types
+                                        ARIA-grid div layout since a native `<table>` can't virtualize rows cleanly
+components/shared/data-table/data-table-toolbar.tsx -> components/ui/{button,separator}, lucide-react (Search),
+                                        lib/shared/utils, ./types — restructured this sync into three stacked
+                                        sections (actions / search / an inserted Separator between rendered
+                                        sections); no longer imports dropdown-menu (button-cluster building moved
+                                        to data-table-buttons.tsx); gained `customSearch`/`onCustomSearch` props
+                                        plus a `buttons` prop rendered by the caller (data-table.tsx)
 components/shared/data-table/data-table-pagination.tsx -> components/ui/{input,pagination}
+components/ui/button-group.tsx (new this sync) -> lib/shared/utils, components/ui/separator — `ButtonGroup`/
+                                        `ButtonGroupSeparator`, visually connects adjacent buttons via shared
+                                        borders and end-only rounding; consumed by data-table-buttons.tsx
 
 components/toast/toaster.tsx        -> next-themes, sonner, ./toast-theme
 components/toast/notify.ts          -> sonner
@@ -369,7 +405,7 @@ Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by
 - **Single-CSS-variable theming** and **runtime accent swap via DOM attribute + localStorage**: unchanged from before — `--primary` drives themed surfaces, `AccentColorProvider` sets `data-accent` on `<html>`.
 - **Hydration-safe browser-state restoration**: unchanged pattern (`hydrated` flag + `useEffect`, `eslint-disable react-hooks/set-state-in-effect`) in `SidebarProvider` and `AccentColorProvider`; `components/theme/use-has-mounted.ts` (`useSyncExternalStore`) still guards `ThemeToggle`.
 - **Mobile drawer closes on route change via render-time state adjustment**: unchanged, still in `hooks/use-sidebar.tsx`.
-- **Generic, presentational `DataTable<TData>` building block**: `components/shared/data-table/` composes a toolbar (actions + debounced search + export/refresh/columns-visibility), a table body (skeleton-loading rows, an `Empty` state, or an `Alert`-based error state that replaces the body and hides pagination), and a windowed-pagination footer (`getPageWindow()` always keeps page 1/last visible plus siblings around the current page). It takes no dependency on any feature or data-fetching library — fully controlled via props (`data`, `columns`, `isLoading`, `error`, callbacks); both `UsersDataTable` (server-driven search via URL params) and `RolesDataTable` (local client-side filtering — there's no backend search endpoint for roles) reuse it as-is with different search wiring. `isLoading` takes priority over a stale `error` — an in-flight refetch (e.g. clicking Refresh) always shows the table's own skeleton-row loading state rather than a leftover error from a previous failed load. **New this sync**: optional per-column client-side sorting (`DataTableColumn.sortable`/`sortValue`) — a sortable header renders as a `<button>` cycling asc → desc → unsorted with `ArrowUp`/`ArrowDown`/`ArrowUpDown` icons, and the table body sorts a `useMemo`-derived copy of `data`. Explicitly scoped to callers holding the full result set client-side — `RolesDataTable` uses it (name/description columns), `UsersDataTable` deliberately does not, since it paginates via the backend and only ever holds one page of `data` at a time. **New this sync**: an optional `mode` prop (`"paginated"` default / `"virtualized"` / `"infinite"`) switches the row/header markup to an ARIA-grid div layout rendered via the new `data-table-virtual-body.tsx` (a native `<table>` can't virtualize its rows cleanly); an optional `onSortChange` lets a caller take over sorting server-side instead of the default client-side sort, a prerequisite for `"virtualized"`/`"infinite"` modes against a large or streamed dataset. Both are additive — no existing caller (`UsersDataTable`, `RolesDataTable`, `NotificationsDataTable`) passes either, so all three keep today's exact `"paginated"` behavior.
+- **Generic, presentational `DataTable<TData>` building block**: `components/shared/data-table/` composes a toolbar (actions + search + a caller-rendered buttons node), a table body (skeleton-loading rows, an `Empty` state, or an `Alert`-based error state that replaces the body and hides pagination), and a windowed-pagination footer (`getPageWindow()` always keeps page 1/last visible plus siblings around the current page). It takes no dependency on any feature or data-fetching library — fully controlled via props (`data`, `columns`, `isLoading`, `error`, callbacks); `UsersDataTable` (server-driven search via URL params), `RolesDataTable` (local client-side filtering — there's no backend search endpoint for roles), and `NotificationsDataTable` (a custom multi-field filter UI, see below) reuse it as-is with different search wiring. `isLoading` takes priority over a stale `error` — an in-flight refetch (e.g. clicking Refresh) always shows the table's own skeleton-row loading state rather than a leftover error from a previous failed load. Optional per-column client-side sorting (`DataTableColumn.sortable`/`sortValue`) — a sortable header renders as a `<button>` cycling asc → desc → unsorted with `ArrowUp`/`ArrowDown`/`ArrowUpDown` icons, and the table body sorts a `useMemo`-derived copy of `data`; explicitly scoped to callers holding the full result set client-side — `RolesDataTable` uses it (name/description columns), `UsersDataTable` deliberately does not, since it paginates via the backend and only ever holds one page of `data` at a time. An optional `mode` prop (`"paginated"` default / `"virtualized"` / `"infinite"`) switches the row/header markup to an ARIA-grid div layout rendered via `data-table-virtual-body.tsx` (a native `<table>` can't virtualize its rows cleanly); an optional `onSortChange` lets a caller take over sorting server-side instead of the default client-side sort, a prerequisite for `"virtualized"`/`"infinite"` modes against a large or streamed dataset — both additive, no existing caller (`UsersDataTable`, `RolesDataTable`, `NotificationsDataTable`) passes either, so all three keep today's exact `"paginated"` behavior. **New this sync — restructured toolbar and extracted buttons**: `data-table-toolbar.tsx` now renders three stacked sections (actions / search / an inserted `Separator` between rendered sections) instead of one combined row, and gained a `customSearch?: React.ReactNode` prop for a caller-supplied multi-field filter UI plus `onCustomSearch?: () => void`, which renders an explicit "Search" button — custom filters apply on click, unlike the built-in single-field text search, which stays auto-debounced (400ms). The toolbar no longer builds the Export/Refresh/Columns cluster itself; the new `data-table-buttons.tsx` (`DataTableButtons`) does, wrapped in the new `components/ui/button-group.tsx` (`ButtonGroup`). `data-table.tsx` computes this buttons node and either passes it to the toolbar as `buttons` (default layout) or, when `customSearch` is used, renders it itself inside the table's own bordered content box (right-aligned, above the content) — the content box (`rounded-md border border-border`) now always wraps the table/empty/error/virtualized body, not just in the `customSearch` case. `NotificationsDataTable` is the first and only consumer of `customSearch` so far — its status + recipient filter dropdowns moved out of a standalone block above `<DataTable>` into this slot, holding local "pending" state applied to the URL only when "Search" is clicked, rather than auto-navigating on every change.
 - **Controlled form state alongside `useActionState`, for Server Action forms that can fail**: dialogs bound to a mutation Server Action keep their own `useState<FormValues>` in parallel with `useActionState(...)`. This is deliberate, not redundant — React resets *uncontrolled* form fields once a Server Action settles, regardless of success or failure, which would silently wipe user input after a validation error; controlled state survives that reset.
 - **Force-remount via a bumped `key` to reset `useActionState`**: `useActionState` has no imperative "clear this error/state" API, so each `*DataTable` bumps a per-dialog key counter on every open (`createDialogKey`, `editDialogKey`, ...) and passes it as that dialog's React `key`, forcing a fresh component instance (fresh action state, fresh controlled form state, and — for the edit dialogs — a fresh detail-fetch) each time it's opened.
 - **Toast notifications via a themed `sonner` wrapper**: `components/toast/` never exposes `sonner`'s `toast` directly — call sites use `notifySuccess`/`notifyError` (`notify.ts`), and the visual theme (`saturatedToastOptions`, `withToastProgress()`) is centralized in `toast-theme.ts` so every toast in the app looks consistent without each call site repeating class names.
@@ -383,7 +419,7 @@ Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by
 - `components/ui/combobox.tsx` (new this sync, plus its `popover.tsx`/`command.tsx` primitives) — the shadcn-style single-select building block, replacing `components/select/*`'s `EntitySelect`/`SearchSelect` (see Key Design Patterns); consumed by `features/users` (edit dialog, status/authProvider) and `features/notifications` (`user-select.tsx`).
 - `components/foundation/` — shrunk this sync to `use-listbox.ts`/`use-virtual-list.ts`/`floating-overlay.tsx` (serving only `components/command/*` and, for `use-virtual-list.ts`, `components/shared/data-table/data-table-virtual-body.tsx`) plus the new `portal-container.ts` (serving `components/ui/{dialog,popover}.tsx`, see Key Design Patterns). No longer backs any select/combobox component.
 - `components/command/*` — Command Palette (Cmd/Ctrl+K), untouched this sync; still no consumer wired into the app.
-- `components/shared/data-table/` — generic list-table building block (toolbar, pagination, loading/empty/error states, optional per-column sort, and — new this sync — optional virtualized/infinite modes via `data-table-virtual-body.tsx`); consumed by `features/users`, `features/roles`, and `features/notifications` (with different search/sort strategies — see Key Design Patterns), designed with no feature-specific knowledge baked in.
+- `components/shared/data-table/` — generic list-table building block (toolbar, `data-table-buttons.tsx` for the Export/Refresh/Columns cluster — new this sync, built on `components/ui/button-group.tsx` — pagination, loading/empty/error states, optional per-column sort, optional virtualized/infinite modes via `data-table-virtual-body.tsx`, and — new this sync — an optional `customSearch`/`onCustomSearch` slot for a caller-supplied, apply-on-click multi-field filter UI); consumed by `features/users`, `features/roles`, and `features/notifications` (with different search/sort strategies — see Key Design Patterns), designed with no feature-specific knowledge baked in.
 - `components/shared/object-viewer/` — new this sync, additive; a recursive read-only object/table renderer built on `components/ui/table` + `components/ui/input`, no `features/*` dependency. Not yet consumed by any page.
 - `components/toast/` — toast notification wrapper around `sonner`; mounted once at the root layout, called from feature code via `notifySuccess`/`notifyError`.
 - `lib/shared/utils.ts` (`cn`), `lib/shared/dedupe-claims.ts`, `lib/shared/user-display.ts` — cross-cutting helpers consumed by 2+ features or by layout chrome. New this sync: `lib/shared/menu.ts` (`buildVisibleMenu`, consumed by `Sidebar`) and `lib/shared/authorization.ts` (`hasPermission`/`hasAnyPermission`/`hasAllPermissions`/`isSuperAdminUser`, safe for both server and client — consumed directly by `Sidebar` and, via `lib/server/authorization.ts`'s thin wrapper, by `UsersPage`/`RolesPage`/`NotificationsPage`).
@@ -416,7 +452,7 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 | `prettier` + `prettier-plugin-tailwindcss` installed but no config file/`format` script | Low | Unchanged — still `unknown` whether formatting is enforced anywhere. |
 | No automated test suite | Low (by design at this stage) | Unchanged — no `*.test.*`/`*.spec.*` files, no test runner in `package.json`. Now more notable given real auth/session logic plus full Users and Roles CRUD flows all exist untested. |
 | `components/ui/button.tsx` hand-modified beyond shadcn CLI output (`loading` prop, `cursor-pointer`) | Low | Unchanged — re-running the shadcn CLI would silently drop these customizations unless done carefully. |
-| `DataTable`'s `onExport` prop has no caller yet | Low | `components/shared/data-table/data-table-toolbar.tsx` already renders an Export button when `onExport` is passed, but no current feature (including `UsersDataTable`/`RolesDataTable`) passes one — dead capability until a consumer needs it. |
+| `DataTable`'s `onExport` prop has no caller yet | Low | `components/shared/data-table/data-table-buttons.tsx` (moved from `data-table-toolbar.tsx` this sync) already renders an Export button when `onExport` is passed, but no current feature (including `UsersDataTable`/`RolesDataTable`/`NotificationsDataTable`) passes one — dead capability until a consumer needs it. |
 | `components/shared/object-viewer/` has no consumer yet | Low (by design) | New this sync, purely additive — ported from an external export spec and adapted to this project's design tokens/`components/ui/*` primitives, but not imported by any page or dialog. Dead code until something wires it in. |
 | `components/command/*` (CommandPalette) has no consumer yet | Low (by design) | Unchanged — nothing in the app wires up `CommandPaletteProvider` yet. Dead code until something adopts it. (`AsyncSelect`/`MultiSelect`, the other two "no consumer yet" components from the previous sync, were deleted this sync rather than left dead — see Key Design Patterns.) |
 | `components/ui/combobox.tsx` does not virtualize its option list | Low (by design) | The Floating-UI select library it replaced auto-virtualized past 50 options (`options-list.tsx`, now deleted); `cmdk`'s `Command` has no built-in virtualization, and the current two consumers (a small static enum, a client-filtered user list) don't need it. Deliberate scope decision made when migrating to `Combobox` — revisit if a future consumer needs a large option list. |
@@ -429,4 +465,4 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-04 (resynced — removed the internal Floating-UI select library (`components/select/*`, most of `components/foundation/*`); added shadcn-style `Combobox` (`ui/{popover,command,combobox}.tsx`, new `cmdk` dependency) and `foundation/portal-container.ts`; documented the Dialog/Popover nested-scroll fix and the sidebar override-based expand/collapse fix; updated layering, dependency direction, key patterns, shared kernel, and known risks accordingly) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-04 (resynced — documented the `data-table-toolbar.tsx` restructure (three stacked sections, new `customSearch`/`onCustomSearch` props) and the new `data-table-buttons.tsx`/`components/ui/button-group.tsx` extraction; updated `data-table.tsx`'s always-bordered content box and buttons placement; corrected `NotificationsDataTable`'s filter-apply behavior; updated layering, dependency direction, key patterns, shared kernel, and known risks accordingly) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
