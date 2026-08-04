@@ -8,7 +8,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
-import { getAllUsers } from "@/features/users";
 import { getNotifications } from "@/features/notifications/api/get-notifications";
 import { NotificationsDataTable } from "@/features/notifications/components/notifications-data-table";
 import { hasPermission } from "@/lib/server/authorization";
@@ -57,15 +56,12 @@ export async function NotificationsPage({ searchParams }: NotificationsPageProps
   const pageNumber = Math.max(Number(page) || 1, 1);
   const statusFilter = parseStatusFilter(status);
 
-  const [result, usersResult] = await Promise.all([
-    getNotifications(session.accessToken, {
-      pageNumber,
-      pageSize: PAGE_SIZE,
-      toUserId,
-      status: statusFilter,
-    }),
-    getAllUsers(session.accessToken),
-  ]);
+  const result = await getNotifications(session.accessToken, {
+    pageNumber,
+    pageSize: PAGE_SIZE,
+    toUserId,
+    status: statusFilter,
+  });
 
   const error =
     !result.isSuccess || !result.data
@@ -75,7 +71,6 @@ export async function NotificationsPage({ searchParams }: NotificationsPageProps
         }
       : undefined;
   const paged = result.data;
-  const users = (usersResult.isSuccess ? usersResult.data : null) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -96,7 +91,6 @@ export async function NotificationsPage({ searchParams }: NotificationsPageProps
             totalRecords={paged?.totalRecords ?? 0}
             error={error}
             canSend={canSend}
-            users={users}
             toUserId={toUserId}
             status={statusFilter}
           />

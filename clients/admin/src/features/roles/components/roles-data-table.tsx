@@ -19,14 +19,12 @@ import {
 import { CreateRoleDialog } from "@/features/roles/components/create-role-dialog";
 import { DeleteRoleDialog } from "@/features/roles/components/delete-role-dialog";
 import { EditRoleDialog } from "@/features/roles/components/edit-role-dialog";
-import type { PermissionDefinition } from "@/features/roles/types/permission-definition";
 import type { RoleDto } from "@/features/roles/types/role";
 
 interface RolesDataTableProps {
   roles: RoleDto[];
   error?: DataTableErrorState;
   canManage?: boolean;
-  permissions: PermissionDefinition[];
 }
 
 const baseColumns: DataTableColumn<RoleDto>[] = [
@@ -51,7 +49,6 @@ export function RolesDataTable({
   roles,
   error,
   canManage,
-  permissions,
 }: RolesDataTableProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -161,7 +158,6 @@ export function RolesDataTable({
         open={editOpen}
         onOpenChange={setEditOpen}
         role={selectedRole}
-        permissions={permissions}
         onUpdated={() => router.refresh()}
       />
       <DeleteRoleDialog

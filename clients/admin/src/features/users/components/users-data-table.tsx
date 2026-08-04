@@ -23,7 +23,6 @@ import { DeleteUserDialog } from "@/features/users/components/delete-user-dialog
 import { EditUserDialog } from "@/features/users/components/edit-user-dialog";
 import { UserStatusBadge } from "@/features/user-profile/components/user-status-badge";
 import { getDisplayName, getInitials } from "@/lib/shared/user-display";
-import type { RoleDto } from "@/features/roles/types/role";
 import type { UserDto } from "@/types/user";
 
 interface UsersDataTableProps {
@@ -37,7 +36,6 @@ interface UsersDataTableProps {
   canCreate?: boolean;
   canUpdate?: boolean;
   canDelete?: boolean;
-  roles: RoleDto[];
 }
 
 const baseColumns: DataTableColumn<UserDto>[] = [
@@ -101,7 +99,6 @@ export function UsersDataTable({
   canCreate,
   canUpdate,
   canDelete,
-  roles,
 }: UsersDataTableProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -222,7 +219,6 @@ export function UsersDataTable({
         open={editOpen}
         onOpenChange={setEditOpen}
         user={selectedUser}
-        roles={roles}
         onUpdated={() => router.refresh()}
       />
       <DeleteUserDialog

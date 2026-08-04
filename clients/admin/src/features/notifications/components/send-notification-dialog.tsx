@@ -20,30 +20,37 @@ import {
   type SendNotificationFormState,
 } from "@/features/notifications/api/send-notification-action";
 import { UserSelect } from "@/features/notifications/components/user-select";
-import type { UserDto } from "@/types/user";
+import { getDisplayName } from "@/lib/shared/user-display";
 
 const initialState: SendNotificationFormState = {};
 
 interface FormValues {
+  fromUserId: string;
+  fromName: string;
   toUserId: string;
   title: string;
   message: string;
   url: string;
 }
 
-const initialValues: FormValues = { toUserId: "", title: "", message: "", url: "" };
+const initialValues: FormValues = {
+  fromUserId: "",
+  fromName: "",
+  toUserId: "",
+  title: "",
+  message: "",
+  url: ""
+};
 
 interface SendNotificationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  users: UserDto[];
   onSent: () => void;
 }
 
 export function SendNotificationDialog({
   open,
   onOpenChange,
-  users,
   onSent,
 }: SendNotificationDialogProps) {
   const [state, formAction, pending] = useActionState(sendNotificationAction, initialState);
@@ -84,14 +91,32 @@ export function SendNotificationDialog({
           )}
 
           <div className="flex flex-col gap-1.5">
+            <Label htmlFor="fromUserId">From</Label>
+            <input type="hidden" name="fromName" value={values.fromName} />
+            <UserSelect
+              id="fromUserId"
+              name="fromUserId"
+              value={values.fromUserId}
+              onValueChange={(user) =>
+                setValues((previous) => ({
+                  ...previous,
+                  fromUserId: user.id,
+                  fromName: getDisplayName(user),
+                }))
+              }
+              triggerClassName="w-full"
+              placeholder="Send as system or select a user"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="toUserId">Recipient</Label>
             <UserSelect
               id="toUserId"
               name="toUserId"
-              users={users}
               value={values.toUserId}
-              onValueChange={(value) =>
-                setValues((previous) => ({ ...previous, toUserId: value }))
+              onValueChange={(user) =>
+                setValues((previous) => ({ ...previous, toUserId: user.id }))
               }
               triggerClassName="w-full"
               placeholder="Select a user"

@@ -25,9 +25,18 @@ export async function sendNotificationAction(
     return { error: "Recipient and title are required." };
   }
 
+  let fromUserId = String(formData.get("fromUserId") ?? "").trim();
+  let fromName = String(formData.get("fromName") ?? "").trim();
+
+  if (!fromUserId)
+  {
+    fromUserId = session.profile.id;
+    fromName = getDisplayName(session.profile);
+  }
+
   const result = await sendNotification(session.accessToken, {
-    fromUserId: session.profile.id,
-    fromName: getDisplayName(session.profile),
+    fromUserId,
+    fromName,
     toUserId,
     title,
     message: String(formData.get("message") ?? "") || undefined,

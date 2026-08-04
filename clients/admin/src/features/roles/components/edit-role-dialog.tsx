@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { notifySuccess } from "@/components/toast";
 import { getRoleDetailAction } from "@/features/roles/api/get-role-detail-action";
+import { getPermissionsAction } from "@/features/roles/api/get-permissions-action";
 import {
   updateRoleAction,
   type UpdateRoleFormState,
@@ -46,7 +47,6 @@ interface EditRoleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   role: RoleDto | null;
-  permissions: PermissionDefinition[];
   onUpdated: () => void;
 }
 
@@ -54,7 +54,6 @@ export function EditRoleDialog({
   open,
   onOpenChange,
   role,
-  permissions,
   onUpdated,
 }: EditRoleDialogProps) {
   const [state, formAction, pending] = useActionState(
@@ -65,10 +64,12 @@ export function EditRoleDialog({
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [detail, setDetail] = useState<RoleDto | null>(null);
+  const [permissions, setPermissions] = useState<PermissionDefinition[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
 
   // The roles list only carries name/description — claims aren't populated
-  // there, so load the full record once the dialog opens.
+  // there, so load the full record (plus the assignable permission list)
+  // once the dialog opens.
   useEffect(() => {
     if (!role) return;
 
@@ -78,21 +79,25 @@ export function EditRoleDialog({
       setLoading(true);
       setLoadError("");
 
-      const result = await getRoleDetailAction(role.id);
+      const [detailResult, permissionsResult] = await Promise.all([
+        getRoleDetailAction(role.id),
+        getPermissionsAction(),
+      ]);
       if (cancelled) return;
 
-      if (!result.data) {
-        setLoadError(result.error || "Unable to load role details.");
+      if (!detailResult.data) {
+        setLoadError(detailResult.error || "Unable to load role details.");
         setLoading(false);
         return;
       }
 
-      setDetail(result.data);
+      setDetail(detailResult.data);
       setSelectedPermissions(
-        result.data.claims
+        detailResult.data.claims
           .filter((claim) => claim.type === PERMISSION_CLAIM_TYPE)
           .map((claim) => claim.value),
       );
+      setPermissions(permissionsResult.data ?? []);
       setLoading(false);
     })();
 

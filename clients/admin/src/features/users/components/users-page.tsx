@@ -3,7 +3,6 @@ import { ShieldOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
-import { getAllRoles } from "@/features/roles/api/get-all-roles";
 import { searchUsers } from "@/features/users/api/search-users";
 import { UsersDataTable } from "@/features/users/components/users-data-table";
 import { hasPermission } from "@/lib/server/authorization";
@@ -54,21 +53,17 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
   const { q, page } = await searchParams;
   const pageNumber = Math.max(Number(page) || 1, 1);
 
-  const [result, rolesResult] = await Promise.all([
-    searchUsers(session.accessToken, {
-      searchValue: q,
-      pageNumber,
-      pageSize: PAGE_SIZE,
-    }),
-    canUpdate ? getAllRoles(session.accessToken) : null,
-  ]);
+  const result = await searchUsers(session.accessToken, {
+    searchValue: q,
+    pageNumber,
+    pageSize: PAGE_SIZE,
+  });
 
   const error =
     !result.isSuccess || !result.data
       ? { title: "Unable to load users", description: result.message || "Please try again." }
       : undefined;
   const paged = result.data;
-  const roles = (rolesResult?.isSuccess ? rolesResult.data : null) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -92,7 +87,6 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
             canCreate={canCreate}
             canUpdate={canUpdate}
             canDelete={canDelete}
-            roles={roles}
           />
         </CardContent>
       </Card>

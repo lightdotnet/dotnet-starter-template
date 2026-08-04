@@ -14,8 +14,6 @@ import {
 import { SendNotificationDialog } from "@/features/notifications/components/send-notification-dialog";
 import { UserSelect } from "@/features/notifications/components/user-select";
 import { NotificationStatus, type NotificationDto } from "@/features/notifications/types/notification";
-import { getDisplayName } from "@/lib/shared/user-display";
-import type { UserDto } from "@/types/user";
 
 interface NotificationsDataTableProps {
   records: NotificationDto[];
@@ -25,7 +23,6 @@ interface NotificationsDataTableProps {
   totalRecords: number;
   error?: DataTableErrorState;
   canSend?: boolean;
-  users: UserDto[];
   toUserId?: string;
   status?: NotificationStatus;
 }
@@ -56,7 +53,6 @@ export function NotificationsDataTable({
   totalRecords,
   error,
   canSend,
-  users,
   toUserId,
   status,
 }: NotificationsDataTableProps) {
@@ -84,8 +80,6 @@ export function NotificationsDataTable({
     setPendingToUserId(toUserId ?? "");
   }
 
-  const usersById = new Map(users.map((user) => [user.id, user]));
-
   function navigate(nextParams: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(nextParams)) {
@@ -96,11 +90,6 @@ export function NotificationsDataTable({
     startTransition(() => {
       router.push(`${pathname}?${params.toString()}`);
     });
-  }
-
-  function userLabel(userId: string) {
-    const user = usersById.get(userId);
-    return user ? getDisplayName(user) : userId;
   }
 
   const actions: DataTableAction[] | undefined = canSend
@@ -119,16 +108,6 @@ export function NotificationsDataTable({
 
   const columns: DataTableColumn<NotificationDto>[] = [
     {
-      id: "from",
-      header: "From",
-      cell: (notification) => notification.fromName ?? notification.fromUserId,
-    },
-    {
-      id: "to",
-      header: "To",
-      cell: (notification) => userLabel(notification.toUserId),
-    },
-    {
       id: "message",
       header: "Message",
       cell: (notification) => (
@@ -145,7 +124,6 @@ export function NotificationsDataTable({
           />
         </div>
       ),
-      className: "max-w-sm whitespace-normal break-words",
     },
     {
       id: "status",
@@ -157,9 +135,9 @@ export function NotificationsDataTable({
       ),
     },
     {
-      id: "created",
-      header: "Created",
-      cell: (notification) => new Date(notification.created).toLocaleString(),
+      id: "from",
+      header: "From",
+      cell: (notification) => notification.fromName ?? notification.fromUserId,
     },
   ];
 
@@ -175,9 +153,8 @@ export function NotificationsDataTable({
       />
 
       <UserSelect
-        users={users}
         value={pendingToUserId}
-        onValueChange={setPendingToUserId}
+        onValueChange={(user) => setPendingToUserId(user.id)}
         triggerClassName="w-56"
         ariaLabel="Filter by recipient"
         placeholder="Search recipients"
@@ -220,7 +197,6 @@ export function NotificationsDataTable({
           key={`send-${sendDialogKey}`}
           open={sendOpen}
           onOpenChange={setSendOpen}
-          users={users}
           onSent={() => router.refresh()}
         />
       )}

@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
 import { getAllRoles } from "@/features/roles/api/get-all-roles";
-import { getPermissions } from "@/features/roles/api/get-permissions";
 import { RolesDataTable } from "@/features/roles/components/roles-data-table";
 import { ROLES_PERMISSIONS } from "@/features/roles/constants/permissions";
 import { hasPermission } from "@/lib/server/authorization";
@@ -42,10 +41,7 @@ export async function RolesPage() {
     ROLES_PERMISSIONS.Manage,
   );
 
-  const [result, permissionsResult] = await Promise.all([
-    getAllRoles(session.accessToken),
-    canManage ? getPermissions(session.accessToken) : null,
-  ]);
+  const result = await getAllRoles(session.accessToken);
 
   const error =
     !result.isSuccess || !result.data
@@ -55,8 +51,6 @@ export async function RolesPage() {
         }
       : undefined;
   const roles = result.data ?? [];
-  const permissions =
-    (permissionsResult?.isSuccess ? permissionsResult.data : null) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -73,7 +67,6 @@ export async function RolesPage() {
             roles={roles}
             error={error}
             canManage={canManage}
-            permissions={permissions}
           />
         </CardContent>
       </Card>

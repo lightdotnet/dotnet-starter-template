@@ -28,6 +28,7 @@ import {
   updateUserAction,
   type UpdateUserFormState,
 } from "@/features/users/api/update-user-action";
+import { getAllRolesAction } from "@/features/roles/api/get-all-roles-action";
 import type { RoleDto } from "@/features/roles/types/role";
 import type { ClaimDto, UserDto } from "@/types/user";
 
@@ -66,7 +67,6 @@ interface EditUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: UserDto | null;
-  roles: RoleDto[];
   onUpdated: () => void;
 }
 
@@ -74,7 +74,6 @@ export function EditUserDialog({
   open,
   onOpenChange,
   user,
-  roles,
   onUpdated,
 }: EditUserDialogProps) {
   const [state, formAction, pending] = useActionState(
@@ -90,12 +89,14 @@ export function EditUserDialog({
   const [loadError, setLoadError] = useState("");
   const [status, setStatus] = useState("active");
   const [authProvider, setAuthProvider] = useState("Local");
+  const [roles, setRoles] = useState<RoleDto[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [claimRows, setClaimRows] = useState<ClaimRow[]>([]);
   const [newPassword, setNewPassword] = useState("");
 
   // The users table only carries list-level fields — roles and claims aren't
-  // populated there, so load the full record once the dialog opens.
+  // populated there, so load the full record (plus the assignable role list)
+  // once the dialog opens.
   useEffect(() => {
     if (!user) return;
 
@@ -105,19 +106,23 @@ export function EditUserDialog({
       setLoading(true);
       setLoadError("");
 
-      const result = await getUserDetailAction(user.id);
+      const [detailResult, rolesResult] = await Promise.all([
+        getUserDetailAction(user.id),
+        getAllRolesAction(),
+      ]);
       if (cancelled) return;
 
-      if (!result.data) {
-        setLoadError(result.error || "Unable to load user details.");
+      if (!detailResult.data) {
+        setLoadError(detailResult.error || "Unable to load user details.");
         setLoading(false);
         return;
       }
 
-      setStatus(result.data.status ?? "active");
-      setAuthProvider(result.data.authProvider ?? "Local");
-      setSelectedRoles(result.data.roles);
-      setClaimRows(toClaimRows(result.data.claims));
+      setStatus(detailResult.data.status ?? "active");
+      setAuthProvider(detailResult.data.authProvider ?? "Local");
+      setSelectedRoles(detailResult.data.roles);
+      setClaimRows(toClaimRows(detailResult.data.claims));
+      setRoles(rolesResult.data ?? []);
       setLoading(false);
     })();
 
