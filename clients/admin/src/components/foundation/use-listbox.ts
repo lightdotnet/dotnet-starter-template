@@ -12,22 +12,20 @@ export interface UseListboxOptions {
   loop?: boolean;
   /**
    * Typeahead ("type a letter to jump to a matching item") is only correct
-   * for a closed, button-triggered listbox (EntitySelect). On a real text
-   * input (SearchSelect/AsyncSelect/MultiSelect/Command Palette), Floating
-   * UI's useTypeahead calls preventDefault on every character keydown while
-   * open — which blocks normal typing entirely. Those components must pass
-   * `false` here; only EntitySelect wants the default `true`.
+   * for a closed, button-triggered listbox. On a real text input (e.g. the
+   * Command Palette), Floating UI's useTypeahead calls preventDefault on
+   * every character keydown while open — which blocks normal typing
+   * entirely. Text-input consumers must pass `false` here.
    */
   enableTypeahead?: boolean;
 }
 
 /**
- * The one keyboard-navigation engine shared by every select-family component
- * and the Command Palette's result list. Uses Floating UI's "virtual" focus
- * mode: DOM focus stays on the trigger/input, active state is communicated
- * via `aria-activedescendant` (the listbox pattern), not by moving real
- * focus onto list items — which is what lets a text input stay focused
- * while arrow keys move the active option.
+ * Keyboard-navigation engine for the Command Palette's result list. Uses
+ * Floating UI's "virtual" focus mode: DOM focus stays on the trigger/input,
+ * active state is communicated via `aria-activedescendant` (the listbox
+ * pattern), not by moving real focus onto list items — which is what lets a
+ * text input stay focused while arrow keys move the active option.
  */
 export function useListbox({
   context,

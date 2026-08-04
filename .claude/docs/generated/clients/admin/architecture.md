@@ -29,18 +29,24 @@ src/
                              notifications-page,notifications-data-table,send-notification-dialog,user-select}.tsx,
                              constants/{permissions,nav-item}.ts, types/notification.ts, index.ts
   components/
-    ui/                     shadcn-CLI-generated primitives (23 files) plus one hand-written addition,
-                             native-select.tsx (wraps a real `<select>`; not shadcn CLI output — see Key
-                             Design Patterns); select.tsx (the former Radix `Select` wrapper) is gone,
-                             migrated to components/select/*
-    foundation/             (new) use-floating-popover.ts, use-listbox.ts, use-async-options.ts,
-                             use-virtual-list.ts, options-list.tsx, floating-overlay.tsx, types.ts —
-                             shared Floating-UI-based primitives underlying components/select/* and
-                             components/command/* (see Key Design Patterns)
-    select/                 (new) entity-select.tsx, search-select.tsx, async-select.tsx, multi-select.tsx,
-                             index.ts (barrel)
-    command/                (new) command-palette.tsx, command-palette-provider.tsx, types.ts, index.ts;
-                             Cmd/Ctrl+K overlay — built, but no consumer wired into the app yet
+    ui/                     shadcn-CLI-generated primitives (23 files) plus four hand-written additions:
+                             native-select.tsx (wraps a real `<select>`); popover.tsx (new — Radix `Popover`
+                             wrapper); command.tsx (new — `cmdk`-based filterable list); combobox.tsx (new)
+                             — `Combobox<TValue>`, composing popover.tsx + command.tsx + button.tsx, the
+                             shadcn-style replacement for the now-deleted components/select/* family (see
+                             Key Design Patterns). select.tsx (the former Radix `Select` wrapper) and
+                             components/select/* (its Floating-UI-based successor) are both gone. 27 files total.
+    foundation/             use-listbox.ts, use-virtual-list.ts, floating-overlay.tsx — shrunk this sync;
+                             use-floating-popover.ts, options-list.tsx, use-async-options.ts, and types.ts
+                             were deleted along with components/select/*, their only consumer. The three
+                             survivors now serve only components/command/* (Command Palette) plus
+                             components/shared/data-table/data-table-virtual-body.tsx (use-virtual-list.ts
+                             only). portal-container.ts (new) is unrelated to the rest of this folder — a
+                             small React Context (`usePortalContainer`/`PortalContainerProvider`) that lets
+                             components/ui/dialog.tsx hand its own DOM node to components/ui/popover.tsx,
+                             fixing a Dialog/Popover nested-scroll bug (see Key Design Patterns)
+    command/                command-palette.tsx, command-palette-provider.tsx, types.ts, index.ts;
+                             Cmd/Ctrl+K overlay — untouched this sync, still no consumer wired into the app
     layout/                 topbar, sidebar, sidebar-nav-item, brand, breadcrumbs, user-menu, app-shell
     theme/                  theme-provider, accent-color-provider, theme-toggle, accent-color-picker, use-has-mounted, index.ts (barrel)
     shared/
@@ -112,6 +118,9 @@ components/layout/sidebar.tsx      -> lib/shared/utils, hooks/use-sidebar, compo
                                        lib/shared/authorization (hasPermission), components/ui/sheet
                                        (takes `{ permissions, userName }`, computes the visible menu via `useMemo`)
 components/layout/sidebar-nav-item.tsx -> lib/shared/utils, hooks/use-sidebar, types/nav
+                                       (`expanded` is now `isExpanded(item.href) ?? branchActive` — was `||`,
+                                       which forced a branch containing the active route permanently open
+                                       regardless of clicks; see Key Design Patterns)
 components/layout/breadcrumbs.tsx  -> components/ui/breadcrumb, constants/nav-items, types/nav
 components/layout/user-menu.tsx    -> components/ui/{avatar,button,dropdown-menu}, lib/shared/user-display,
                                        features/auth/api/logout-action (direct file, not the barrel — the barrel also
@@ -168,9 +177,10 @@ features/users/components/users-data-table.tsx -> components/shared/data-table (
                                         features/roles/types/role (RoleDto), types/user
 features/users/components/create-user-dialog.tsx -> components/ui/{alert,button,dialog,input,label}, components/toast (notifySuccess),
                                         features/users/api/create-user-action
-features/users/components/edit-user-dialog.tsx -> components/ui/{alert,button,checkbox,dialog,input,label,spinner,tabs},
-                                        components/select (EntitySelect — status/authProvider; replaced components/ui/select,
-                                        the former Radix wrapper, this sync),
+features/users/components/edit-user-dialog.tsx -> components/ui/{alert,button,checkbox,combobox,dialog,input,label,
+                                        spinner,tabs} — status/authProvider now use the new components/ui/combobox
+                                        (`Combobox`); components/select, whose `EntitySelect` this used before this
+                                        sync, is gone,
                                         components/toast (notifySuccess), features/users/api/get-user-detail-action,
                                         features/users/api/update-user-action, features/users/api/force-password-action,
                                         features/roles/types/role (RoleDto), types/user
@@ -238,16 +248,13 @@ features/notifications/components/notifications-data-table.tsx -> components/sha
 features/notifications/components/send-notification-dialog.tsx -> components/ui/{alert,button,dialog,input,label,textarea},
                                         components/toast (notifySuccess), features/notifications/api/send-notification-action,
                                         features/notifications/components/user-select, types/user
-features/notifications/components/user-select.tsx -> components/select (SearchSelect), lib/shared/user-display, types/user
+features/notifications/components/user-select.tsx -> components/ui/combobox (Combobox), lib/shared/user-display, types/user
                                         (reusable searchable user picker, consumed by both notifications-data-table.tsx
                                         and send-notification-dialog.tsx within this same feature; not promoted to
                                         components/shared/, consistent with "only promote once 2+ features need it".
-                                        Rewritten this sync on top of the new SearchSelect — previously stuffed a search
-                                        `<Input>` inside a Radix `SelectContent` to work around `onOpenAutoFocus` not
-                                        being exposed on Radix's Select.Content; that workaround is gone. Also dropped
-                                        its `allOption` prop/pattern — the notifications page's "no filter" state is now
-                                        SearchSelect's own placeholder, not an injected fake option, and an optional
-                                        `onClear` prop shows a real clear (X) button)
+                                        Migrated this sync from components/select's SearchSelect (now gone) to the new
+                                        Combobox — UserSelect's own external props are unchanged, so neither consumer
+                                        needed any change)
 features/notifications/api/get-notifications.ts -> lib/server/http, lib/server/call-guard, types/api, features/notifications/types/notification
 features/notifications/api/get-my-notifications.ts -> lib/server/http, lib/server/call-guard, types/api, features/notifications/types/notification
 features/notifications/api/get-my-notifications-action.ts -> "use server"; features/user-profile (resolveSession),
@@ -266,35 +273,24 @@ features/notifications/api/get-signalr-token-action.ts -> "use server"; features
                                         hands the browser a short-lived access token specifically for the SignalR handshake,
                                         the one deliberate place the token leaves the httpOnly cookie boundary
 
-components/foundation/use-floating-popover.ts  -> @floating-ui/react (useFloating, useClick, useDismiss, useRole,
-                                        flip/shift/offset/size middleware, autoUpdate) — no internal dependency (new)
 components/foundation/use-listbox.ts     -> @floating-ui/react (useListNavigation, useTypeahead) — `enableTypeahead`
-                                        option lets text-input callers disable it (see Key Design Patterns) (new)
-components/foundation/use-async-options.ts -> components/foundation/types (SelectOption) — debounced fetch +
-                                        AbortController cancellation, no Floating UI dependency (new)
-components/foundation/use-virtual-list.ts -> @tanstack/react-virtual (useVirtualizer) (new)
-components/foundation/options-list.tsx   -> lucide-react, lib/shared/utils, components/foundation/{use-virtual-list,types} —
-                                        shared listbox row renderer (virtualizes past 50 options) (new)
+                                        option lets text-input callers disable it; sole remaining consumer is
+                                        components/command/command-palette.tsx (use-floating-popover.ts,
+                                        options-list.tsx, use-async-options.ts, and types.ts, whose only
+                                        consumer was components/select/*, were deleted this sync)
+components/foundation/use-virtual-list.ts -> @tanstack/react-virtual (useVirtualizer) — consumers are now
+                                        components/command/command-palette.tsx and components/shared/
+                                        data-table/data-table-virtual-body.tsx only (options-list.tsx, a
+                                        third former consumer, was deleted this sync)
 components/foundation/floating-overlay.tsx -> @floating-ui/react (FloatingPortal, FloatingOverlay, FloatingFocusManager),
-                                        lib/shared/utils — modal backdrop + focus trap with `lockScroll={false}` (new)
-components/select/entity-select.tsx      -> @floating-ui/react (FloatingPortal, useInteractions), lucide-react,
-                                        lib/shared/utils, components/foundation/{use-floating-popover,use-listbox,
-                                        options-list,types} — button-triggered, non-searchable single-select (new)
-components/select/search-select.tsx      -> same components/foundation/* set as entity-select.tsx, plus lucide-react
-                                        (Search/ChevronDown/X icons) — text-input-triggered filterable combobox;
-                                        `enableClick: false`/`enableTypeahead: false` on its foundation hooks (see Key
-                                        Design Patterns for why) (new)
-components/select/async-select.tsx        -> components/foundation/use-async-options plus the same set as
-                                        search-select.tsx — remote-search combobox; no current UI consumer (new)
-components/select/multi-select.tsx        -> same foundation set as search-select.tsx — chip-based multi-select (new)
-components/select/index.ts                -> re-exports EntitySelect/SearchSelect/AsyncSelect/MultiSelect + foundation
-                                        SelectOption/RenderOption types (new — barrel)
+                                        lib/shared/utils — modal backdrop + focus trap with `lockScroll={false}`;
+                                        used only by components/command/command-palette.tsx
 components/command/command-palette.tsx    -> @floating-ui/react (useFloating, useDismiss, useRole, useInteractions),
                                         lucide-react, lib/shared/utils, components/foundation/{floating-overlay,
-                                        use-listbox,use-virtual-list} — Cmd/Ctrl+K overlay; no UI consumer yet (new)
+                                        use-listbox,use-virtual-list} — Cmd/Ctrl+K overlay; still no UI consumer
 components/command/command-palette-provider.tsx -> components/command/command-palette — owns the global
-                                        Cmd/Ctrl+K keydown listener + open state via React Context (new)
-components/command/index.ts               -> re-exports CommandPalette/CommandPaletteProvider/useCommandPalette + types (new)
+                                        Cmd/Ctrl+K keydown listener + open state via React Context
+components/command/index.ts               -> re-exports CommandPalette/CommandPaletteProvider/useCommandPalette + types
 
 components/shared/data-table/data-table.tsx -> components/ui/{table,skeleton,empty,alert}, ./data-table-toolbar,
                                         ./data-table-pagination, ./data-table-virtual-body (new), ./types
@@ -329,10 +325,29 @@ components/ui/*                     -> lib/shared/utils, radix-ui, class-varianc
                                         (button.tsx additionally -> components/ui/spinner). Exception:
                                         native-select.tsx -> lib/shared/utils, components/ui/{label,spinner},
                                         lucide-react only — no radix-ui dependency, hand-written rather than
-                                        shadcn-CLI-generated (new)
+                                        shadcn-CLI-generated
+components/ui/popover.tsx (new)     -> radix-ui (Popover), lib/shared/utils, components/foundation/
+                                        portal-container (usePortalContainer) — the one components/ui/*
+                                        file besides dialog.tsx that reaches into components/foundation/,
+                                        a deliberate, narrow exception to "components/ui/* is a strict leaf
+                                        layer" (see Key Design Patterns and Dependency Direction below)
+components/ui/command.tsx (new)     -> cmdk (new dependency), lucide-react, lib/shared/utils — no
+                                        components/foundation/ or components/select/ dependency
+components/ui/combobox.tsx (new)    -> components/ui/{button,popover,command}, lucide-react, lib/shared/
+                                        utils — `Combobox<TValue>`, the shadcn-style replacement for
+                                        components/select/*'s EntitySelect/SearchSelect (see Key Design
+                                        Patterns)
+components/ui/dialog.tsx (changed)  -> adds components/foundation/portal-container (PortalContainerProvider)
+                                        to its existing radix-ui/lib/shared/utils/components/ui/button
+                                        dependencies — DialogContent now captures its own DOM node and
+                                        provides it via context so a nested Popover can portal inside it
+                                        (see Key Design Patterns)
+components/foundation/portal-container.ts (new) -> react (createContext/useContext) only — no
+                                        components/ui/ or components/foundation/ dependency of its own;
+                                        consumed by components/ui/{dialog,popover}.tsx
 ```
 
-Direction is still one-way: `components/ui/*` never imports from `components/layout/*`, `components/theme/*`, or `features/*`. Cross-feature imports go through a feature's `index.ts` barrel, not its internals — e.g. `features/auth/api/login-action.ts` and `features/users/components/users-page.tsx`/`api/create-user-action.ts` all import `resolveSession`/`getCurrentUser` from `@/features/user-profile` (the barrel), not from its internals directly; `features/users/components/users-page.tsx` similarly imports `getAllRoles` from `@/features/roles`'s barrel, not `@/features/roles/api/get-all-roles` directly. `features/dashboard` is still not imported by any other feature. `features/roles` gained a cross-feature importer in a prior sync (`features/users/components/users-page.tsx`, for the role catalog) in addition to its own route. `features/users` and `features/roles` are each imported by their own `app/**/page.tsx` (routing, not another feature). `components/shared/data-table/*`, `components/shared/object-viewer/*`, and `components/toast/*` sit below `features/*` in the same leaf-adjacent tier as `components/ui/*` — they're imported by feature code but import nothing from `features/*` themselves (`object-viewer/*` currently has no importer at all — purely additive). `components/foundation/*`, `components/select/*`, and `components/command/*` (new this sync) sit at that same tier too — `foundation/*` imports only `@floating-ui/react`/`@tanstack/react-virtual`/`lucide-react`, `select/*` and `command/*` import only `foundation/*` plus those same libraries, and none of the three import from `features/*`. `AsyncSelect` and `command/*` currently have no importer at all outside this library itself — purely additive, same as `object-viewer/*`.
+Direction is still one-way: `components/ui/*` never imports from `components/layout/*`, `components/theme/*`, or `features/*`. Cross-feature imports go through a feature's `index.ts` barrel, not its internals — e.g. `features/auth/api/login-action.ts` and `features/users/components/users-page.tsx`/`api/create-user-action.ts` all import `resolveSession`/`getCurrentUser` from `@/features/user-profile` (the barrel), not from its internals directly; `features/users/components/users-page.tsx` similarly imports `getAllRoles` from `@/features/roles`'s barrel, not `@/features/roles/api/get-all-roles` directly. `features/dashboard` is still not imported by any other feature. `features/roles` gained a cross-feature importer in a prior sync (`features/users/components/users-page.tsx`, for the role catalog) in addition to its own route. `features/users` and `features/roles` are each imported by their own `app/**/page.tsx` (routing, not another feature). `components/shared/data-table/*`, `components/shared/object-viewer/*`, and `components/toast/*` sit below `features/*` in the same leaf-adjacent tier as `components/ui/*` — they're imported by feature code but import nothing from `features/*` themselves (`object-viewer/*` currently has no importer at all — purely additive). `components/foundation/*` and `components/command/*` sit at that same tier too — `foundation/*` imports only `@floating-ui/react`/`@tanstack/react-virtual`/`react`, `command/*` imports only `foundation/*` plus `@floating-ui/react`/`lucide-react`, and neither imports from `features/*`. `command/*` still has no importer at all outside this library itself — purely additive, same as `object-viewer/*`. **New this sync, and the one narrow exception to "`components/ui/*` never imports from another component tier"**: `components/ui/dialog.tsx` and `components/ui/popover.tsx` both import `components/foundation/portal-container.ts` — a plain React Context with no further dependency of its own, added specifically so a `Popover`/`Combobox` nested inside a `Dialog` can portal into the Dialog's own DOM node (see Key Design Patterns). `components/select/*` — the library `AsyncSelect`/`MultiSelect` lived in — is gone entirely this sync, not just unimported.
 
 Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by the RSC client/server boundary rather than an oversight: `constants/nav-items.ts` imports `DASHBOARD_NAV_ITEM`/`USERS_NAV_ITEM`/`ROLES_NAV_ITEM`/`NOTIFICATIONS_NAV_ITEM` by direct file path (`@/features/dashboard/constants/nav-item`, etc.) rather than via each feature's barrel; `components/layout/user-menu.tsx` imports `logoutAction` directly from `@/features/auth/api/logout-action` rather than from `@/features/auth`'s barrel (which, notably, does not currently re-export `logoutAction` at all); and `components/layout/topbar.tsx` imports `NotificationBell` directly from `@/features/notifications/components/notification-bell` rather than from `@/features/notifications`'s barrel — here the barrel *does* also export `NotificationBell`, but it additionally re-exports `NotificationsPage`, an async Server Component (`resolveSession()`, `next/headers`), so importing the barrel from this Client Component reproduced the same "next/headers only available in Server Components" build error the `nav-items.ts` exception was already working around. See Key Design Patterns for the reasoning.
 
@@ -348,7 +363,9 @@ Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by
 - **Permissions/roles decoded from the JWT, never trusted from the profile API** (new): `lib/server/jwt.ts` decodes the access token's payload (no signature verification — safe here since the token was just issued by this app's own backend) and extracts the `permission`/`role` claim types; `lib/server/build-session-claims.ts` unions those with the profile API's own claims for display purposes only. Both `loginAction` and `refreshSession()` independently re-derive `permissions`/`roles` this way on every token issuance.
 - **Context-provider-per-concern for client state**: `SidebarProvider`/`useSidebar`, `AccentColorProvider`/`useAccentColor`, and `next-themes`' provider (wrapped in `components/theme/theme-provider.tsx`) each own one slice of persisted UI state via a throwing custom hook — unchanged pattern, relocated files.
 - **Owned, CLI-generated UI primitives**: `components/ui/*` (23 shadcn-CLI-generated files, style `"radix-nova"`) still follows the `data-slot="<name>"` + `cva()` convention. `button.tsx` retains its hand-modification beyond CLI output: a `loading` prop (renders `Spinner`, sets `aria-busy`/`disabled`) plus a `cursor-pointer` utility baked into `buttonVariants`. `native-select.tsx` is the one hand-written exception in this folder — see the next pattern for why it and the rest of the new select family aren't CLI/Radix-based.
-- **Internal select/overlay component library on Floating UI, not Radix** (new this sync): `components/foundation/*` (`useFloatingPopover`, `useListbox`, `useAsyncOptions`, `useVirtualList`, `OptionsList`, `FloatingModalOverlay`) is the one shared investment every new select-family component and the Command Palette build on — positioning/interaction hooks, keyboard navigation, async fetch/debounce, virtualization, and listbox row rendering are each written once. `EntitySelect` (button trigger, closed listbox) is the direct Radix `Select` replacement for non-searchable cases; `SearchSelect`/`AsyncSelect`/`MultiSelect` (text-input triggers) layer a combobox on the same primitives; `CommandPalette` reuses `floating-overlay.tsx` for its modal rather than the Radix `Dialog` used elsewhere in `ui/`, specifically because Radix `Dialog` locks body scroll by default and this library's overlay explicitly must not (`FloatingOverlay`'s `lockScroll={false}`, kept explicit as documentation). Two bugs found and fixed while building this are worth remembering for any future component added on this foundation: (1) `useListbox`'s `useTypeahead` calls `stopEvent()`/`preventDefault()` on every character keydown while open — correct for a closed listbox trigger, but it silently blocks all typing if wired to a real `<input>`; every text-input-triggered component here passes `enableTypeahead: false` to `useListbox`, and only the button-triggered `EntitySelect` keeps it on. (2) `useFloatingPopover`'s `useClick` toggles open on click; a text-input trigger that also opens via `onFocus` (as all of them do) will see focus-then-click double-toggle the panel closed on the very first interaction unless `enableClick: false` is passed and opening is driven by `onFocus`/`onClick` handlers explicitly instead. `react-hooks/refs` (the React Compiler ESLint rule) is disabled specifically for `components/foundation/select/command` in `eslint.config.mjs` — a known false-positive category, since Floating UI's `context`/`refs` objects are read throughout render by design, not a `.current`-during-render hazard the rule is meant to catch.
+- **The internal Floating-UI select library from the previous sync is gone; single-select now goes through a shadcn-style `Combobox`** (changed this sync): `components/ui/combobox.tsx` (`Combobox<TValue>`) composes `components/ui/{button,popover,command}.tsx` — `popover.tsx` is a new, otherwise-ordinary Radix `Popover` wrapper (`data-slot`/`cn` conventions matching the rest of `ui/`), `command.tsx` wraps the new `cmdk` dependency for the filterable list. This replaces both `EntitySelect` (button-triggered, non-searchable) and `SearchSelect` (text-input-triggered, filterable) with one component — `Command`'s built-in search input covers both cases, so the two consumers (`edit-user-dialog.tsx`'s status/authProvider, `features/notifications/user-select.tsx`) needed no prop changes beyond the import. `AsyncSelect`/`MultiSelect` were deleted rather than ported — neither ever had a UI consumer, so there was nothing to preserve; a remote-search or multi-value variant can be built on `Combobox` if a future feature needs one. `components/command/*` (Command Palette) still builds directly on `components/foundation/*`/`@floating-ui/react`, unrelated to and untouched by this change — it still reuses `floating-overlay.tsx` rather than Radix `Dialog` specifically because Radix `Dialog` locks body scroll by default and the Palette's overlay explicitly must not (`FloatingOverlay`'s `lockScroll={false}`).
+- **A Popover nested inside a Dialog couldn't be scrolled with the mouse wheel — fixed via a shared portal-container context** (new this sync, found while building `Combobox`): Radix `Dialog`'s modal scroll lock (`react-remove-scroll`, active while the dialog is open) only treats content that is an actual DOM descendant of `DialogContent`'s own node as "inside" the locked region; anything portaled elsewhere — which is what `Popover.Portal` does by default (`document.body`) — has its wheel/touch scroll blocked as if it were page background, even though it renders visually on top and in the right place. The fix has two parts, both in `components/ui/dialog.tsx`: (1) `DialogContent` now centers via a `flex items-center justify-center` wrapper `div` instead of a `transform` (`-translate-x-1/2 -translate-y-1/2`) on the content node itself — a `transform` on an ancestor creates a new CSS containing block for `position: fixed` descendants, which would have broken a nested Popover's floating-position math the moment its portal target moved inside `DialogContent`; the wrapper is `pointer-events-none` with `pointer-events-auto` on the content itself, so backdrop clicks still reach `DialogOverlay` exactly as before. (2) `DialogContent` captures its own DOM node (`ref={setPortalNode}`) and provides it through a new `components/foundation/portal-container.ts` context (`PortalContainerProvider`/`usePortalContainer`); `components/ui/popover.tsx`'s `PopoverContent` reads that context and passes it as `Popover.Portal`'s `container` prop, falling back to Radix's own `document.body` default outside a Dialog. This is automatic for any future `Combobox`/`Popover` nested in a `Dialog` — no per-call-site wiring needed, and `send-notification-dialog.tsx`'s `Combobox`-based user picker (the bug's original repro) needed no changes itself.
+- **A sidebar nav group containing the active route could never be manually collapsed — fixed by separating "default" from "explicit override"** (new this sync): `sidebar-nav-item.tsx` used to compute `expanded = hasChildren && (isExpanded(item.href) || branchActive)` — since `branchActive` (true whenever a descendant route is the current page) was OR'd in, a group containing the active page stayed forced-open no matter how many times its toggle was clicked; `toggleExpanded` could only ever flip `isExpanded`, which the `||` made irrelevant. `hooks/use-sidebar.tsx` now stores explicit per-href overrides in a `Map<string, boolean>` (`expandedOverrides`) rather than a plain expanded-`Set`; `isExpanded(href)` returns `boolean | undefined` (`undefined` = no override yet, so the group still auto-expands to reveal the active route by default), and `toggleExpanded(href, current)` writes an explicit `!current`, which now wins over `branchActive` once set. Persisted to `localStorage` the same way as before, just serialized as `[...map.entries()]` instead of a plain string array.
 - **Single-CSS-variable theming** and **runtime accent swap via DOM attribute + localStorage**: unchanged from before — `--primary` drives themed surfaces, `AccentColorProvider` sets `data-accent` on `<html>`.
 - **Hydration-safe browser-state restoration**: unchanged pattern (`hydrated` flag + `useEffect`, `eslint-disable react-hooks/set-state-in-effect`) in `SidebarProvider` and `AccentColorProvider`; `components/theme/use-has-mounted.ts` (`useSyncExternalStore`) still guards `ThemeToggle`.
 - **Mobile drawer closes on route change via render-time state adjustment**: unchanged, still in `hooks/use-sidebar.tsx`.
@@ -363,14 +380,16 @@ Three deliberate, narrow exceptions to the barrel-only rule exist, all driven by
 ## Shared Kernel / Common Building Blocks Used
 
 - `components/ui/*` — the app's own primitive layer.
-- `components/foundation/`, `components/select/`, `components/command/` (new this sync) — the internal Floating-UI-based select/overlay component library (see Key Design Patterns); `EntitySelect`/`SearchSelect` are consumed by `features/users` (edit dialog) and `features/notifications` (status filter, `user-select.tsx`); `AsyncSelect`/`MultiSelect`/`CommandPalette` have no consumer yet but are part of this shared layer.
+- `components/ui/combobox.tsx` (new this sync, plus its `popover.tsx`/`command.tsx` primitives) — the shadcn-style single-select building block, replacing `components/select/*`'s `EntitySelect`/`SearchSelect` (see Key Design Patterns); consumed by `features/users` (edit dialog, status/authProvider) and `features/notifications` (`user-select.tsx`).
+- `components/foundation/` — shrunk this sync to `use-listbox.ts`/`use-virtual-list.ts`/`floating-overlay.tsx` (serving only `components/command/*` and, for `use-virtual-list.ts`, `components/shared/data-table/data-table-virtual-body.tsx`) plus the new `portal-container.ts` (serving `components/ui/{dialog,popover}.tsx`, see Key Design Patterns). No longer backs any select/combobox component.
+- `components/command/*` — Command Palette (Cmd/Ctrl+K), untouched this sync; still no consumer wired into the app.
 - `components/shared/data-table/` — generic list-table building block (toolbar, pagination, loading/empty/error states, optional per-column sort, and — new this sync — optional virtualized/infinite modes via `data-table-virtual-body.tsx`); consumed by `features/users`, `features/roles`, and `features/notifications` (with different search/sort strategies — see Key Design Patterns), designed with no feature-specific knowledge baked in.
 - `components/shared/object-viewer/` — new this sync, additive; a recursive read-only object/table renderer built on `components/ui/table` + `components/ui/input`, no `features/*` dependency. Not yet consumed by any page.
 - `components/toast/` — toast notification wrapper around `sonner`; mounted once at the root layout, called from feature code via `notifySuccess`/`notifyError`.
 - `lib/shared/utils.ts` (`cn`), `lib/shared/dedupe-claims.ts`, `lib/shared/user-display.ts` — cross-cutting helpers consumed by 2+ features or by layout chrome. New this sync: `lib/shared/menu.ts` (`buildVisibleMenu`, consumed by `Sidebar`) and `lib/shared/authorization.ts` (`hasPermission`/`hasAnyPermission`/`hasAllPermissions`/`isSuperAdminUser`, safe for both server and client — consumed directly by `Sidebar` and, via `lib/server/authorization.ts`'s thin wrapper, by `UsersPage`/`RolesPage`/`NotificationsPage`).
 - `lib/server/*` — the server-only building blocks every feature's `api/` layer is built on: `http.ts`, `call-guard.ts`, `config.ts`, `session.ts`, `session-cookie.ts`, `authorization.ts` (now a thin wrapper over `lib/shared/authorization.ts`), plus the session-encryption/refresh chain — `token-cipher.ts`, `jwt.ts`, `build-session-claims.ts`, `parse-session.ts`, `refresh-session.ts` — used by `src/proxy.ts` and `features/auth/api/{login,logout}-action.ts`.
 - Permission-string constants remain **not** a shared kernel piece — per-feature `features/{users,roles,notifications}/constants/permissions.ts` (`USERS_PERMISSIONS`, `ROLES_PERMISSIONS`, `NOTIFICATIONS_PERMISSIONS`), each mirroring the backend's own permission-string constants for that module. Nav metadata follows the same per-feature-ownership move (`features/{dashboard,users,roles,notifications}/constants/nav-item.ts`), assembled (not owned) by the top-level `constants/nav-items.ts`.
-- `features/notifications/components/user-select.tsx` is a **feature-owned** reusable component (searchable user picker, now built on the shared `SearchSelect`), not promoted to `components/shared/` — consumed by two components within the same feature, not yet by a second feature, consistent with the "only promote once 2+ features need it" pattern.
+- `features/notifications/components/user-select.tsx` is a **feature-owned** reusable component (searchable user picker, now built on the shared `Combobox`), not promoted to `components/shared/` — consumed by two components within the same feature, not yet by a second feature, consistent with the "only promote once 2+ features need it" pattern.
 - `hooks/*`, `components/theme/*` — cross-cutting building blocks consumed by layout components.
 - No package or code is shared with another client app — `clients/` still contains only `admin`.
 
@@ -399,8 +418,9 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 | `components/ui/button.tsx` hand-modified beyond shadcn CLI output (`loading` prop, `cursor-pointer`) | Low | Unchanged — re-running the shadcn CLI would silently drop these customizations unless done carefully. |
 | `DataTable`'s `onExport` prop has no caller yet | Low | `components/shared/data-table/data-table-toolbar.tsx` already renders an Export button when `onExport` is passed, but no current feature (including `UsersDataTable`/`RolesDataTable`) passes one — dead capability until a consumer needs it. |
 | `components/shared/object-viewer/` has no consumer yet | Low (by design) | New this sync, purely additive — ported from an external export spec and adapted to this project's design tokens/`components/ui/*` primitives, but not imported by any page or dialog. Dead code until something wires it in. |
-| `AsyncSelect` and `components/command/*` (CommandPalette) have no consumer yet | Low (by design) | New this sync, purely additive — built as part of the internal select/overlay library but nothing in the app currently renders an `AsyncSelect` or wires up `CommandPaletteProvider`. Dead code until something adopts them. |
-| `MultiSelect`'s client-side `filter` has no minimum-character gate (unlike `SearchSelect`/`AsyncSelect`) | Low | `SearchSelect`/`AsyncSelect` both narrow their option list only once the query reaches `minChars` (default 3); `MultiSelect` filters from the first character typed. Deliberate scope decision, not an oversight — worth revisiting for consistency if `MultiSelect` gets a real consumer with a large option list. |
+| `components/command/*` (CommandPalette) has no consumer yet | Low (by design) | Unchanged — nothing in the app wires up `CommandPaletteProvider` yet. Dead code until something adopts it. (`AsyncSelect`/`MultiSelect`, the other two "no consumer yet" components from the previous sync, were deleted this sync rather than left dead — see Key Design Patterns.) |
+| `components/ui/combobox.tsx` does not virtualize its option list | Low (by design) | The Floating-UI select library it replaced auto-virtualized past 50 options (`options-list.tsx`, now deleted); `cmdk`'s `Command` has no built-in virtualization, and the current two consumers (a small static enum, a client-filtered user list) don't need it. Deliberate scope decision made when migrating to `Combobox` — revisit if a future consumer needs a large option list. |
+| `eslint.config.mjs`'s `react-hooks/refs` override glob still lists `src/components/select/**/*.tsx` | Trivial | `components/select/*` was deleted this sync; the glob entry is now a no-op (matches nothing) rather than a functional problem, but is stale and should be removed the next time `eslint.config.mjs` is touched. |
 | The SignalR handshake token intentionally narrows the "JWT never leaves the httpOnly cookie" invariant | Low (deliberate) | `getSignalRTokenAction()` hands the browser a real, short-lived access token so `use-notifications.ts` can authenticate the WebSocket handshake — the one place in the app where the access token is readable by browser JS. A deliberate trade-off (SignalR can't attach a cookie/header the way `fetch` can), not an oversight, but worth keeping in mind if the token's blast radius ever needs to shrink further. |
 | `notifications-page.tsx` calls `getAllUsers(session.accessToken)` unpaginated to populate the recipient filter/picker | Low (same pattern used elsewhere) | Same unbounded-list pattern already used by `RolesDataTable`'s client-side filtering — fine at current scale, worth revisiting if the user list grows large. `getAllUsers` is now called unconditionally (not gated by `canSend`), since both the filter dropdown and the send dialog need it; if the caller lacks `identity.users.view` and the call 403s, `users` gracefully degrades to `[]` rather than crashing the page. |
 
@@ -409,4 +429,4 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added internal Floating-UI-based select/overlay component library: layering, dependency direction, key patterns, new risks; removed Radix `Select`; DataTable `mode`/`onSortChange`) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-04 (resynced — removed the internal Floating-UI select library (`components/select/*`, most of `components/foundation/*`); added shadcn-style `Combobox` (`ui/{popover,command,combobox}.tsx`, new `cmdk` dependency) and `foundation/portal-container.ts`; documented the Dialog/Popover nested-scroll fix and the sidebar override-based expand/collapse fix; updated layering, dependency direction, key patterns, shared kernel, and known risks accordingly) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._

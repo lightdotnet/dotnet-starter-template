@@ -5,6 +5,7 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/shared/utils";
 import { Button } from "@/components/ui/button";
+import { PortalContainerProvider } from "@/components/foundation/portal-container";
 import { XIcon } from "lucide-react";
 
 function Dialog({
@@ -55,31 +56,43 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
 }) {
+  // Centers via a flex wrapper instead of a `transform` on the content node
+  // itself — a `transform` on an ancestor creates a new containing block for
+  // `position: fixed` descendants, which would break a nested Popover's
+  // (Combobox's) floating-position math once its portal renders inside this
+  // node (see portalNode below).
+  const [portalNode, setPortalNode] = React.useState<HTMLDivElement | null>(null);
+
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Content
-        data-slot="dialog-content"
-        className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button
-              variant="ghost"
-              className="absolute top-2 right-2"
-              size="icon-sm"
-            >
-              <XIcon />
-              <span className="sr-only">Close</span>
-            </Button>
-          </DialogPrimitive.Close>
-        )}
-      </DialogPrimitive.Content>
+      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+        <DialogPrimitive.Content
+          ref={setPortalNode}
+          data-slot="dialog-content"
+          className={cn(
+            "pointer-events-auto grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            className,
+          )}
+          {...props}
+        >
+          <PortalContainerProvider value={portalNode}>
+            {children}
+            {showCloseButton && (
+              <DialogPrimitive.Close data-slot="dialog-close" asChild>
+                <Button
+                  variant="ghost"
+                  className="absolute top-2 right-2"
+                  size="icon-sm"
+                >
+                  <XIcon />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </DialogPrimitive.Close>
+            )}
+          </PortalContainerProvider>
+        </DialogPrimitive.Content>
+      </div>
     </DialogPortal>
   );
 }

@@ -15,8 +15,9 @@ const EXPANDED_KEY = "admin.sidebar.expanded";
 interface SidebarContextValue {
   hidden: boolean;
   toggleSidebar: () => void;
-  isExpanded: (href: string) => boolean;
-  toggleExpanded: (href: string) => void;
+  /** Explicit user override for a nav group's expanded state, if any — `undefined` means no override yet. */
+  isExpanded: (href: string) => boolean | undefined;
+  toggleExpanded: (href: string, current: boolean) => void;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
 }
@@ -25,7 +26,10 @@ const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [hidden, setHidden] = useState(false);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  // Explicit per-href expand/collapse overrides — absence means "no override
+  // yet," letting a group's default (auto-expand when it contains the active
+  // route) show through until the user clicks it themselves.
+  const [expandedOverrides, setExpandedOverrides] = useState<Map<string, boolean>>(new Map());
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
@@ -51,7 +55,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     const storedExpanded = localStorage.getItem(EXPANDED_KEY);
     if (storedExpanded) {
       try {
-        setExpanded(new Set(JSON.parse(storedExpanded) as string[]));
+        setExpandedOverrides(new Map(JSON.parse(storedExpanded) as [string, boolean][]));
       } catch {
         // ignore malformed persisted state
       }
@@ -66,14 +70,16 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (hydrated)
-      localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expanded]));
-  }, [expanded, hydrated]);
+      localStorage.setItem(
+        EXPANDED_KEY,
+        JSON.stringify([...expandedOverrides.entries()]),
+      );
+  }, [expandedOverrides, hydrated]);
 
-  const toggleExpanded = (href: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(href)) next.delete(href);
-      else next.add(href);
+  const toggleExpanded = (href: string, current: boolean) =>
+    setExpandedOverrides((prev) => {
+      const next = new Map(prev);
+      next.set(href, !current);
       return next;
     });
 
@@ -82,7 +88,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       value={{
         hidden,
         toggleSidebar: () => setHidden((prev) => !prev),
-        isExpanded: (href) => expanded.has(href),
+        isExpanded: (href) => expandedOverrides.get(href),
         toggleExpanded,
         mobileOpen,
         setMobileOpen,

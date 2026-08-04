@@ -9,8 +9,8 @@ export interface UseVirtualListOptions {
   overscan?: number;
 }
 
-/** Thin, opinionated wrapper around @tanstack/react-virtual shared by option
- * lists, the DataTable's virtualized/infinite modes, and the Command Palette. */
+/** Thin, opinionated wrapper around @tanstack/react-virtual shared by the
+ * DataTable's virtualized/infinite modes and the Command Palette. */
 export function useVirtualList({ count, estimateSize = 36, overscan = 8 }: UseVirtualListOptions) {
   const scrollRef = useRef<HTMLDivElement>(null);
 

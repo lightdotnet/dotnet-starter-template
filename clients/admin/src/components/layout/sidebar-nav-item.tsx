@@ -26,7 +26,11 @@ export function SidebarNavItem({ item }: { item: NavItem }) {
   const active = isActivePath(pathname, item.href);
   const hasChildren = !!item.children?.length;
   const branchActive = containsActive(item, pathname);
-  const expanded = hasChildren && (isExpanded(item.href) || branchActive);
+  // No explicit user override yet -> default to auto-expanding the branch
+  // that contains the active route. Once the user toggles it, that choice
+  // wins even while a child route stays active (otherwise the group could
+  // never be collapsed while its own page is open).
+  const expanded = hasChildren && (isExpanded(item.href) ?? branchActive);
   const Icon = item.icon;
 
   const linkRef = useRef<HTMLAnchorElement>(null);
@@ -46,7 +50,7 @@ export function SidebarNavItem({ item }: { item: NavItem }) {
         <button
           ref={buttonRef}
           type="button"
-          onClick={() => toggleExpanded(item.href)}
+          onClick={() => toggleExpanded(item.href, expanded)}
           aria-expanded={expanded}
           className={cn(
             "flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-sidebar-foreground/80 transition-colors duration-fast ease-standard hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",

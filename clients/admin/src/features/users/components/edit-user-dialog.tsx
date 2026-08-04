@@ -13,9 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EntitySelect } from "@/components/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notifySuccess } from "@/components/toast";
@@ -252,10 +252,9 @@ export function EditUserDialog({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="status">Status</Label>
-                    <EntitySelect
+                    <Combobox
                       id="status"
                       name="status"
-                      className="w-full"
                       value={status}
                       onValueChange={setStatus}
                       options={STATUS_SELECT_OPTIONS}
@@ -263,10 +262,9 @@ export function EditUserDialog({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="authProvider">Auth provider</Label>
-                    <EntitySelect
+                    <Combobox
                       id="authProvider"
                       name="authProvider"
-                      className="w-full"
                       value={authProvider}
                       onValueChange={setAuthProvider}
                       options={AUTH_PROVIDER_SELECT_OPTIONS}

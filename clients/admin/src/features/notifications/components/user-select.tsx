@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { SearchSelect } from "@/components/select";
+import { Combobox } from "@/components/ui/combobox";
 import { getDisplayName } from "@/lib/shared/user-display";
 import type { UserDto } from "@/types/user";
 
@@ -39,7 +39,7 @@ export function UserSelect({
   );
 
   return (
-    <SearchSelect
+    <Combobox
       id={id}
       name={name}
       value={value}
