@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { notifyError, notifySuccess } from "@/components/toast";
+import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { deleteRoleAction } from "@/features/roles/api/delete-role-action";
 import type { RoleDto } from "@/features/roles/types/role";
 
@@ -27,23 +26,19 @@ export function DeleteRoleDialog({
   role,
   onDeleted,
 }: DeleteRoleDialogProps) {
-  const [deleting, startTransition] = useTransition();
+  const [deleting, run] = useGuardedAction();
 
   function handleConfirm() {
     if (!role) return;
 
-    startTransition(async () => {
-      const result = await deleteRoleAction(role.id);
-
-      if (!result.success) {
-        notifyError(result.error || "Failed to delete role.");
-        return;
-      }
-
-      notifySuccess(`Role "${role.name}" deleted.`);
-      onOpenChange(false);
-      onDeleted();
-    });
+    run(
+      () => deleteRoleAction(role.id),
+      `Role "${role.name}" deleted.`,
+      () => {
+        onOpenChange(false);
+        onDeleted();
+      },
+    );
   }
 
   return (

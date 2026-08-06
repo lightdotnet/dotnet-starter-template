@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { notifySuccess } from "@/components/toast";
+import { useActionSuccessToast } from "@/hooks/use-action-success-toast";
 import {
   sendNotificationAction,
   type SendNotificationFormState,
@@ -66,15 +66,11 @@ export function SendNotificationDialog({
     onOpenChange(nextOpen);
   }
 
-  useEffect(() => {
-    if (!state.success) return;
+  useActionSuccessToast(state, "Notification sent.", () => {
     onSent();
-    notifySuccess("Notification sent.");
     onOpenChange(false);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting the form after a completed send action, not deriving state from a prop
     setValues(initialValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to a fresh success result
-  }, [state.success]);
+  });
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

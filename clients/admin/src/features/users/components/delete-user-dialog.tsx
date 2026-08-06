@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { notifyError, notifySuccess } from "@/components/toast";
+import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { deleteUserAction } from "@/features/users/api/delete-user-action";
 import type { UserDto } from "@/types/user";
 
@@ -22,23 +21,19 @@ interface DeleteUserDialogProps {
 }
 
 export function DeleteUserDialog({ open, onOpenChange, user, onDeleted }: DeleteUserDialogProps) {
-  const [deleting, startTransition] = useTransition();
+  const [deleting, run] = useGuardedAction();
 
   function handleConfirm() {
     if (!user) return;
 
-    startTransition(async () => {
-      const result = await deleteUserAction(user.id);
-
-      if (!result.success) {
-        notifyError(result.error || "Failed to delete user.");
-        return;
-      }
-
-      notifySuccess(`User "${user.userName}" deleted.`);
-      onOpenChange(false);
-      onDeleted();
-    });
+    run(
+      () => deleteUserAction(user.id),
+      `User "${user.userName}" deleted.`,
+      () => {
+        onOpenChange(false);
+        onDeleted();
+      },
+    );
   }
 
   return (

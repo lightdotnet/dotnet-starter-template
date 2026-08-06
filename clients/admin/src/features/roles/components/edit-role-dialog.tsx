@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { notifySuccess } from "@/components/toast";
+import { useActionSuccessToast } from "@/hooks/use-action-success-toast";
 import { getRoleDetailAction } from "@/features/roles/api/get-role-detail-action";
 import { getPermissionsAction } from "@/features/roles/api/get-permissions-action";
 import {
@@ -107,13 +107,10 @@ export function EditRoleDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch once per mount; the dialog remounts fresh (via `key`) on every open
   }, []);
 
-  useEffect(() => {
-    if (!state.success) return;
+  useActionSuccessToast(state, "Role updated.", () => {
     onUpdated();
-    notifySuccess("Role updated.");
     onOpenChange(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to a fresh success result
-  }, [state.success]);
+  });
 
   function togglePermission(name: string, checked: boolean) {
     setSelectedPermissions((previous) =>

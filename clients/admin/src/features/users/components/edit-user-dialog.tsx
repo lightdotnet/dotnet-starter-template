@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { notifySuccess } from "@/components/toast";
+import { useActionSuccessToast } from "@/hooks/use-action-success-toast";
 import {
   forcePasswordAction,
   type ForcePasswordFormState,
@@ -32,7 +32,7 @@ import { getAllRolesAction } from "@/features/roles/api/get-all-roles-action";
 import type { RoleDto } from "@/features/roles/types/role";
 import type { ClaimDto, UserDto } from "@/types/user";
 
-const STATUS_OPTIONS = ["active", "locked"];
+const STATUS_OPTIONS = ["Active", "Locked"];
 const AUTH_PROVIDER_OPTIONS = ["Local", "AD"];
 const STATUS_SELECT_OPTIONS = STATUS_OPTIONS.map((option) => ({ value: option, label: option }));
 const AUTH_PROVIDER_SELECT_OPTIONS = AUTH_PROVIDER_OPTIONS.map((option) => ({
@@ -132,20 +132,14 @@ export function EditUserDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch once per mount; the dialog remounts fresh (via `key`) on every open
   }, []);
 
-  useEffect(() => {
-    if (!state.success) return;
+  useActionSuccessToast(state, "User updated.", () => {
     onUpdated();
-    notifySuccess("User updated.");
     onOpenChange(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to a fresh success result
-  }, [state.success]);
+  });
 
-  useEffect(() => {
-    if (!passwordState.success) return;
-    notifySuccess("Password reset.");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting the field after a completed reset action, not deriving state from a prop
+  useActionSuccessToast(passwordState, "Password reset.", () => {
     setNewPassword("");
-  }, [passwordState.success]);
+  });
 
   function toggleRole(roleName: string, checked: boolean) {
     setSelectedRoles((previous) =>
