@@ -80,11 +80,16 @@ src/
                              column-resize-handle.tsx, object-viewer-row.tsx, object-viewer.tsx, index.ts;
                              built on `components/ui/table` + `components/ui/input`, no `features/*` dependency
     toast/                  toast-theme.ts, notify.ts, toaster.tsx, index.ts (barrel); wraps the `sonner` dependency
-  hooks/                    use-sidebar.tsx, use-scrolled.ts
+  hooks/                    use-sidebar.tsx, use-scrolled.ts, use-guarded-action.ts, use-action-success-toast.ts
+                             (last 2 new — centralize the toast/pending patterns previously duplicated per dialog,
+                             see Key Design Patterns)
   lib/
     server/                 config.ts, http.ts, call-guard.ts, session-cookie.ts, session.ts, authorization.ts,
-                             token-cipher.ts, jwt.ts, build-session-claims.ts, refresh-session.ts, parse-session.ts
-                             (the last 5 are new — session encryption, JWT claim decoding, and the token-refresh flow)
+                             token-cipher.ts, jwt.ts, build-session-claims.ts, refresh-session.ts, parse-session.ts,
+                             backend-api.ts, api-clients.ts, http-handlers/bearer-token-handler.ts
+                             (session encryption/JWT/refresh chain from a prior sync; the last 3 are new this
+                             sync — decouple auth-token injection from http.ts into a handler pipeline, see
+                             Key Design Patterns)
     shared/                 utils.ts, dedupe-claims.ts, user-display.ts, menu.ts, authorization.ts
                              (menu.ts and authorization.ts are new — see Key Design Patterns)
   constants/                nav-items.ts (permissions.ts is still gone — relocated per-feature; nav item definitions
@@ -161,8 +166,12 @@ features/auth/api/login-action.ts   -> "use server"; features/auth/api/login, fe
 features/auth/api/logout-action.ts  -> "use server"; lib/server/session-cookie (SESSION_COOKIE_NAME), next/navigation
                                         (redirect) — new; deletes the cookie, redirects to `/login?redirect=<path>` (guarded)
 features/auth/api/login.ts          -> lib/server/http, lib/server/call-guard, types/{api,token}
+                                        (one of 3 exceptions still calling lib/server/http directly — runs before
+                                        a session cookie exists, so login-action.ts's own explicit token isn't
+                                        applicable here; see Key Design Patterns for the handler-pipeline change)
 features/auth/api/refresh-token.ts  -> lib/server/http, lib/server/call-guard, types/{api,token}
-                                        (now has a real caller: lib/server/refresh-session.ts)
+                                        (now has a real caller: lib/server/refresh-session.ts; another of the
+                                        3 lib/server/http exceptions — runs before a session cookie exists)
 
 features/user-profile/index.ts      -> ./components/user-profile-page, ./api/{resolve-session,get-current-user,list-sessions,revoke-session}, ./types/user-session
 features/user-profile/components/user-profile-page.tsx -> components/ui/{card,badge,separator,avatar,alert}, qrcode,
@@ -171,7 +180,12 @@ features/user-profile/api/resolve-session.ts -> lib/server/session (getSession),
                                         (now a thin passthrough to getSession() — no longer calls getCurrentUser itself;
                                         proxy.ts keeps the cookie's profile/claims fresh instead, see Key Design Patterns)
 features/user-profile/api/get-current-user.ts -> lib/server/http, lib/server/call-guard, types/{api,user}
-features/user-profile/api/{list-sessions,revoke-session}.ts -> lib/server/http, lib/server/call-guard, ./types/user-session (list)
+                                        (the 3rd lib/server/http exception — takes an explicit accessToken param
+                                        and passes it via lib/server/http-handlers/bearer-token-handler.ts's
+                                        explicitBearerTokenHandler; called from login-action.ts and proxy.ts,
+                                        both before/without an ambient session)
+features/user-profile/api/{list-sessions,revoke-session}.ts -> lib/server/backend-api, lib/server/call-guard, ./types/user-session (list)
+                                        (changed this sync — now via backend-api.ts like ordinary endpoint files)
 
 features/dashboard/index.ts         -> ./components/dashboard-page, ./constants/nav-item (DASHBOARD_NAV_ITEM)
 features/dashboard/components/dashboard-page.tsx -> components/ui/card, ./stat-card, ./users-table, features/dashboard/api/sample-data
@@ -195,6 +209,7 @@ features/users/components/users-data-table.tsx -> components/shared/data-table (
                                         types/user — no longer takes a `roles`/`RoleDto` prop or imports
                                         features/roles/types/role this sync (edit-user-dialog.tsx now fetches roles itself)
 features/users/components/create-user-dialog.tsx -> components/ui/{alert,button,dialog,input,label}, components/toast (notifySuccess),
+                                        hooks/use-action-success-toast (new this sync, replacing an inline useEffect),
                                         features/users/api/create-user-action
 features/users/components/edit-user-dialog.tsx -> components/ui/{alert,button,checkbox,combobox,dialog,input,label,
                                         spinner,tabs} — status/authProvider now use the new components/ui/combobox
@@ -207,13 +222,18 @@ features/users/components/edit-user-dialog.tsx -> components/ui/{alert,button,ch
                                         features/roles/types/role (RoleDto), types/user — now holds its own
                                         `roles: RoleDto[]` state and fetches
                                         `Promise.all([getUserDetailAction(user.id), getAllRolesAction()])` on open,
-                                        since users-data-table.tsx no longer passes a `roles` prop down
-features/users/components/delete-user-dialog.tsx -> components/ui/{button,dialog}, components/toast, features/users/api/delete-user-action, types/user
+                                        since users-data-table.tsx no longer passes a `roles` prop down; also uses
+                                        hooks/use-action-success-toast (new this sync, 2 call sites — the update form
+                                        and the password-reset form)
+features/users/components/delete-user-dialog.tsx -> components/ui/{button,dialog}, components/toast, hooks/use-guarded-action
+                                        (new this sync, replacing hand-rolled useTransition), features/users/api/delete-user-action, types/user
 features/users/api/create-user-action.ts -> "use server"; features/user-profile (resolveSession), features/users/api/create-user, types/user
 features/users/api/{update-user-action,force-password-action,delete-user-action,get-user-detail-action}.ts
                                      -> "use server"; features/user-profile (resolveSession),
                                         features/users/api/{update-user,force-password,delete-user,get-user-by-id} respectively, types/user
-features/users/api/*.ts (7 remaining files) -> lib/server/http, lib/server/call-guard, types/{api,user}
+features/users/api/*.ts (7 remaining files) -> lib/server/backend-api, lib/server/call-guard, types/{api,user}
+                                        (changed this sync — was lib/server/http; these ordinary endpoint files
+                                        no longer take an accessToken parameter, see Key Design Patterns)
 
 features/roles/index.ts             -> ./components/roles-page, ./api/{get-all-roles,get-role-by-id,get-permissions,
                                         create-role,update-role,delete-role}, ./constants/permissions (ROLES_PERMISSIONS),
@@ -237,26 +257,31 @@ features/roles/components/roles-data-table.tsx -> components/shared/data-table (
                                         features/roles/types/permission-definition this sync (edit-role-dialog.tsx
                                         now fetches permissions itself)
 features/roles/components/create-role-dialog.tsx -> components/ui/{alert,button,dialog,input,label}, components/toast (notifySuccess),
+                                        hooks/use-action-success-toast (new this sync, replacing an inline useEffect),
                                         features/roles/api/create-role-action
 features/roles/components/edit-role-dialog.tsx -> components/ui/{alert,button,checkbox,dialog,input,label,spinner},
-                                        components/toast (notifySuccess), features/roles/api/get-role-detail-action,
+                                        components/toast (notifySuccess), hooks/use-action-success-toast
+                                        (new this sync, replacing an inline useEffect), features/roles/api/get-role-detail-action,
                                         features/roles/api/get-permissions-action (new this sync — intra-feature
                                         import, both files live under features/roles/),
                                         features/roles/api/update-role-action, features/roles/types/{role,permission-definition}
                                         — now holds its own `permissions: PermissionDefinition[]` state and fetches
                                         `Promise.all([getRoleDetailAction(role.id), getPermissionsAction()])` on open,
                                         since roles-data-table.tsx no longer passes a `permissions` prop down
-features/roles/components/delete-role-dialog.tsx -> components/ui/{button,dialog}, components/toast, features/roles/api/delete-role-action, features/roles/types/role
+features/roles/components/delete-role-dialog.tsx -> components/ui/{button,dialog}, components/toast, hooks/use-guarded-action
+                                        (new this sync, replacing hand-rolled useTransition), features/roles/api/delete-role-action, features/roles/types/role
 features/roles/api/{create-role-action,update-role-action,delete-role-action,get-role-detail-action}.ts
                                      -> "use server"; features/user-profile (resolveSession),
                                         features/roles/api/{create-role,update-role,delete-role,get-role-by-id} respectively
                                         (update-role-action additionally re-reads get-role-by-id first, to preserve any
                                         non-"permission"-typed claims before writing back the submitted permission set)
-features/roles/api/get-permissions.ts -> lib/server/http, lib/server/call-guard, features/roles/types/permission-definition
-features/roles/api/get-all-roles.ts -> lib/server/http, lib/server/call-guard, features/roles/types/role
-                                        (fixed this sync: was guardRawCall assuming a bare array; the endpoint actually
-                                        wraps its response in the same envelope every other endpoint uses)
-features/roles/api/{get-role-by-id,create-role,update-role,delete-role}.ts -> lib/server/http, lib/server/call-guard, features/roles/types/role
+features/roles/api/get-permissions.ts -> lib/server/backend-api, lib/server/call-guard, features/roles/types/permission-definition
+features/roles/api/get-all-roles.ts -> lib/server/backend-api, lib/server/call-guard, features/roles/types/role
+                                        (fixed in a prior sync: was guardRawCall assuming a bare array; the endpoint
+                                        actually wraps its response in the same envelope every other endpoint uses)
+features/roles/api/{get-role-by-id,create-role,update-role,delete-role}.ts -> lib/server/backend-api, lib/server/call-guard, features/roles/types/role
+                                        (all 4, plus get-permissions/get-all-roles above — changed this sync from
+                                        lib/server/http to lib/server/backend-api)
 
 features/notifications/index.ts     -> ./components/{notification-bell,notifications-page}, ./hooks/use-notifications,
                                         ./constants/{permissions,nav-item} (NOTIFICATIONS_PERMISSIONS, NOTIFICATIONS_NAV_ITEM),
@@ -290,7 +315,8 @@ features/notifications/components/notifications-data-table.tsx -> components/sha
                                         directly (matching the existing `fromName ?? fromUserId` fallback style
                                         already used for "From")
 features/notifications/components/send-notification-dialog.tsx -> components/ui/{alert,button,dialog,input,label,textarea},
-                                        components/toast (notifySuccess), features/notifications/api/send-notification-action,
+                                        components/toast (notifySuccess), hooks/use-action-success-toast
+                                        (new this sync, replacing an inline useEffect), features/notifications/api/send-notification-action,
                                         features/notifications/components/user-select, lib/shared/user-display
                                         (new this sync — getDisplayName) — no longer takes a `users` prop. While
                                         updating UserSelect's `onValueChange` to the new `(user: UserDto) => void`
@@ -322,18 +348,23 @@ features/notifications/components/user-select.tsx -> components/ui/{button,popov
                                         Feature-owned, consumed by both notifications-data-table.tsx and
                                         send-notification-dialog.tsx within this same feature; not promoted to
                                         components/shared/, consistent with "only promote once 2+ features need it"
-features/notifications/api/get-notifications.ts -> lib/server/http, lib/server/call-guard, types/api, features/notifications/types/notification
-features/notifications/api/get-my-notifications.ts -> lib/server/http, lib/server/call-guard, types/api, features/notifications/types/notification
+features/notifications/api/get-notifications.ts -> lib/server/backend-api, lib/server/call-guard, types/api, features/notifications/types/notification
+                                        (changed this sync — was lib/server/http)
+features/notifications/api/get-my-notifications.ts -> lib/server/backend-api, lib/server/call-guard, types/api, features/notifications/types/notification
+                                        (changed this sync — was lib/server/http)
 features/notifications/api/get-my-notifications-action.ts -> "use server"; features/user-profile (resolveSession),
                                         features/notifications/api/get-my-notifications
-features/notifications/api/get-unread-count.ts -> lib/server/http, lib/server/call-guard, types/api
+features/notifications/api/get-unread-count.ts -> lib/server/backend-api, lib/server/call-guard, types/api
+                                        (changed this sync — was lib/server/http)
 features/notifications/api/get-unread-count-action.ts -> "use server"; features/user-profile (resolveSession),
                                         features/notifications/api/get-unread-count — swallows any failure to `0`
                                         rather than surfacing an error (fire-and-forget-safe shape)
-features/notifications/api/mark-notification-read.ts -> lib/server/http, lib/server/call-guard, types/api, features/notifications/types/notification
+features/notifications/api/mark-notification-read.ts -> lib/server/backend-api, lib/server/call-guard, types/api, features/notifications/types/notification
+                                        (changed this sync — was lib/server/http)
 features/notifications/api/mark-notification-read-action.ts -> "use server"; features/user-profile (resolveSession),
                                         features/notifications/api/mark-notification-read — returns a boolean rather than {error?, success?}
-features/notifications/api/send-notification.ts -> lib/server/http, lib/server/call-guard, types/api
+features/notifications/api/send-notification.ts -> lib/server/backend-api, lib/server/call-guard, types/api
+                                        (changed this sync — was lib/server/http)
 features/notifications/api/send-notification-action.ts -> "use server"; features/user-profile (resolveSession),
                                         features/notifications/api/send-notification, lib/shared/user-display (getDisplayName)
 features/notifications/api/get-signalr-token-action.ts -> "use server"; features/user-profile (resolveSession) —
@@ -396,7 +427,26 @@ lib/server/token-cipher.ts          -> node:crypto, lib/server/config (getTokenE
 lib/server/jwt.ts                   -> types/user (ClaimDto) — decodes a JWT payload without verifying its signature;
                                         no other lib/server/* dependency (new)
 lib/server/build-session-claims.ts  -> lib/server/jwt (extractAllClaims), lib/shared/dedupe-claims, types/user (new)
-lib/server/http.ts                  -> lib/server/config (getApiBaseUrl)
+lib/server/http.ts                  -> lib/server/config (getApiBaseUrl), lib/server/api-clients (ApiClientName,
+                                        default ApiClients.Backend) — changed this sync: no longer accepts an
+                                        `accessToken` option; `RequestOptions` now has `handlers?: HttpRequestHandler[]`
+                                        (run in order against a shared `headers` object before fetch()) and
+                                        `client?: ApiClientName`
+lib/server/backend-api.ts (new)     -> lib/server/http (requestJson/requestVoid, re-exported), lib/server/
+                                        http-handlers/bearer-token-handler (bearerTokenHandler), lib/server/
+                                        api-clients (ApiClients.Backend) — the entry point nearly every
+                                        features/*/api/*.ts file now uses instead of lib/server/http directly;
+                                        auto-injects `handlers: [bearerTokenHandler, ...]` and `client: ApiClients.Backend`
+lib/server/api-clients.ts (new)     -> no internal dependency — `ApiClients = { Backend: "Backend" }`, `ApiClientName`;
+                                        a named-client registry with room for more entries later (only one exists today)
+lib/server/http-handlers/bearer-token-handler.ts (new) -> lib/server/session (getSession), lib/server/http (type
+                                        HttpRequestHandler) — exports `bearerTokenHandler` (reads the ambient session,
+                                        sets Authorization if present) and `explicitBearerTokenHandler(accessToken)`
+                                        (a factory for the 3 call sites that run before a session cookie exists:
+                                        login.ts, refresh-token.ts, get-current-user.ts)
+lib/server/config.ts                -> lib/server/api-clients (ApiClientName) — changed this sync: `getApiBaseUrl()`
+                                        now takes `client: ApiClientName = ApiClients.Backend`, resolving the env var
+                                        per-client via an internal map (`Backend` -> `API_BASE_URL`, the only entry today)
 lib/server/authorization.ts         -> lib/shared/authorization (delegates to it), types/session (SessionData) —
                                         now a thin wrapper preserving the original `(session, userName, permission)`
                                         call-site signature for existing server callers (was previously self-contained)
@@ -463,6 +513,8 @@ Five deliberate, narrow exceptions to the barrel-only rule exist, all driven by 
 - **Backend error messages surfaced through the shared `send()` wrapper**: `lib/server/http.ts`'s `extractErrorMessage()` centralizes turning a non-2xx response body into a human-readable string (envelope message → validation-errors map → `ProblemDetails.title` → generic fallback), so every `features/*/api/*.ts` call gets real error text without each call site parsing the body itself.
 - **Real-time push via SignalR, browser-authenticated with a short-lived, action-issued access token** (new): `use-notifications.ts` opens a `HubConnection` directly from the browser to `/api/signalr-hub` (same-origin, proxied to the backend's `/signalr-hub` via `next.config.ts`'s new `rewrites()`), authenticated via `accessTokenFactory` calling `getSignalRTokenAction()` — a Server Action that hands the browser a short-lived access token specifically for this handshake, since the real session token stays in an httpOnly cookie the browser can't read otherwise. On any `SystemMessage` push it calls `refresh()` (refetches the list + unread count) rather than merging the pushed payload into state, because the payload is the raw backend `SystemMessage`, not a full `NotificationDto`.
 - **Every backend API response is envelope-wrapped — never assume a bare value** (new, learned from a real bug): `get-all-users.ts` (pre-existing, previously uncalled) assumed `GET user` returned a bare `UserDto[]` (`guardRawCall`) and broke (`users.map is not a function`) the first time something actually called it — the endpoint, like every other endpoint in this backend, wraps its response in the `Result`/`ApiResponse` envelope. Several of the new `features/notifications/api/*.ts` files had the same wrong assumption and were fixed the same way. Treat `guardRawCall` as almost never correct for this backend; verify against a sibling endpoint's actual response shape rather than assuming.
+- **Auth-token injection moved out of `http.ts` into a request-handler pipeline, decoupling the API layer from sessions** (new this sync): `lib/server/http.ts`'s `RequestOptions.accessToken?: string` is gone, replaced by `handlers?: HttpRequestHandler[]` (`(context: HttpRequestContext) => Promise<void> | void`, `context.headers` a mutable `Record<string, string>`) run in order by `send()` before `fetch()` — `http.ts` no longer imports or knows about sessions at all. A new `lib/server/backend-api.ts` re-exports `requestJson`/`requestVoid` pre-wired with `handlers: [bearerTokenHandler, ...]` and `client: ApiClients.Backend` (a new `lib/server/api-clients.ts` named-client registry, room for more entries later); nearly every `features/*/api/*.ts` file now imports from `backend-api.ts` instead of `http.ts`, and those functions no longer take an `accessToken` parameter. `lib/server/http-handlers/bearer-token-handler.ts` exports `bearerTokenHandler` (reads the ambient session via `getSession()`) and `explicitBearerTokenHandler(accessToken)`, a factory used by the 3 call sites that run before a session cookie exists — `login.ts` (via `login-action.ts`), `refresh-token.ts`, and `get-current-user.ts` (called from both `login-action.ts` and `proxy.ts`'s Edge middleware, which has no `next/headers` session access) — which still call `http.ts` directly. Every mutation `*-action.ts` Server Action stopped extracting/passing `session.accessToken` to its api function but kept `resolveSession()` + the "session expired" early-exit for the friendly UX message.
+- **Client-side toast/pending feedback centralized into two small hooks, replacing per-dialog duplication** (new this sync): `hooks/use-guarded-action.ts`'s `useGuardedAction()` (`[pending, run]`, built on `useTransition`) wraps the "run an imperative action, toast the result, track pending" pattern for non-form calls — applied to `delete-user-dialog.tsx`/`delete-role-dialog.tsx` (their confirm-dialog UI itself was left untouched, a deliberate scope decision). `hooks/use-action-success-toast.ts`'s `useActionSuccessToast(state, successMessage, onSuccess?)` is a `useEffect` wrapper that toasts and runs `onSuccess` once a `useActionState`-bound result's `.success` turns true — applied at 6 call sites across 5 form dialogs (`create-user-dialog.tsx`, `create-role-dialog.tsx`, `send-notification-dialog.tsx`, `edit-role-dialog.tsx`, `edit-user-dialog.tsx` — 2 call sites, the update form and the password-reset form), replacing a `useEffect` + `notifySuccess(...)` pattern previously duplicated in each.
 
 ## Shared Kernel / Common Building Blocks Used
 
@@ -516,4 +568,4 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-04 (resynced — documented the removal of the `users -> roles` and `notifications -> users` page-level barrel edges (edit dialogs now self-fetch their own role/permission picklists on open via new `get-all-roles-action.ts`/`get-permissions-action.ts`); documented `user-select.tsx`'s full rewrite into a bespoke on-demand search component backed by a new `search-users-action.ts` (debounced, min-length search, no more `users` preload); barrel-bypass exceptions three -> five; bumped `users`/`roles` api file counts (14/12); resolved the `getAllUsers` unpaginated-fetch risk row) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-06 (resynced — documented the auth-token-injection decoupling into a `handlers`/`HttpRequestHandler` pipeline (new `lib/server/backend-api.ts`, `lib/server/api-clients.ts`, `lib/server/http-handlers/bearer-token-handler.ts`); updated every `features/*/api/*.ts -> lib/server/http` dependency line to `lib/server/backend-api` except the 3 pre-session-cookie exceptions (`login.ts`, `refresh-token.ts`, `get-current-user.ts`); added the new `hooks/use-guarded-action.ts`/`use-action-success-toast.ts` and their consumers to Layering/Dependency Direction/Key Design Patterns) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
