@@ -124,6 +124,7 @@ export function NotificationsDataTable({
           />
         </div>
       ),
+      className: "w-[80%]",
     },
     {
       id: "status",
