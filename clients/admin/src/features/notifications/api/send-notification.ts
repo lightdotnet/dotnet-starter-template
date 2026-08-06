@@ -1,4 +1,4 @@
-import { requestJson } from "@/lib/server/http";
+import { requestJson } from "@/lib/server/backend-api";
 import { guardResponseCall } from "@/lib/server/call-guard";
 import type { ApiResponse } from "@/types/api";
 
@@ -11,11 +11,10 @@ export interface SendNotificationRequest {
   url?: string;
 }
 
-export function sendNotification(accessToken: string, request: SendNotificationRequest) {
+export function sendNotification(request: SendNotificationRequest) {
   return guardResponseCall(() =>
     requestJson<ApiResponse>("notification", {
       method: "POST",
-      accessToken,
       query: {
         fromUserId: request.fromUserId,
         fromName: request.fromName ?? undefined,

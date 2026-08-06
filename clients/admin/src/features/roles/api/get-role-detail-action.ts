@@ -20,7 +20,7 @@ export async function getRoleDetailAction(
     };
   }
 
-  const result = await getRoleById(session.accessToken, id);
+  const result = await getRoleById(id);
 
   if (!result.isSuccess || !result.data) {
     return { data: null, error: result.message || "Failed to load role." };

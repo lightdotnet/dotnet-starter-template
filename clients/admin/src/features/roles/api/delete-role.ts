@@ -1,9 +1,9 @@
-import { requestJson } from "@/lib/server/http";
+import { requestJson } from "@/lib/server/backend-api";
 import { guardResponseCall } from "@/lib/server/call-guard";
 import type { ApiResponse } from "@/types/api";
 
-export function deleteRole(accessToken: string, id: string) {
+export function deleteRole(id: string) {
   return guardResponseCall(() =>
-    requestJson<ApiResponse>(`role/${id}`, { method: "DELETE", accessToken }),
+    requestJson<ApiResponse>(`role/${id}`, { method: "DELETE" }),
   );
 }

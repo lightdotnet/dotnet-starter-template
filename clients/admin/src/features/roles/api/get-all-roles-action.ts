@@ -18,7 +18,7 @@ export async function getAllRolesAction(): Promise<GetAllRolesState> {
     };
   }
 
-  const result = await getAllRoles(session.accessToken);
+  const result = await getAllRoles();
 
   if (!result.isSuccess || !result.data) {
     return { data: null, error: result.message || "Failed to load roles." };

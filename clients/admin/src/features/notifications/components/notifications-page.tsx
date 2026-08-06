@@ -56,7 +56,7 @@ export async function NotificationsPage({ searchParams }: NotificationsPageProps
   const pageNumber = Math.max(Number(page) || 1, 1);
   const statusFilter = parseStatusFilter(status);
 
-  const result = await getNotifications(session.accessToken, {
+  const result = await getNotifications({
     pageNumber,
     pageSize: PAGE_SIZE,
     toUserId,

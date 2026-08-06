@@ -18,7 +18,7 @@ export async function getPermissionsAction(): Promise<GetPermissionsState> {
     };
   }
 
-  const result = await getPermissions(session.accessToken);
+  const result = await getPermissions();
 
   if (!result.isSuccess || !result.data) {
     return {

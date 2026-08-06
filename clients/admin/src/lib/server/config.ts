@@ -1,3 +1,5 @@
+import { ApiClients, type ApiClientName } from "@/lib/server/api-clients";
+
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -6,8 +8,12 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export function getApiBaseUrl(): string {
-  return requireEnv("API_BASE_URL");
+const API_BASE_URL_ENV_VARS: Record<ApiClientName, string> = {
+  [ApiClients.Backend]: "API_BASE_URL",
+};
+
+export function getApiBaseUrl(client: ApiClientName = ApiClients.Backend): string {
+  return requireEnv(API_BASE_URL_ENV_VARS[client]);
 }
 
 export function getTokenEncryptionKey(): string {

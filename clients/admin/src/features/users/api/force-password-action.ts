@@ -24,7 +24,7 @@ export async function forcePasswordAction(
     return { error: "A new password is required." };
   }
 
-  const result = await forcePassword(session.accessToken, id, newPassword);
+  const result = await forcePassword(id, newPassword);
 
   if (!result.isSuccess) {
     return { error: result.message || "Failed to reset password." };

@@ -34,7 +34,7 @@ export async function sendNotificationAction(
     fromName = getDisplayName(session.profile);
   }
 
-  const result = await sendNotification(session.accessToken, {
+  const result = await sendNotification({
     fromUserId,
     fromName,
     toUserId,

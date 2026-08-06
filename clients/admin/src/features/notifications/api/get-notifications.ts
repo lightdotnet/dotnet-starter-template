@@ -1,4 +1,4 @@
-import { requestJson } from "@/lib/server/http";
+import { requestJson } from "@/lib/server/backend-api";
 import { guardCall } from "@/lib/server/call-guard";
 import type { PagedResult } from "@/types/api";
 import type {
@@ -6,14 +6,10 @@ import type {
   NotificationLookupParams,
 } from "@/features/notifications/types/notification";
 
-export function getNotifications(
-  accessToken: string,
-  params: NotificationLookupParams = {},
-) {
+export function getNotifications(params: NotificationLookupParams = {}) {
   return guardCall(() =>
     requestJson<PagedResult<NotificationDto>>("notification", {
       method: "GET",
-      accessToken,
       query: {
         toUserId: params.toUserId,
         status: params.status !== undefined ? String(params.status) : undefined,

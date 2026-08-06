@@ -53,7 +53,7 @@ export async function UsersPage({ searchParams }: UsersPageProps) {
   const { q, page } = await searchParams;
   const pageNumber = Math.max(Number(page) || 1, 1);
 
-  const result = await searchUsers(session.accessToken, {
+  const result = await searchUsers({
     searchValue: q,
     pageNumber,
     pageSize: PAGE_SIZE,

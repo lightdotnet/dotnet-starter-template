@@ -29,7 +29,7 @@ export async function createRoleAction(
     description: String(formData.get("description") ?? "") || undefined,
   };
 
-  const result = await createRole(session.accessToken, request);
+  const result = await createRole(request);
 
   if (!result.isSuccess) {
     return { error: result.message || "Failed to create role." };

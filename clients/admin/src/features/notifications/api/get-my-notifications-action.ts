@@ -16,7 +16,7 @@ export async function getMyNotificationsAction(): Promise<GetMyNotificationsStat
     return { data: null, error: "Your session has expired. Please sign in again." };
   }
 
-  const result = await getMyNotifications(session.accessToken);
+  const result = await getMyNotifications();
 
   if (!result.isSuccess || !result.data) {
     return { data: null, error: result.message || "Failed to load notifications." };

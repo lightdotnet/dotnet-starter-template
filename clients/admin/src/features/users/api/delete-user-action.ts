@@ -14,7 +14,7 @@ export async function deleteUserAction(id: string): Promise<DeleteUserActionStat
     return { error: "Your session has expired. Please sign in again." };
   }
 
-  const result = await deleteUser(session.accessToken, id);
+  const result = await deleteUser(id);
 
   if (!result.isSuccess) {
     return { error: result.message || "Failed to delete user." };

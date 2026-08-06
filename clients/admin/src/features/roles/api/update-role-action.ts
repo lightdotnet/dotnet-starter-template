@@ -28,7 +28,7 @@ export async function updateRoleAction(
     return { error: "Name is required." };
   }
 
-  const current = await getRoleById(session.accessToken, id);
+  const current = await getRoleById(id);
   if (!current.isSuccess || !current.data) {
     return { error: current.message || "Failed to load the current role." };
   }
@@ -47,7 +47,7 @@ export async function updateRoleAction(
     claims: [...nonPermissionClaims, ...permissionClaims],
   };
 
-  const result = await updateRole(session.accessToken, role);
+  const result = await updateRole(role);
 
   if (!result.isSuccess) {
     return { error: result.message || "Failed to update role." };

@@ -45,7 +45,7 @@ export async function updateUserAction(
     claims,
   };
 
-  const result = await updateUser(session.accessToken, user);
+  const result = await updateUser(user);
 
   if (!result.isSuccess) {
     return { error: result.message || "Failed to update user." };

@@ -21,7 +21,7 @@ export async function searchUsersAction(
     };
   }
 
-  const result = await searchUsers(session.accessToken, params);
+  const result = await searchUsers(params);
 
   if (!result.isSuccess || !result.data) {
     return { data: null, error: result.message || "Failed to search users." };

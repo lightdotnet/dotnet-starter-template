@@ -41,7 +41,7 @@ export async function RolesPage() {
     ROLES_PERMISSIONS.Manage,
   );
 
-  const result = await getAllRoles(session.accessToken);
+  const result = await getAllRoles();
 
   const error =
     !result.isSuccess || !result.data

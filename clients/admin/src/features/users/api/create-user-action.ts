@@ -34,7 +34,7 @@ export async function createUserAction(
     phoneNumber: String(formData.get("phoneNumber") ?? "") || undefined,
   };
 
-  const result = await createUser(session.accessToken, request);
+  const result = await createUser(request);
 
   if (!result.isSuccess) {
     return { error: result.message || "Failed to create user." };

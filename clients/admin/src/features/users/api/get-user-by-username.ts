@@ -1,10 +1,10 @@
-import { requestJson } from "@/lib/server/http";
+import { requestJson } from "@/lib/server/backend-api";
 import { guardCall } from "@/lib/server/call-guard";
 import type { Result } from "@/types/api";
 import type { UserDto } from "@/types/user";
 
-export function getUserByUsername(accessToken: string, username: string) {
+export function getUserByUsername(username: string) {
   return guardCall(() =>
-    requestJson<Result<UserDto>>(`user/by_username/${username}`, { accessToken }),
+    requestJson<Result<UserDto>>(`user/by_username/${username}`),
   );
 }

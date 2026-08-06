@@ -15,7 +15,7 @@ export async function getUserDetailAction(id: string): Promise<GetUserDetailStat
     return { data: null, error: "Your session has expired. Please sign in again." };
   }
 
-  const result = await getUserById(session.accessToken, id);
+  const result = await getUserById(id);
 
   if (!result.isSuccess || !result.data) {
     return { data: null, error: result.message || "Failed to load user." };

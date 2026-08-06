@@ -1,14 +1,26 @@
 import { getApiBaseUrl } from "@/lib/server/config";
+import { ApiClients, type ApiClientName } from "@/lib/server/api-clients";
 
-interface RequestOptions {
+export interface HttpRequestContext {
+  headers: Record<string, string>;
+}
+
+export type HttpRequestHandler = (context: HttpRequestContext) => Promise<void> | void;
+
+export interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   query?: Record<string, string | undefined>;
   body?: unknown;
-  accessToken?: string;
+  handlers?: HttpRequestHandler[];
+  client?: ApiClientName;
 }
 
-function buildUrl(path: string, query?: Record<string, string | undefined>): URL {
-  const url = new URL(`api/v1/${path}`, getApiBaseUrl());
+function buildUrl(
+  path: string,
+  query?: Record<string, string | undefined>,
+  client: ApiClientName = ApiClients.Backend,
+): URL {
+  const url = new URL(`api/v1/${path}`, getApiBaseUrl(client));
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined) url.searchParams.set(key, value);
@@ -42,14 +54,16 @@ async function extractErrorMessage(response: Response, path: string): Promise<st
 }
 
 async function send(path: string, options: RequestOptions): Promise<Response> {
-  const response = await fetch(buildUrl(path, options.query), {
+  const context: HttpRequestContext = {
+    headers: { "Content-Type": "application/json" },
+  };
+  for (const handler of options.handlers ?? []) {
+    await handler(context);
+  }
+
+  const response = await fetch(buildUrl(path, options.query, options.client), {
     method: options.method ?? "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.accessToken
-        ? { Authorization: `Bearer ${options.accessToken}` }
-        : {}),
-    },
+    headers: context.headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 

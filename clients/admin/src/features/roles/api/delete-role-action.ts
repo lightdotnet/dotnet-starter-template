@@ -16,7 +16,7 @@ export async function deleteRoleAction(
     return { error: "Your session has expired. Please sign in again." };
   }
 
-  const result = await deleteRole(session.accessToken, id);
+  const result = await deleteRole(id);
 
   if (!result.isSuccess) {
     return { error: result.message || "Failed to delete role." };
