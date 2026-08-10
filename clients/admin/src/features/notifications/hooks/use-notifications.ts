@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   HttpTransportType,
   HubConnectionBuilder,
+  LogLevel,
   type HubConnection,
 } from "@microsoft/signalr";
 import { getMyNotificationsAction } from "@/features/notifications/api/get-my-notifications-action";
@@ -30,10 +31,14 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const connectionRef = useRef<HubConnection | null>(null);
+  // Remembers the last status filter so a SignalR push re-fetches the tab
+  // currently being viewed instead of resetting it back to "all".
+  const statusRef = useRef<NotificationStatus | undefined>(undefined);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (status?: NotificationStatus) => {
+    statusRef.current = status;
     const [listResult, count] = await Promise.all([
-      getMyNotificationsAction(),
+      getMyNotificationsAction({ status }),
       getUnreadCountAction(),
     ]);
     if (listResult.data) setNotifications(listResult.data.records);
@@ -42,7 +47,7 @@ export function useNotifications() {
 
   const markAsRead = useCallback(async (id: string) => {
     const success = await markNotificationReadAction(id);
-    if (!success) return;
+    if (!success) return false;
 
     setNotifications((previous) =>
       previous.map((notification) =>
@@ -52,6 +57,7 @@ export function useNotifications() {
       ),
     );
     setUnreadCount(await getUnreadCountAction());
+    return true;
   }, []);
 
   useEffect(() => {
@@ -68,11 +74,17 @@ export function useNotifications() {
           transport: HttpTransportType.WebSockets,
         })
         .withAutomaticReconnect()
+        // Navigating away (e.g. to a 404, which unmounts the whole dashboard
+        // layout) intentionally stops this connection mid-flight, which the
+        // browser surfaces as an abnormal WS closure (code 1006). SignalR logs
+        // that at Error level by default; our own connect-failure logging
+        // below stays untouched since it's an explicit console.error call.
+        .configureLogging(LogLevel.Critical)
         .build();
 
       // Payload is the raw `SystemMessage` pushed by the backend (no id/status/created),
       // so re-fetch instead of merging a partial one.
-      connection.on("SystemMessage", () => void refresh());
+      connection.on("SystemMessage", () => void refresh(statusRef.current));
 
       try {
         await connection.start();
@@ -108,5 +120,5 @@ export function useNotifications() {
     };
   }, [refresh]);
 
-  return { notifications, unreadCount, loading, markAsRead };
+  return { notifications, unreadCount, loading, markAsRead, refresh };
 }

@@ -21,10 +21,19 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNotifications } from "@/features/notifications/hooks/use-notifications";
+import { useNotificationsContext } from "@/features/notifications/context/notifications-provider";
 import { NotificationStatus } from "@/features/notifications/types/notification";
 
 type NotificationFilter = "all" | "unread" | "archived";
+
+// Filtering happens server-side (via `refresh`) rather than over the already-fetched
+// batch — the badge count is a true total across all pages, so a client-side filter
+// over just the latest page could show fewer items than the badge implies.
+const FILTER_TO_STATUS: Record<NotificationFilter, NotificationStatus | undefined> = {
+  all: undefined,
+  unread: NotificationStatus.None,
+  archived: NotificationStatus.Archived,
+};
 
 const EMPTY_MESSAGE: Record<NotificationFilter, string> = {
   all: "You're all caught up.",
@@ -33,14 +42,14 @@ const EMPTY_MESSAGE: Record<NotificationFilter, string> = {
 };
 
 export function NotificationBell() {
-  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, refresh } = useNotificationsContext();
   const [filter, setFilter] = useState<NotificationFilter>("all");
 
-  const filteredNotifications = notifications.filter((notification) => {
-    if (filter === "unread") return notification.status === NotificationStatus.None;
-    if (filter === "archived") return notification.status === NotificationStatus.Archived;
-    return true;
-  });
+  function handleFilterChange(value: string) {
+    const next = value as NotificationFilter;
+    setFilter(next);
+    void refresh(FILTER_TO_STATUS[next]);
+  }
 
   return (
     <DropdownMenu modal={false}>
@@ -71,10 +80,7 @@ export function NotificationBell() {
         <DropdownMenuLabel>Notifications</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        <Tabs
-          value={filter}
-          onValueChange={(value) => setFilter(value as NotificationFilter)}
-        >
+        <Tabs value={filter} onValueChange={handleFilterChange}>
           <TabsList className="mx-1.5 mb-1 w-full" style={{ width: "calc(100% - 0.75rem)" }}>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="unread">Unread</TabsTrigger>
@@ -83,7 +89,7 @@ export function NotificationBell() {
         </Tabs>
 
         <div className="max-h-72 overflow-y-auto">
-          {filteredNotifications.length === 0 ? (
+          {notifications.length === 0 ? (
             <Empty className="p-4">
               <EmptyMedia variant="icon">
                 <Bell />
@@ -92,7 +98,7 @@ export function NotificationBell() {
               <EmptyDescription>{EMPTY_MESSAGE[filter]}</EmptyDescription>
             </Empty>
           ) : (
-            filteredNotifications.map((notification) => {
+            notifications.map((notification) => {
               const content = (
                 <div className="flex w-full flex-col gap-0.5">
                   <div className="flex items-center gap-2">
