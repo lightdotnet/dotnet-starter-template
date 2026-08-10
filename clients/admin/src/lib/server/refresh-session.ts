@@ -1,5 +1,6 @@
 import { refreshToken } from "@/features/auth/api/refresh-token";
 import { extractPermissions, extractRoles } from "@/lib/server/jwt";
+import { REFRESH_LEAD_MS } from "@/lib/server/session-cookie";
 import type { SessionData } from "@/types/session";
 
 /**
@@ -28,4 +29,16 @@ export async function refreshSession(session: SessionData): Promise<SessionData 
     permissions: extractPermissions(token.accessToken),
     roles: extractRoles(token.accessToken),
   };
+}
+
+/**
+ * Refreshes only if the access token is within `REFRESH_LEAD_MS` of expiring.
+ * Returns null both when a refresh wasn't due and when it was attempted and
+ * failed — callers only ever care whether they got a new session to persist.
+ */
+export async function refreshSessionIfNearExpiry(
+  session: SessionData,
+): Promise<SessionData | null> {
+  if (session.expiresAt - Date.now() > REFRESH_LEAD_MS) return null;
+  return refreshSession(session);
 }

@@ -10,7 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ACCENT_COLORS, useAccentColor } from "./accent-color-provider";
+import {
+  ACCENT_COLORS,
+  useAccentColor,
+  type AccentColor,
+} from "./accent-color-provider";
+
+// Every preset maps to a Tailwind `-600` shade except "black", which has no
+// shade scale — it's the flat `--color-black` token instead.
+function swatchColor(value: AccentColor) {
+  return value === "black" ? "var(--color-black)" : `var(--color-${value}-600)`;
+}
 
 export function AccentColorPicker() {
   const { accentColor, setAccentColor } = useAccentColor();
@@ -29,7 +39,7 @@ export function AccentColorPicker() {
           <DropdownMenuItem key={value} onSelect={() => setAccentColor(value)}>
             <span
               className="size-3.5 shrink-0 rounded-full"
-              style={{ backgroundColor: `var(--color-${value}-600)` }}
+              style={{ backgroundColor: swatchColor(value) }}
               aria-hidden="true"
             />
             {label}

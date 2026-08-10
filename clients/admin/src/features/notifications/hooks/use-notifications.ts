@@ -15,7 +15,15 @@ import {
   type NotificationDto,
 } from "@/features/notifications/types/notification";
 
-const SIGNALR_HUB_URL = "/api/signalr-hub";
+const SIGNALR_HUB_URL = process.env.NEXT_PUBLIC_SIGNALR_HUB_URL!;
+
+// SignalR embeds the raw negotiate response body in the error message. When
+// the URL is misconfigured, that body is an HTML error page instead of
+// JSON/XML — strip it so the console isn't flooded with a full HTML document.
+function sanitizeSignalRErrorMessage(message: string): string {
+  const htmlIndex = message.search(/<!DOCTYPE html|<html[\s>]/i);
+  return htmlIndex === -1 ? message : message.slice(0, htmlIndex).trim();
+}
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
@@ -48,12 +56,9 @@ export function useNotifications() {
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    void (async () => {
-      await refresh();
-      if (cancelled) return;
-      setLoading(false);
-
+    const connectSignalR = async () => {
       const tokenState = await getSignalRTokenAction();
       if (cancelled || !tokenState) return;
 
@@ -69,12 +74,35 @@ export function useNotifications() {
       // so re-fetch instead of merging a partial one.
       connection.on("SystemMessage", () => void refresh());
 
+      try {
+        await connection.start();
+      } catch (error) {
+        console.error(
+          error instanceof Error
+            ? sanitizeSignalRErrorMessage(error.message)
+            : error,
+        );
+        retryTimeout = setTimeout(() => void connectSignalR(), 30_000);
+        return;
+      }
+
+      if (cancelled) {
+        void connection.stop();
+        return;
+      }
       connectionRef.current = connection;
-      await connection.start();
+    };
+
+    void (async () => {
+      await refresh();
+      if (cancelled) return;
+      setLoading(false);
+      await connectSignalR();
     })();
 
     return () => {
       cancelled = true;
+      if (retryTimeout) clearTimeout(retryTimeout);
       void connectionRef.current?.stop();
       connectionRef.current = null;
     };

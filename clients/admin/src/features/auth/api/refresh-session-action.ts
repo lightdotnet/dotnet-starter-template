@@ -1,12 +1,10 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/server/session";
 import { refreshSession } from "@/lib/server/refresh-session";
-import { encrypt } from "@/lib/server/token-cipher";
+import { persistSessionCookie } from "@/lib/server/persist-session-cookie";
 import { isSuperAdminUser } from "@/lib/server/authorization";
-import { SESSION_COOKIE_NAME, buildSessionCookieOptions } from "@/lib/server/session-cookie";
 
 /**
  * Manually rotates the current session's tokens. Gated on super-admin here —
@@ -20,12 +18,7 @@ export async function refreshSessionAction(): Promise<void> {
   const refreshed = await refreshSession(session);
   if (!refreshed) return;
 
-  const cookieStore = await cookies();
-  cookieStore.set(
-    SESSION_COOKIE_NAME,
-    encrypt(JSON.stringify(refreshed)),
-    buildSessionCookieOptions(refreshed.sessionExpiresAt),
-  );
+  await persistSessionCookie(refreshed);
 
   revalidatePath("/user-profile");
 }

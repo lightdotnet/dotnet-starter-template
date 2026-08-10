@@ -15,6 +15,7 @@ export const ACCENT_COLORS = [
   { value: "rose", label: "Rose" },
   { value: "orange", label: "Orange" },
   { value: "amber", label: "Amber" },
+  { value: "black", label: "Black" },
 ] as const;
 
 export type AccentColor = (typeof ACCENT_COLORS)[number]["value"];

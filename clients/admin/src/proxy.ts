@@ -3,9 +3,12 @@ import type { NextRequest } from "next/server";
 import { getCurrentUser } from "@/features/user-profile/api/get-current-user";
 import { encrypt } from "@/lib/server/token-cipher";
 import { buildSessionClaims } from "@/lib/server/build-session-claims";
-import { refreshSession } from "@/lib/server/refresh-session";
+import { refreshSessionIfNearExpiry } from "@/lib/server/refresh-session";
 import { parseSessionCookie } from "@/lib/server/parse-session";
-import { SESSION_COOKIE_NAME, REFRESH_LEAD_MS } from "@/lib/server/session-cookie";
+import {
+  SESSION_COOKIE_NAME,
+  buildSessionCookieOptions,
+} from "@/lib/server/session-cookie";
 import type { ProfileData, SessionData } from "@/types/session";
 
 const LOGIN_PATH = "/login";
@@ -24,12 +27,11 @@ function setCookieOnRequest(request: NextRequest, session: SessionData): void {
 }
 
 function setCookieOnResponse(response: NextResponse, session: SessionData): void {
-  response.cookies.set(SESSION_COOKIE_NAME, encrypt(JSON.stringify(session)), {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: Math.floor((session.sessionExpiresAt - Date.now()) / 1000),
-  });
+  response.cookies.set(
+    SESSION_COOKIE_NAME,
+    encrypt(JSON.stringify(session)),
+    buildSessionCookieOptions(session.sessionExpiresAt),
+  );
 }
 
 /**
@@ -95,13 +97,11 @@ export async function proxy(request: NextRequest) {
   let activeSession = session;
   let tokenWasRefreshed = false;
 
-  if (session.expiresAt - now <= REFRESH_LEAD_MS) {
-    // A failed refresh is not treated as a dead session — see `refreshSession` doc comment.
-    const refreshed = await refreshSession(session);
-    if (refreshed) {
-      activeSession = refreshed;
-      tokenWasRefreshed = true;
-    }
+  // A failed/not-due refresh is not treated as a dead session — see `refreshSessionIfNearExpiry` doc comment.
+  const refreshed = await refreshSessionIfNearExpiry(session);
+  if (refreshed) {
+    activeSession = refreshed;
+    tokenWasRefreshed = true;
   }
 
   // Profile display data (name/email/claims) is only refetched on a real page

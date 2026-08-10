@@ -190,6 +190,15 @@
   --primary: var(--color-amber-500);
 }
 
+/* Black has no Tailwind shade scale (just the flat --color-black/--color-white
+   tokens), so it inverts across themes instead of stepping one shade lighter. */
+:root[data-accent="black"] {
+  --primary: var(--color-black);
+}
+.dark[data-accent="black"] {
+  --primary: var(--color-white);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
