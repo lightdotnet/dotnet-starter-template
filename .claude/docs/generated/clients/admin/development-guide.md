@@ -4,7 +4,7 @@
 
 - **Node.js**: version not pinned anywhere — no `"engines"` field in `package.json`, no `.nvmrc`/`.node-version`. `@types/node` is `^20`, suggesting Node 20.x is the target, but this is inferred, not enforced — still `unknown`/unverified.
 - **pnpm**: required — `pnpm-lock.yaml` is the only lockfile present. Exact pnpm version is `unknown` (no `packageManager` field in `package.json`). A `pnpm-workspace.yaml` now exists but only configures build-script approval (`allowBuilds`/`ignoredBuiltDependencies` for `sharp`, `unrs-resolver`) — no change to the install/run flow.
-- **Backend must be reachable**: unlike the prior UI-shell-only state, this app now makes real calls to `src/Identity.Api` for login and profile data — `API_BASE_URL` must point at a running instance for auth/profile pages to work (dashboard still works standalone since it's mock data).
+- **Backend must be reachable**: unlike the prior UI-shell-only state, this app now makes real calls to `src/Identity.Api` for login and profile data — `API_BASE_URL` must point at a running instance for auth/profile pages to work (dashboard still works standalone since it's mock data). **Changed this sync**: the SignalR notification hub also needs the backend reachable **directly from the browser** (not just server-side) — `NEXT_PUBLIC_SIGNALR_HUB_URL` must resolve, and the backend must allow CORS for the admin app's origin.
 
 ## Building
 
@@ -34,12 +34,12 @@ None — no test runner is installed (`package.json` has no `test` script, no Je
 
 ## Local Setup
 
-- `.gitignore` ignores `.env*` wholesale except `.env.example`, which is now committed and documents the two required server-only env vars:
+- `.gitignore` ignores `.env*` wholesale except `.env.example`, which is now committed and documents three env vars — two required server-only, one client-exposed:
   - `API_BASE_URL` — backend API base URL (e.g. `http://localhost:5000`); never expose via `NEXT_PUBLIC_`.
   - `TOKEN_ENCRYPTION_KEY` — a 32-byte base64 key (generate with `openssl rand -base64 32`, per `.env.example`'s own comment); `lib/server/config.ts`'s `getTokenEncryptionKey()` throws if it's unset, and **is now actually read on every request** — `lib/server/token-cipher.ts` uses it to AES-256-GCM encrypt/decrypt the `admin_session` cookie, exercised by `features/auth/api/login-action.ts` (encrypt, on login) and `src/proxy.ts` (decrypt on every request; re-encrypt after a token refresh or profile refetch). The app will fail at runtime without a valid key set; the previous "prep work, not wired up yet" state is resolved (see [architecture.md](./architecture.md#known-architectural-risks--debt)).
+  - `NEXT_PUBLIC_SIGNALR_HUB_URL` (new this sync) — absolute URL to the backend's SignalR hub (e.g. `http://localhost:5000/signalr-hub`), the first `NEXT_PUBLIC_`-prefixed var in this app. `use-notifications.ts` connects the browser directly to it, bypassing the Next.js server entirely — see the removed `next.config.ts` rewrite below.
 - A `.env.local` file exists locally (gitignored) — not read for this doc since it may contain real values; use `.env.example` as the template.
 - `pnpm lint` runs ESLint per `eslint.config.mjs`.
-- `next.config.ts` now also reads `process.env.API_BASE_URL` directly (not via `lib/server/config.ts`) to build the SignalR `rewrites()` target — a second, independent read site for the same existing env var, not a new var to add to `.env.example`.
 
 ## Common Tasks
 
@@ -82,7 +82,7 @@ None — no test runner is installed (`package.json` has no `test` script, no Je
 - **Top bar**: `components/layout/topbar.tsx` (brand, breadcrumbs, search, accent picker, theme toggle, notifications, user menu).
 - **Sidebar (nav + show/hide + mobile drawer)**: `components/layout/sidebar.tsx` (also computes the permission-filtered menu via `lib/shared/menu.ts`'s `buildVisibleMenu()`), `components/layout/sidebar-nav-item.tsx`, state in `hooks/use-sidebar.tsx`.
 - **Nav structure/labels**: each nav-bearing feature owns its own entry — `features/{dashboard,users,roles,notifications}/constants/nav-item.ts` (`DASHBOARD_NAV_ITEM`/`USERS_NAV_ITEM`/`ROLES_NAV_ITEM`/`NOTIFICATIONS_NAV_ITEM`); `src/constants/nav-items.ts` (typed via `types/nav.ts`) assembles those into `NAV_ITEMS`, only declaring the "Identity" group and "Settings" leaf itself.
-- **SignalR proxy (real-time push)**: `next.config.ts`'s `rewrites()` (first use of Next.js rewrites in this app) forwards `/api/signalr-hub/:path*` to the backend so the browser can open a same-origin WebSocket without exposing `API_BASE_URL` to client code; `features/notifications/api/get-signalr-token-action.ts` hands the browser the short-lived access token needed for the handshake.
+- **SignalR direct connection (real-time push)**: **changed this sync** — `use-notifications.ts` now opens a WebSocket directly from the browser to the backend via `NEXT_PUBLIC_SIGNALR_HUB_URL` (an absolute URL); `next.config.ts`'s `rewrites()` proxy is gone (the config is now empty), so this requires the backend to allow CORS for the admin app's origin. `features/notifications/api/get-signalr-token-action.ts` hands the browser the short-lived access token needed for the handshake, proactively refreshing a near-expiry session first via `refreshSessionIfNearExpiry()`. A failed handshake retries every 30s (`connectSignalR`), logging a sanitized error instead of the SignalR client's raw HTML-embedding one.
 - **Theming (light/dark, accent color)**: `components/theme/` (`theme-provider.tsx`, `accent-color-provider.tsx`, `theme-toggle.tsx`, `accent-color-picker.tsx`, `use-has-mounted.ts`); design tokens in `src/app/globals.css`'s `@theme inline` block and `:root`/`.dark[data-accent=...]` variable declarations.
 - **shadcn-generated UI primitives**: `components/ui/*` — configured via `components.json`.
 - **Server-only API plumbing**: `lib/server/http.ts` (fetch wrapper, `api/v1/` prefix, `handlers`/`HttpRequestHandler` pipeline run before `fetch()` — no longer session-aware itself), `lib/server/backend-api.ts` (new this sync — the entry point most `features/*/api/*.ts` files should use; wraps `http.ts` with bearer-token auth + `client: ApiClients.Backend` pre-wired), `lib/server/api-clients.ts` (new — the `ApiClients` named-backend registry, only `Backend` today), `lib/server/http-handlers/bearer-token-handler.ts` (new — `bearerTokenHandler`, reads the ambient session; `explicitBearerTokenHandler(accessToken)`, for the 3 call sites that run before a session cookie exists: `login.ts`, `refresh-token.ts`, `get-current-user.ts`), `lib/server/call-guard.ts` (error-envelope normalization), `lib/server/config.ts` (env access, now per-client via `getApiBaseUrl(client)`).
@@ -94,4 +94,4 @@ None — no test runner is installed (`package.json` has no `test` script, no Je
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-06 (resynced — updated "Add a new backend endpoint call" and "Server-only API plumbing" for the new `lib/server/backend-api.ts`/`api-clients.ts`/`http-handlers/bearer-token-handler.ts` request-handler pipeline replacing `http.ts`'s `accessToken` option; added two new Common Tasks rows for `hooks/use-guarded-action.ts`/`use-action-success-toast.ts`) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-10 (resynced — SignalR now connects directly from the browser to the backend via `NEXT_PUBLIC_SIGNALR_HUB_URL` instead of `next.config.ts`'s now-deleted `rewrites()` proxy; documented the new env var and the handshake's proactive-refresh/retry behavior; noted the backend-must-be-reachable-from-the-browser + CORS requirement) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
