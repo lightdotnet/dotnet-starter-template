@@ -13,7 +13,7 @@
 - **Type**: Starter template monorepo — C#/.NET backend (Modular Monolith) + one or more frontend clients.
 - **Backend**: `src/` — ASP.NET Core Web API, API-only MVC controllers. See [PROJECT-BACKEND.md](PROJECT-BACKEND.md).
 - **Clients**: `clients/<app-name>/` — one or more apps; the primary one is Next.js, TypeScript/React. See [PROJECT-CLIENTS.md](PROJECT-CLIENTS.md).
-- **Status**: First backend module (`Identity`) and composition-root host (`StarterKit.WebApi`) built. First client app (`clients/admin/`, a Next.js admin dashboard) scaffolded as a UI shell — no calls to `src/Identity.Api` yet. Verify current state before describing further additions as built.
+- **Status**: Two backend modules (`Identity`, `Notifications`) and composition-root host (`StarterKit.WebApi`) built. The one client app (`clients/admin/`, a Next.js admin dashboard) is actively developed with real integration against both modules — auth/session, Users/Roles CRUD, and real-time Notifications (SignalR) — no longer a UI shell. Verify current state before describing further additions as built.
 
 ## Known Entry Points
 
@@ -26,7 +26,7 @@
 
 > Cross-cutting only. Backend-specific gaps live in [PROJECT-BACKEND.md § Backend Open Questions / Gaps](PROJECT-BACKEND.md#backend-open-questions--gaps); client-specific gaps in [PROJECT-CLIENTS.md § Client Open Questions / Gaps](PROJECT-CLIENTS.md#client-open-questions--gaps).
 
-- Full-stack integration (auth/data wiring between `clients/admin/` and `src/Identity.Api`) hasn't been designed yet — this spans both halves so is tracked here rather than in either split file.
+- None currently open cross-cutting. (The prior "full-stack integration hasn't been designed yet" item is resolved — see [PROJECT-CLIENTS.md § Client Open Questions / Gaps](PROJECT-CLIENTS.md#client-open-questions--gaps) and `docs/generated/clients/admin/overview.md` § Auth Flow / Backend Integration for the built state.)
 
 ---
-_Last updated: 2026-08-01 — split into [PROJECT-BACKEND.md](PROJECT-BACKEND.md) and [PROJECT-CLIENTS.md](PROJECT-CLIENTS.md); this root file now holds only the cross-cutting summary._
+_Last updated: 2026-08-10 (ROT resync — corrected Status/Open Questions, stale since 2026-08-01: added the `Notifications` module, corrected `clients/admin/`'s status from UI-shell to actively-integrated, resolved the full-stack-integration open question)._

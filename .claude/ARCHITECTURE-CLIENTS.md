@@ -30,7 +30,7 @@
 
 > Findings from `review-architecture`/`nextjs-architect` runs go here, tagged with date and app.
 
-- See [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#known-architectural-risks--debt) for the full, maintained list (e.g. `proxy.ts`'s runtime pin is unverified, no automated test suite, dashboard still mock data, `/settings` nav entry has no route). Not duplicated here to avoid drift between two copies of the same list.
+- See [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#known-architectural-risks--debt) for the full, maintained list (e.g. `proxy.ts`'s runtime pin is unverified, no automated test suite, `/settings` nav entry has no route). Not duplicated here to avoid drift between two copies of the same list.
 
 ---
-_Last updated: 2026-08-04 — filled in the Structure/Key Areas/Risks placeholders for `admin` with pointers to its now-detailed generated docs, rather than re-deriving the analysis here; corrected Status (no longer "Scaffolded, UI-shell only")._
+_Last updated: 2026-08-10 (ROT resync — removed the stale "dashboard still mock data" item: the Dashboard feature was deleted and replaced by a real Home page on 2026-08-10)._

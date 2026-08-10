@@ -14,7 +14,7 @@
 - **Target framework(s)**: `net10.0` (all of `src/Shared`, `src/Infrastructure`, `tests/Framework.Tests`).
 - **Shared build props/targets**: `Directory.Build.props` sets `ImplicitUsings=enable` and `Nullable=enable` repo-wide. `Directory.Packages.props` centralizes all package versions (`ManagePackageVersionsCentrally=true`, `CentralPackageTransitivePinningEnabled=false`); `Framework.Tests.csproj` opts out (`ManagePackageVersionsCentrally=false`) and pins its own test package versions directly.
 - **Central package management**: yes, repo-wide via `Directory.Packages.props` (except `Framework.Tests`, see above).
-- **Module structure convention**: flat projects directly under `src/` (no `src/Modules/` nesting), plus a `<Module>.Contracts` seam project per module — see `.claude/ARCHITECTURE-BACKEND.md § Module Structure Convention`. `Identity` is the first module built (single project, `Identity.Api` + `Identity.Contracts`); its internal layering is informal and not yet fully conformant — see `.claude/ARCHITECTURE-BACKEND.md` for details.
+- **Module structure convention**: flat projects directly under `src/` (no `src/Modules/` nesting), plus a `<Module>.Contracts` seam project per module — see `.claude/ARCHITECTURE-BACKEND.md § Module Structure Convention`. Two modules built so far: `Identity` (first, single project, `Identity.Api` + `Identity.Contracts`; internal layering informal, not yet fully conformant) and `Notifications` (second, single project, `Notifications.Api` + `Notifications.Contracts`; controllers split by audience rather than resource) — see `.claude/ARCHITECTURE-BACKEND.md` for details.
 - **Vendor library family**: a private NuGet package family `Lightsoft.*` (namespace `Light.*`) supplies the mediator (`Lightsoft.Mediator`), `Result`/`Paged` contracts (`Lightsoft.Result`), domain base types (`Lightsoft.SharedKernel`, namespace `Light.Domain`), ASP.NET Core authorization/modularity/CORS helpers, EF Core helpers, and Serilog setup. Treat these as fixed external API, not renameable/refactorable project code.
 
 ### Coding Style
@@ -28,7 +28,10 @@
 
 > Only document a layering convention once seen consistently across multiple modules — otherwise note it as local to one module. See [agents/architecture-reviewer.md](agents/architecture-reviewer.md).
 
-- Unverified — no modules exist yet.
+- Both modules built so far (`Identity`, `Notifications`) are single-project, folder-organized (no Domain/Application/Infrastructure/Api split yet in this repo) — controllers call only into services/mediator, never directly into entities/DbContext. This discipline holds in both but isn't compiler-enforced (single assembly per module).
+- **Not consistent across modules**: `Identity`'s controllers split by *resource* (`UserController`, `RoleController`, `TokenController`); `Notifications`' split by *audience* (`NotificationController` admin vs. `UserNotificationController` self-service) over the same table. Treat as two valid patterns depending on the module's shape, not a convention violation.
+- `Identity` mixes CQRS commands and traditional service classes for what should be one approach (open finding, not yet reconciled); `Notifications` uses one service class throughout, no CQRS.
+- See `.claude/ARCHITECTURE-BACKEND.md § Backend — Layering (per module)` for the full per-module table.
 
 ### Dependency Injection Patterns
 
@@ -55,61 +58,64 @@
 
 > See also [agents/efcore-specialist.md](agents/efcore-specialist.md), [skills/efcore.md](skills/efcore.md).
 
-- **Migration strategy**: unverified — no module `DbContext`/migrations exist yet. `MigrationsExtensions.MigrateDatabaseAsync` (`src/Infrastructure/Database/`) is the generic apply-pending-migrations helper intended for a host's startup path.
-- **Configuration style** (Fluent API vs. attributes): unverified — no entity configurations exist yet outside the base wrappers.
-- **Naming conventions for tables/columns**: unverified.
-- **DbContext-per-module boundary respected**: unverified — no module `DbContext` exists yet; `BaseDbContext` (`src/Infrastructure/Database/BaseDbContext.cs`) is the intended shared base (applies the Sqlite `DateTimeOffset` conversion fix).
-- **Provider selection**: `DbContextExtensions.GetDbProvider`/`AddConfiguredDbContext<TContext>` read an `IConfiguration["DbProvider"]` enum value (`InMemory`/`PostgreSQL`/`MSSQL`/`Sqlite`) and configure the matching EF Core provider.
+- **Migration strategy**: `MigrationsExtensions.MigrateDatabaseAsync` (`src/Persistence/MigrationSupport/`, moved from `src/Infrastructure/Database/` in the 2026-07 refactor) is the generic apply-pending-migrations helper called from the host's startup path. Design-time EF migration projects live separately under top-level `src/Migrations/{Sqlite,PostgreSQL,MSSQL}`, one per provider, not colocated with each module.
+- **Configuration style** (Fluent API vs. attributes): Fluent API, via each `DbContext`'s model configuration (e.g. `EntityBuilderExtensions.BuildEntities` for `IdentityDbContext`) — no attribute-based (`[Column]`/`[Table]`) configuration observed.
+- **Naming conventions for tables/columns**: not yet documented as a repo-wide rule — verify per module (`Notifications` uses schema `"system"`, table `Notifications`; `Identity` uses ASP.NET Identity's own default table names).
+- **DbContext-per-module boundary respected**: yes, verified with two modules. `IdentityDbContext` (`src/Identity.Api/Data/`) extends ASP.NET Identity's own `IdentityDbContext<...>` (can't also extend `BaseDbContext` — single inheritance; re-applies the Sqlite `DateTimeOffset` fix manually). `NotificationDbContext` (`src/Notifications.Api/Data/`) does extend `Persistence/Context/BaseDbContext.cs` (`src/Persistence/`, moved from `Infrastructure` during the 2026-07 refactor). Both currently share the same physical database/connection string (`DbConnectionNames.Default`), separated by schema/table only — "one DbContext per module, shared physical DB" is the confirmed default, not full physical isolation.
+- **Provider selection**: `DbContextExtensions.GetDbProvider`/`AddConfiguredDbContext<TContext>` (`src/Persistence/`) read an `IConfiguration["DbProvider"]` enum value (`InMemory`/`PostgreSQL`/`MSSQL`/`Sqlite`) and configure the matching EF Core provider — used by both `IdentityDbContext` and `NotificationDbContext`.
+- **Audit/soft-delete**: `TrackingExtensions.AuditEntries` (`src/Persistence/Extensions/`), called from each module's own `SaveChanges[Async]`, stamps `Created`/`LastModified`/`*By` and applies soft-delete via `ISoftDelete`. `Identity`'s `User` implements `ISoftDelete` but passes `enableSoftDelete: false` (flagged as a likely bug, currently dead code); `Notifications`' `Notification` doesn't implement `ISoftDelete` at all (no soft-delete support, not a bug).
+- See `.claude/ARCHITECTURE-BACKEND.md § Backend — Data Access` for full per-module detail.
 
 ### API Conventions
 
 > See also [agents/api-designer.md](agents/api-designer.md), [skills/api.md](skills/api.md).
 
-- **Versioning strategy**: `Asp.Versioning` is referenced; `VersionedApiController` (`src/Infrastructure/Endpoints/`) is decorated `[ApiVersion("1.0")]` as the versioned controller base — no actual versioned routes exist yet (no controllers/modules built).
-- **Response/error contract shape**: unverified at the HTTP level — no controllers exist yet; the `Result`/`PagedResult<T>` pattern above is what controllers are expected to return.
-- **Controllers are API-only (no Razor views)**: unverified — no controllers exist yet, only the base classes (`ApiControllerBase`, `VersionedApiController`) and a `BasicAuthAttribute` authorization filter.
+- **Versioning strategy**: `Asp.Versioning` via `VersionedApiController` (`src/Infrastructure/Endpoints/`, `[ApiVersion("1.0")]`) as the versioned controller base. Both modules' controllers use the `api/v{version:apiVersion}/...` URL-segment convention (confirmed via the admin client's actual call sites) — header vs. URL negotiation and default-version behavior beyond that are still unverified.
+- **Response/error contract shape**: vendor `Light.Contracts.Result`/`Result<T>`/`PagedResult<T>` (`Lightsoft.Result`) is the standard controller return type, auto-wrapped into the response envelope by `ApiControllerBase`/`VersionedApiController`'s `Ok<T>()` helpers — a bare-looking service return type is not a bug, it's wrapped before reaching the client. Confirmed consumed as such by the admin client's `types/api.ts` (`Result`/`ApiResponse`/`Paged`/`PagedResult`).
+- **Controllers are API-only (no Razor views)**: confirmed — `UserController`/`RoleController`/`TokenController`/`UserProfileController` (`Identity`) and `NotificationController`/`UserNotificationController` (`Notifications`) are all JSON-only MVC controllers, no views.
+- **Route-splitting pattern**: two controllers can front the same table for different audiences, gated differently — `Notifications`' `NotificationController` (admin, `[MustHavePermission]`) vs. `UserNotificationController` (self-service, permission-less, hard-scoped server-side via `ICurrentUser.UserId`). Worth reusing for a future module needing both an admin and a self-service view.
 
 ## Clients (`clients/<app-name>/`)
 
-> There may be more than one app under `clients/` — repeat this subsection per app if their conventions diverge (e.g. `clients/web/` vs a future `clients/admin/`). Don't assume a convention observed in one app applies to another until verified.
+> There may be more than one app under `clients/` — repeat this subsection per app if their conventions diverge. Don't assume a convention observed in one app applies to another until verified. Full detail lives in `docs/generated/clients/<app>/*.md`; this section keeps only a summary.
 
-### `clients/web/` (primary app — rename/duplicate this heading once other apps exist)
+### `clients/admin/` (first and, so far, only client app)
 
 #### Build & Tooling
 
-- **Next.js version / router (App vs Pages)**: _unknown_
-- **Package manager**: _unknown_
-- **`tsconfig.json` strictness**: _unknown_
+- **Next.js version / router**: 16.2.12, App Router, rooted at `src/app/` (no `pages/` directory).
+- **Package manager**: pnpm (`pnpm-lock.yaml`). A `pnpm-workspace.yaml` exists but only configures build-script approval, not a multi-package workspace.
+- **`tsconfig.json` strictness**: `"strict": true`, target `ES2017`, module resolution `"bundler"`, path alias `"@/*"` → `"./src/*"`.
 
 #### Coding Style
 
-- **Linting** (ESLint config): _unknown_
-- **Formatting** (Prettier or other): _unknown_
-- **Component naming/file organization**: _unknown_
+- **Linting**: ESLint 9 flat config (`eslint.config.mjs`), `eslint-config-next`'s `core-web-vitals` + `typescript` rule sets.
+- **Formatting**: `prettier` + `prettier-plugin-tailwindcss` are devDependencies, but no `.prettierrc*` and no `format` script exist — unverified whether formatting is actually enforced anywhere.
+- **Component naming/file organization**: kebab-case filenames, one primary export per file matching a PascalCase component/function name; feature-folder layout (`features/<name>/{api,components,types,constants,hooks}` + a mandatory `index.ts` barrel), see `docs/generated/clients/admin/coding-conventions.md § Structural Conventions`.
 
 #### Data Fetching & State
 
-- **Server vs client components usage**: _unknown_
-- **Data fetching library** (React Query/SWR/native fetch/server actions): _unknown_
-- **Global state management**: _unknown_
+- **Server vs client components usage**: mostly Server Components (whole-list reads, session resolution); `"use client"` applied to files using hooks/state/browser APIs (most of `hooks/*`, `components/theme/*`, `components/layout/*` except `brand.tsx`, most feature components with interactivity).
+- **Data fetching library**: none (no React Query/SWR) — hand-written per-endpoint functions under `features/<name>/api/*.ts`, one file per backend call, via `lib/server/backend-api.ts`/`lib/server/http.ts`. Writes go through Next.js Server Actions (`"use server"`). Real-time notifications use a direct `@microsoft/signalr` WebSocket connection from the browser, not a fetch-based library.
+- **Global state management**: none — local component state + React Context per concern (`SidebarProvider`, `AccentColorProvider`, `ThemeProvider`, `NotificationsProvider`), no Redux/Zustand/etc.
 
 #### Styling
 
-- **Styling approach** (Tailwind/CSS Modules/other): _unknown_
+- **Styling approach**: Tailwind CSS v4, CSS-first config (`src/app/globals.css`'s `@import "tailwindcss"` + `@theme inline`), no `tailwind.config.ts`. shadcn-CLI-generated primitives under `components/ui/*` on top of `radix-ui` + `class-variance-authority`.
 
 #### Testing Conventions
 
-- **Test framework(s)** (Jest/Vitest + Testing Library, Playwright, etc.): _unknown_
-- **Naming convention**: _unknown_
+- **Test framework(s)**: none installed — no Jest/Vitest/Playwright/Testing Library, no `*.test.*`/`*.spec.*` files, no `test` script. Notable gap given real auth/session/CRUD logic is in place untested.
+- **Naming convention**: not applicable (no test suite exists yet).
 
 ## Full-Stack Integration Conventions
 
 > See also [agents/api-contract-reviewer.md](agents/api-contract-reviewer.md), [skills/nextjs.md](skills/nextjs.md). If multiple clients exist, note per-client deviations explicitly rather than assuming they all integrate the same way.
 
-- **API client generation** (hand-written vs generated from OpenAPI), per client app: _unknown_
-- **Environment/config for API base URL**, per client app: _unknown_
-- **Auth token handling between each client and the backend**: _unknown_
-- **Error contract mapping** (backend error shape → client handling): _unknown_
+- **API client generation** (`admin`): hand-written, one function per backend endpoint under `features/<name>/api/*.ts` — no OpenAPI-generated client.
+- **Environment/config for API base URL** (`admin`): server-only `API_BASE_URL` env var (never `NEXT_PUBLIC_`), resolved via `lib/server/config.ts`/`lib/server/api-clients.ts`; every request is prefixed `api/v1/`. Real-time notifications additionally need `NEXT_PUBLIC_SIGNALR_HUB_URL` (client-exposed, absolute URL — the browser connects directly to the backend's `/signalr-hub`, requiring backend CORS for the admin origin).
+- **Auth token handling** (`admin` ↔ backend): cookie-based session (`admin_session`, httpOnly, AES-256-GCM encrypted via `lib/server/token-cipher.ts`), decoded permissions/roles straight from the access-token JWT. A request-handler pipeline (`lib/server/backend-api.ts` + `lib/server/http-handlers/bearer-token-handler.ts`) auto-attaches `Authorization: Bearer <accessToken>`; `src/proxy.ts` proactively refreshes a near-expiry token on every request. SignalR's handshake gets a short-lived access token handed to the browser via a dedicated Server Action (`getSignalRTokenAction`) — the one deliberate point the token leaves the httpOnly-cookie boundary.
+- **Error contract mapping** (`admin`): `lib/server/call-guard.ts`'s `guardCall`/`guardResponseCall`/`guardRawCall` normalize network failures, non-2xx responses, and non-JSON bodies into the same `Result`/`ApiResponse`-shaped envelope the backend itself returns (`types/api.ts`), preferring a real backend-authored message (`ApiResponse.message` → `ValidationProblemDetails.errors` → `ProblemDetails.title`) over a generic fallback.
 
 ## Versioning & Release
 
@@ -117,4 +123,4 @@
 - **Changelog convention**: _unknown_
 
 ---
-_Last updated: 2026-07-29 — backend section covers `src/Shared`, `src/Infrastructure`, `tests/Framework.Tests`; Clients/Full-Stack Integration/Versioning sections still unpopulated (no `clients/` app exists yet)._
+_Last updated: 2026-08-10 (ROT resync — stale since 2026-07-29, predating almost everything currently built: added the `Notifications` module to Backend sections, resynced EF Core/API Conventions from `ARCHITECTURE-BACKEND.md`'s current state (was still saying "no DbContext/migrations exist yet," contradicting it), populated the `clients/admin/` section and Full-Stack Integration Conventions from the generated admin docs (was previously all `_unknown_` under a `clients/web/` placeholder heading). Versioning & Release section remains unpopulated — no evidence observed yet._

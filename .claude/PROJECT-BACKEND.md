@@ -9,6 +9,7 @@
 | Module | Path | Responsibility | Status |
 |---|---|---|---|
 | Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance. Single-project module (Entities/Data/Application/Services/Jwt/Controllers all in `Identity.Api`) + a `Contracts` seam project (DTOs, `IUserService`/`IRoleService`/`IServiceClaimService`). Kept the `.Api` name deliberately — anticipated candidate for future extraction into an independent identity service. | Built, but internal layering is still informal and CQRS/service-class patterns coexist inconsistently. See [reviews/2026-07-30-backend-project-analysis.md](reviews/2026-07-30-backend-project-analysis.md) for the full list of pending cleanup items. Now covered by `tests/Identity.Tests` (98 tests) — see the `Identity.Tests` row below. |
+| Notifications | `src/Notifications.Api/Notifications.Api.csproj` + `src/Notifications.Contracts/Notifications.Contracts.csproj` | Notification storage + real-time push over SignalR. Single-project module, controllers split by *audience* rather than by resource: `NotificationController` (admin browse/send, permission-gated) vs. `UserNotificationController` (self-service, auto-scoped via `ICurrentUser`, no extra permission). Same `.Api`-suffix convention as `Identity`. See [docs/generated/backend/modules/Notifications.md](docs/generated/backend/modules/Notifications.md) for full detail. | Built. No automated test project yet (no `tests/Notifications.Tests`). Two known functional gaps: no "mark all read" endpoint despite `ReadAllAsync` existing on the service interface, and no code path ever sets `NotificationStatus.Archived`. |
 
 ## Backend Key Projects
 
@@ -19,9 +20,11 @@
 | Shared | `src/Shared/Shared.csproj` | Shared kernel: base entity/DTO/value-object wrappers around the vendor `Light.Domain` types, `ICurrentUser`/`IDateTime` abstractions, permission-based authorization building blocks (`SuperUserPolicy`, `AccessControl`, `CurrentUserBase`, `AuthorizationHandler`), FluentValidation pipeline behavior, constants. | (none — leaf project) |
 | Infrastructure | `src/Infrastructure/Infrastructure.csproj` | Cross-cutting infrastructure: CORS, health checks, Serilog bootstrap logging (`AppLogging`), Mapster config, module/endpoint base classes (`AppModule`, `AppModuleEndpoint`), API controller base classes, Basic Auth attribute. **EF Core/DbContext concerns moved out to `Persistence` (below) during the 2026-07 refactor** — this row previously (incorrectly) listed them here. | Shared |
 | Persistence | `src/Persistence/Persistence.csproj` | EF Core provider configuration (`DbContextExtensions`/`DbProvider`, Sqlite `DateTimeOffset` workaround), DbContext base class (`Context/BaseDbContext`), audit/soft-delete tracking + domain-event dispatch for `DbContext.SaveChanges`, generic paging/result helpers, migration-time runtime support (`Migrations/` — design-time EF projects live separately under top-level `src/Migrations/`, excluded from this analysis pass). | Shared |
-| Identity.Contracts | `src/Identity.Contracts/Identity.Contracts.csproj` | Public seam for the Identity module: DTOs, request types (incl. new `SearchUserQuery`), `IUserService` (incl. new `SearchAsync`)/`IRoleService`/`IServiceClaimService` (the last currently unimplemented). Leaf project — confirmed no `ProjectReference`s. | (none — leaf project) |
+| Identity.Contracts | `src/Identity.Contracts/Identity.Contracts.csproj` | Public seam for the Identity module: DTOs, request types (incl. new `SearchUserQuery`), `IUserService` (incl. new `SearchAsync`)/`IRoleService`/`IServiceClaimService` (the last currently unimplemented). Not a true leaf — also references `Shared` (to reach a transitive vendor authorization package). | Shared |
 | Identity.Api | `src/Identity.Api/Identity.Api.csproj` | The Identity module itself (see Backend Modules table above). | Identity.Contracts, Infrastructure, Persistence |
-| StarterKit.WebApi | `src/StarterKit.WebApi/StarterKit.WebApi.csproj` | Composition-root host (`Program.cs`) — the only executable/deployable project. | Identity.Api, Infrastructure, Shared |
+| Notifications.Contracts | `src/Notifications.Contracts/Notifications.Contracts.csproj` | Public seam for the Notifications module: `NotificationDto`, `NotificationStatus` enum, `NotificationLookup` request type, push-message contracts (`SystemMessage`, `ForceLogoutMessage`), `INotificationService`, permission catalog (`NotificationPermissions`). True leaf. | Shared |
+| Notifications.Api | `src/Notifications.Api/Notifications.Api.csproj` | The Notifications module itself (see Backend Modules table above). | Notifications.Contracts, Infrastructure, Persistence |
+| StarterKit.WebApi | `src/StarterKit.WebApi/StarterKit.WebApi.csproj` | Composition-root host (`Program.cs`) — the only executable/deployable project. | Identity.Api, Notifications.Api, Infrastructure, Shared |
 | Framework.Tests | `tests/Framework.Tests/Framework.Tests.csproj` | xUnit v3 test project covering `Shared`, `Infrastructure`, `Persistence` only — does not reference `Identity.Api`/`Identity.Contracts` (that coverage lives in `Identity.Tests` instead). | Shared, Infrastructure, Persistence |
 | Identity.Tests | `tests/Identity.Tests/Identity.Tests.csproj` | xUnit v3 + Moq test project covering the `Identity` module: `Extensions/`, `Jwt/` (incl. `internal` orchestration classes via `Identity.Api`'s `InternalsVisibleTo`), `Entities/`, `Services/`, `Controllers/`. Most service/Jwt tests run against a real Sqlite in-memory `IdentityDbContext` + ASP.NET Identity stack (`TestSupport/IdentityTestHost`) rather than mocking EF Core. 98 tests, all passing. | Identity.Api, Shared |
 
@@ -40,14 +43,15 @@
 
 ## Backend Entry Points
 
-- `src/StarterKit.WebApi/Program.cs` — the composition-root host, referencing `Identity.Api`, `Infrastructure`, `Shared`.
+- `src/StarterKit.WebApi/Program.cs` — the composition-root host, referencing `Identity.Api`, `Notifications.Api`, `Infrastructure`, `Shared`.
 
 ## Backend Open Questions / Gaps
 
-- Module-structure convention is now decided (see [ARCHITECTURE-BACKEND.md](ARCHITECTURE-BACKEND.md#backend--module-structure-convention)), but `Identity` — the only module built — predates it and doesn't fully conform yet (naming, internal layering discipline). Treat as pending cleanup, not a second convention to reconcile.
-- Cross-module boundary enforcement (via `<Module>.Contracts`) is unverified in practice — only one module exists so far.
-- `MigrationsExtensions.AddMigrationsServices` registers mediator handlers via `Assembly.GetExecutingAssembly()` (now the `Persistence` assembly) — worth re-checking once real module assemblies with domain-event handlers exist, since it won't pick those up automatically.
+- Module-structure convention is now decided (see [ARCHITECTURE-BACKEND.md](ARCHITECTURE-BACKEND.md#backend--module-structure-convention)), but `Identity` — the first module built — predates it and doesn't fully conform yet (naming, internal layering discipline). `Notifications` (built second) does conform. Treat as pending `Identity` cleanup, not a second convention to reconcile.
+- Cross-module boundary enforcement (via `<Module>.Contracts`) is now verified with two modules: `Identity` and `Notifications` don't reference each other at all — `Notifications` uses opaque `fromUserId`/`toUserId` strings, no FK or cross-module service call.
+- `MigrationsExtensions.AddMigrationsServices` registers mediator handlers via `Assembly.GetExecutingAssembly()` (the `Persistence` assembly) — still won't pick up handlers defined in `Identity.Api`/`Notifications.Api` themselves; revisit once a module actually relies on this for domain-event dispatch.
+- `Notifications` has no dedicated test project yet (`Identity` has `tests/Identity.Tests`, 98 tests) — a coverage gap, not by design.
 - Several correctness/naming/dependency-hygiene findings from the 2026-07-30 four-agent review are still open — see [reviews/2026-07-30-backend-project-analysis.md](reviews/2026-07-30-backend-project-analysis.md) for the full prioritized list (not duplicated here to avoid two copies drifting apart).
 
 ---
-_Last updated: 2026-08-02 (resynced — added `tests/Identity.Tests`, closing the Identity module's test-coverage gap noted in the prior sync)._
+_Last updated: 2026-08-10 (ROT resync — added the `Notifications` module, stale since its 2026-08-03 build: modules table, key-projects rows, entry points, dependency direction, open questions)._

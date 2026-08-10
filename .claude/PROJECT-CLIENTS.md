@@ -8,7 +8,7 @@
 
 | App | Path | Responsibility | Stack | Status |
 |---|---|---|---|---|
-| admin | `clients/admin/` | Admin dashboard — real backend integration against `src/Identity.Api`: encrypted-cookie auth with proactive token refresh, full Users/Roles CRUD, real-time Notifications (SignalR) with a management page, permission-gated nav. Dashboard page (`/`) is the one remaining mock-data exception. | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn-generated primitives on `radix-ui` + `class-variance-authority`, `next-themes`, `@microsoft/signalr`, pnpm | Actively developed — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md) for full detail |
+| admin | `clients/admin/` | Admin dashboard — real backend integration against both `src/Identity.Api` and `src/Notifications.Api`: encrypted-cookie auth with proactive token refresh, full Users/Roles CRUD, real-time Notifications (SignalR) with both a topbar bell and a two-pane inbox on the Home page (`/`), permission-gated nav. No remaining mock-data page — the former Dashboard was replaced by a real Home page. | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn-generated primitives on `radix-ui` + `class-variance-authority`, `next-themes`, `@microsoft/signalr`, pnpm | Actively developed — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md) for full detail |
 
 ## Client Cross-Cutting Concerns
 
@@ -19,7 +19,8 @@
 ## Client Open Questions / Gaps
 
 - ~~`clients/admin/` is UI-shell-only — real auth/data wiring to `src/Identity.Api` hasn't been designed yet~~ — resolved; see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md) (Auth Flow, Backend Integration sections).
-- Remaining gaps, per [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#known-architectural-risks--debt): dashboard page still renders mock data; no automated test suite; `/settings` nav entry has no route yet.
+- ~~Dashboard page (`/`) still renders mock data~~ — resolved 2026-08-10: the Dashboard feature was deleted and replaced by a real Home page (session-backed profile summary + a live notification inbox).
+- Remaining gaps, per [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#known-architectural-risks--debt): no automated test suite; `/settings` nav entry has no route yet.
 
 ---
-_Last updated: 2026-08-04 — corrected the `admin` row and Open Questions to match its current state (real auth/CRUD/notifications, not UI-shell/mock-data); pointers added to the generated admin docs rather than re-deriving detail here._
+_Last updated: 2026-08-10 (ROT resync — the dashboard/mock-data references were stale since the 2026-08-10 Home-page replacement; corrected the `admin` row and Open Questions accordingly)._
