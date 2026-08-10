@@ -1,4 +1,4 @@
-import type { ClaimDto } from "@/types/user";
+import type { ClaimDto } from "@/types/claim";
 
 export interface RoleDto {
   id: string;

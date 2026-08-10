@@ -2,7 +2,8 @@
 
 import { resolveSession } from "@/features/user-profile";
 import { updateUser } from "@/features/users/api/update-user";
-import type { ClaimDto, UserDto } from "@/types/user";
+import type { ClaimDto } from "@/types/claim";
+import type { UserDto } from "@/features/users/types/user";
 
 export interface UpdateUserFormState {
   error?: string;

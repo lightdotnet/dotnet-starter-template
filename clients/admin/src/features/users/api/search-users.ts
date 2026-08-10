@@ -1,7 +1,7 @@
 import { requestJson } from "@/lib/server/backend-api";
 import { guardCall } from "@/lib/server/call-guard";
 import type { PagedResult } from "@/types/api";
-import type { SearchUsersParams, UserDto } from "@/types/user";
+import type { SearchUsersParams, UserDto } from "@/features/users/types/user";
 
 export function searchUsers(params: SearchUsersParams = {}) {
   return guardCall(() =>

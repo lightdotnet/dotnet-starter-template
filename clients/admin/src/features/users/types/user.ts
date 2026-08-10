@@ -1,7 +1,4 @@
-export interface ClaimDto {
-  type: string;
-  value: string;
-}
+import type { ClaimDto } from "@/types/claim";
 
 export interface UserDto {
   id: string;

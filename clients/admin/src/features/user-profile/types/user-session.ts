@@ -1,4 +1,4 @@
-import type { DeviceDto } from "@/types/token";
+import type { DeviceDto } from "@/features/auth";
 
 export interface UserSessionDto {
   id: string;

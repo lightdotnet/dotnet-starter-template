@@ -1,4 +1,5 @@
-import type { ClaimDto, UserDto } from "@/types/user";
+import type { ClaimDto } from "@/types/claim";
+import type { UserDto } from "@/features/users";
 
 /** Display-only profile data. Excludes `roles`/`claims` — those have their own session fields. */
 export type ProfileData = Omit<UserDto, "roles" | "claims">;

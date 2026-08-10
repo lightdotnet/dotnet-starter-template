@@ -1,7 +1,7 @@
 import { requestJson } from "@/lib/server/backend-api";
 import { guardResponseCall } from "@/lib/server/call-guard";
 import type { ApiResponse } from "@/types/api";
-import type { UserDto } from "@/types/user";
+import type { UserDto } from "@/features/users/types/user";
 
 export function updateUser(user: UserDto) {
   return guardResponseCall(() =>

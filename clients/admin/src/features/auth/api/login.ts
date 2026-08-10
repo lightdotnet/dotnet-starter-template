@@ -1,7 +1,7 @@
 import { requestJson } from "@/lib/server/http";
 import { guardCall } from "@/lib/server/call-guard";
 import type { Result } from "@/types/api";
-import type { DeviceDto, GetTokenRequest, TokenDto } from "@/types/token";
+import type { DeviceDto, GetTokenRequest, TokenDto } from "@/features/auth/types/token";
 
 export function login(request: GetTokenRequest, device?: Pick<DeviceDto, "id" | "name">) {
   // TokenController's own route ("token") plus its action route ("token/get")

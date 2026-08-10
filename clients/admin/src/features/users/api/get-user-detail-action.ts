@@ -2,7 +2,7 @@
 
 import { resolveSession } from "@/features/user-profile";
 import { getUserById } from "@/features/users/api/get-user-by-id";
-import type { UserDto } from "@/types/user";
+import type { UserDto } from "@/features/users/types/user";
 
 export interface GetUserDetailState {
   data: UserDto | null;

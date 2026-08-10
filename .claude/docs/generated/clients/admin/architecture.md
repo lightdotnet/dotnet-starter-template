@@ -11,7 +11,7 @@ src/
                              notifications/page.tsx}
   features/
     auth/                   api/{login,refresh-token,login-action,logout-action,refresh-session-action}.ts,
-                             components/{login-page,login-form}.tsx, index.ts
+                             components/{login-page,login-form}.tsx, types/token.ts (new this sync), index.ts
                              (logout-action.ts — barrel does not export it, see Dependency Direction;
                              refresh-session-action.ts — a super-admin-gated manual token-rotation Server Action,
                              not previously listed here; changed this sync to use the new persistSessionCookie()
@@ -23,7 +23,8 @@ src/
                              force-password-action, delete-user-action, get-user-detail-action, and — new this sync —
                              search-users-action, all "use server"),
                              components/{users-page,users-data-table,create-user-dialog,edit-user-dialog,delete-user-dialog}.tsx,
-                             constants/{permissions,nav-item}.ts (`USERS_PERMISSIONS`, `USERS_NAV_ITEM` — nav-item.ts new), index.ts
+                             constants/{permissions,nav-item}.ts (`USERS_PERMISSIONS`, `USERS_NAV_ITEM` — nav-item.ts new),
+                             types/user.ts (new this sync), index.ts
     roles/                  api/*.ts (12 endpoint files — the original 5 plus get-permissions, get-role-detail-action,
                              create-role-action, update-role-action, delete-role-action, and — new this sync —
                              get-all-roles-action, get-permissions-action),
@@ -102,7 +103,7 @@ src/
                              (menu.ts and authorization.ts are new — see Key Design Patterns)
   constants/                nav-items.ts (permissions.ts is still gone — relocated per-feature; nav item definitions
                              are now also per-feature, see `features/{dashboard,users,roles}/constants/nav-item.ts`)
-  types/                    api.ts, nav.ts, session.ts, token.ts, user.ts
+  types/                    api.ts, claim.ts, nav.ts, session.ts
   proxy.ts                  Next.js 16 "proxy" convention file (successor to middleware.ts); calls into
                              `lib/server/{parse-session,refresh-session,token-cipher,session-cookie}.ts` — see
                              Known Architectural Risks / Debt for an open question about which runtime this requires
@@ -165,7 +166,7 @@ components/layout/user-menu.tsx    -> components/ui/{avatar,button,dropdown-menu
 components/theme/theme-toggle.tsx        -> next-themes, ./use-has-mounted, components/ui/{button,dropdown-menu}
 components/theme/accent-color-picker.tsx -> components/ui/{button,dropdown-menu}, ./accent-color-provider
 
-features/auth/index.ts              -> ./components/login-page, ./api/login, ./api/refresh-token
+features/auth/index.ts              -> ./components/login-page, ./api/login, ./api/refresh-token, ./types/token
                                         (does NOT export logoutAction — see components/layout/user-menu.tsx above)
 features/auth/components/login-page.tsx  -> components/ui/card, ./login-form (async; reads `searchParams` for `redirect`)
 features/auth/components/login-form.tsx  -> components/ui/{button,input,label,alert}, features/auth/api/login-action
@@ -186,11 +187,11 @@ features/auth/api/refresh-session-action.ts -> "use server"; lib/server/session 
                                         tokens, gated on super-admin; called from
                                         features/user-profile/components/session-info-card.tsx (that file/caller
                                         is not otherwise documented here — out of scope for this pass)
-features/auth/api/login.ts          -> lib/server/http, lib/server/call-guard, types/{api,token}
+features/auth/api/login.ts          -> lib/server/http, lib/server/call-guard, types/api, features/auth/types/token
                                         (one of 3 exceptions still calling lib/server/http directly — runs before
                                         a session cookie exists, so login-action.ts's own explicit token isn't
                                         applicable here; see Key Design Patterns for the handler-pipeline change)
-features/auth/api/refresh-token.ts  -> lib/server/http, lib/server/call-guard, types/{api,token}
+features/auth/api/refresh-token.ts  -> lib/server/http, lib/server/call-guard, types/api, features/auth/types/token
                                         (now has a real caller: lib/server/refresh-session.ts; another of the
                                         3 lib/server/http exceptions — runs before a session cookie exists)
 
@@ -200,7 +201,9 @@ features/user-profile/components/user-profile-page.tsx -> components/ui/{card,ba
 features/user-profile/api/resolve-session.ts -> lib/server/session (getSession), types/session
                                         (now a thin passthrough to getSession() — no longer calls getCurrentUser itself;
                                         proxy.ts keeps the cookie's profile/claims fresh instead, see Key Design Patterns)
-features/user-profile/api/get-current-user.ts -> lib/server/http, lib/server/call-guard, types/{api,user}
+features/user-profile/api/get-current-user.ts -> lib/server/http, lib/server/call-guard, types/api,
+                                        features/users (barrel, type-only — UserDto; new cross-feature edge this
+                                        sync, safe from a bundle standpoint since `import type` is erased)
                                         (the 3rd lib/server/http exception — takes an explicit accessToken param
                                         and passes it via lib/server/http-handlers/bearer-token-handler.ts's
                                         explicitBearerTokenHandler; called from login-action.ts and proxy.ts,
@@ -215,7 +218,8 @@ features/dashboard/constants/nav-item.ts -> lucide-react (LayoutDashboard), type
 
 features/users/index.ts             -> ./components/users-page, ./api/{search-users,get-all-users,get-user-by-id,
                                         get-user-by-username,create-user,update-user,delete-user,force-password},
-                                        ./constants/permissions (USERS_PERMISSIONS), ./constants/nav-item (USERS_NAV_ITEM)
+                                        ./constants/permissions (USERS_PERMISSIONS), ./constants/nav-item (USERS_NAV_ITEM),
+                                        ./types/user
 features/users/constants/nav-item.ts -> lucide-react (Users), ./permissions (USERS_PERMISSIONS), types/nav
                                         (new; label "Users", href "/identity/users", permission USERS_PERMISSIONS.View)
 features/users/components/users-page.tsx -> features/user-profile (resolveSession), features/users/api/search-users,
@@ -227,7 +231,7 @@ features/users/components/users-page.tsx -> features/user-profile (resolveSessio
 features/users/components/users-data-table.tsx -> components/shared/data-table (DataTable + types), components/ui/{avatar,badge,button},
                                         components/ui/dropdown-menu, features/users/components/{create,edit,delete}-user-dialog,
                                         features/user-profile/components/user-status-badge, lib/shared/user-display,
-                                        types/user — no longer takes a `roles`/`RoleDto` prop or imports
+                                        features/users/types/user — no longer takes a `roles`/`RoleDto` prop or imports
                                         features/roles/types/role this sync (edit-user-dialog.tsx now fetches roles itself)
 features/users/components/create-user-dialog.tsx -> components/ui/{alert,button,dialog,input,label}, components/toast (notifySuccess),
                                         hooks/use-action-success-toast (new this sync, replacing an inline useEffect),
@@ -240,19 +244,20 @@ features/users/components/edit-user-dialog.tsx -> components/ui/{alert,button,ch
                                         features/users/api/update-user-action, features/users/api/force-password-action,
                                         features/roles/api/get-all-roles-action (new this sync — direct file import,
                                         not the @/features/roles barrel; see the barrel-bypass exceptions below),
-                                        features/roles/types/role (RoleDto), types/user — now holds its own
+                                        features/roles/types/role (RoleDto), features/users/types/user,
+                                        types/claim (ClaimDto) — now holds its own
                                         `roles: RoleDto[]` state and fetches
                                         `Promise.all([getUserDetailAction(user.id), getAllRolesAction()])` on open,
                                         since users-data-table.tsx no longer passes a `roles` prop down; also uses
                                         hooks/use-action-success-toast (new this sync, 2 call sites — the update form
                                         and the password-reset form)
 features/users/components/delete-user-dialog.tsx -> components/ui/{button,dialog}, components/toast, hooks/use-guarded-action
-                                        (new this sync, replacing hand-rolled useTransition), features/users/api/delete-user-action, types/user
-features/users/api/create-user-action.ts -> "use server"; features/user-profile (resolveSession), features/users/api/create-user, types/user
+                                        (new this sync, replacing hand-rolled useTransition), features/users/api/delete-user-action, features/users/types/user
+features/users/api/create-user-action.ts -> "use server"; features/user-profile (resolveSession), features/users/api/create-user, features/users/types/user
 features/users/api/{update-user-action,force-password-action,delete-user-action,get-user-detail-action}.ts
                                      -> "use server"; features/user-profile (resolveSession),
-                                        features/users/api/{update-user,force-password,delete-user,get-user-by-id} respectively, types/user
-features/users/api/*.ts (7 remaining files) -> lib/server/backend-api, lib/server/call-guard, types/{api,user}
+                                        features/users/api/{update-user,force-password,delete-user,get-user-by-id} respectively, features/users/types/user
+features/users/api/*.ts (7 remaining files) -> lib/server/backend-api, lib/server/call-guard, types/api, features/users/types/user
                                         (changed this sync — was lib/server/http; these ordinary endpoint files
                                         no longer take an accessToken parameter, see Key Design Patterns)
 
@@ -351,7 +356,8 @@ features/notifications/components/send-notification-dialog.tsx -> components/ui/
 features/notifications/components/user-select.tsx -> components/ui/{button,popover,command}, lucide-react,
                                         lib/shared/utils, features/users/api/search-users-action (new this sync —
                                         direct file import, cross-feature, bypassing @/features/users's barrel; see
-                                        the barrel-bypass exceptions below), lib/shared/user-display, types/user —
+                                        the barrel-bypass exceptions below), lib/shared/user-display,
+                                        features/users (barrel, type-only — UserDto) —
                                         **completely rewritten this sync**: no longer built on components/ui/combobox
                                         (Combobox); now a bespoke component with its own `open`/`query`/`options`/
                                         `loading`/`selectedLabel` state. No default/first-page fetch on open anymore;
@@ -464,9 +470,9 @@ lib/server/persist-session-cookie.ts (new) -> next/headers (cookies), lib/server
                                         features/auth/api/refresh-session-action.ts, replacing each file's own
                                         hand-rolled cookies().set(...) call
 lib/server/token-cipher.ts          -> node:crypto, lib/server/config (getTokenEncryptionKey) — AES-256-GCM (new)
-lib/server/jwt.ts                   -> types/user (ClaimDto) — decodes a JWT payload without verifying its signature;
+lib/server/jwt.ts                   -> types/claim (ClaimDto) — decodes a JWT payload without verifying its signature;
                                         no other lib/server/* dependency (new)
-lib/server/build-session-claims.ts  -> lib/server/jwt (extractAllClaims), lib/shared/dedupe-claims, types/user (new)
+lib/server/build-session-claims.ts  -> lib/server/jwt (extractAllClaims), lib/shared/dedupe-claims, types/claim (new)
 lib/server/http.ts                  -> lib/server/config (getApiBaseUrl), lib/server/api-clients (ApiClientName,
                                         default ApiClients.Backend) — changed this sync: no longer accepts an
                                         `accessToken` option; `RequestOptions` now has `handlers?: HttpRequestHandler[]`
@@ -529,7 +535,7 @@ Five deliberate, narrow exceptions to the barrel-only rule exist, all driven by 
 
 ## Key Design Patterns
 
-- **Feature-folder + barrel-export convention**: each `features/<name>/` owns `api/` (one file per backend endpoint), `components/`, optionally `types/` (only for types with exactly one consumer — `features/roles/types/{role,permission-definition}.ts`, `features/user-profile/types/user-session.ts`) and optionally `constants/` (a feature-owned permission-string file, e.g. `features/users/constants/permissions.ts`, and now — new this sync — a `nav-item.ts` per nav-bearing feature), and an `index.ts` that is the only sanctioned import surface for other features or `app/*`. **Five narrow, deliberate exceptions** to the barrel-only rule exist (see Dependency Direction): `constants/nav-items.ts`, `components/layout/user-menu.tsx`, `components/layout/topbar.tsx`, and — new this sync — `features/users/components/edit-user-dialog.tsx` (imports `@/features/roles/api/get-all-roles-action`) and `features/notifications/components/user-select.tsx` (imports `@/features/users/api/search-users-action`) each import one specific file directly rather than through a barrel, to avoid pulling a barrel's other, server-only exports (async Server Components, cookie-reading API functions) into a client bundle.
+- **Feature-folder + barrel-export convention**: each `features/<name>/` owns `api/` (one file per backend endpoint), `components/`, optionally `types/` — either single-consumer (`features/roles/types/{role,permission-definition}.ts`, `features/user-profile/types/user-session.ts`) or feature-owned DTOs with multiple consumers inside and outside the feature, re-exported through the barrel for cross-feature use (`features/users/types/user.ts` — `UserDto`/`CreateUserRequest`/`SearchUsersParams`; `features/auth/types/token.ts` — `TokenDto`/`GetTokenRequest`/`RefreshTokenRequest`/`DeviceDto`, both new this sync, split out of the former global `types/user.ts`/`types/token.ts` — `ClaimDto` moved to a new global `types/claim.ts` instead, since `auth`/`users`/`roles` all depend on it equally) — and optionally `constants/` (a feature-owned permission-string file, e.g. `features/users/constants/permissions.ts`, and now — new this sync — a `nav-item.ts` per nav-bearing feature), and an `index.ts` that is the only sanctioned import surface for other features or `app/*`. **Five narrow, deliberate exceptions** to the barrel-only rule exist (see Dependency Direction): `constants/nav-items.ts`, `components/layout/user-menu.tsx`, `components/layout/topbar.tsx`, and — new this sync — `features/users/components/edit-user-dialog.tsx` (imports `@/features/roles/api/get-all-roles-action`) and `features/notifications/components/user-select.tsx` (imports `@/features/users/api/search-users-action`) each import one specific file directly rather than through a barrel, to avoid pulling a barrel's other, server-only exports (async Server Components, cookie-reading API functions) into a client bundle.
 - **Each nav-bearing feature owns its own `NavItem` metadata** (extended this sync): `features/{dashboard,users,roles,notifications}/constants/nav-item.ts` each export one `NavItem` (label, href, icon, and — where relevant — the permission that gates it), re-exported from that feature's barrel. `constants/nav-items.ts` imports these four constants **by direct file path**, not via each feature's barrel, and assembles them into `NAV_ITEMS` alongside two nodes it still declares itself (the "Identity" group, since it spans two features, and "Settings", which has no owning feature or page at all). The direct-file-path import is intentional, not an oversight: `nav-items.ts` is imported by the client-side `Sidebar` component, and `features/users/index.ts`/`features/roles/index.ts`'s barrels also re-export server-only code (`UsersPage`/`RolesPage`, async Server Components calling `resolveSession()`, which reads cookies via `next/headers`) — importing the full barrel from client code would drag that server-only chain into the client bundle (this was tried and produced a real "next/headers only available in Server Components" build error before being fixed this way). The `nav-item.ts` files themselves are plain data (an icon reference plus strings) with no server/client-bound dependency, so importing them directly is safe. `components/layout/sidebar.tsx` then computes the permission-filtered menu client-side via `lib/shared/menu.ts`'s `buildVisibleMenu(NAV_ITEMS, can)`, where `can` is built from the new `lib/shared/authorization.ts` (`hasPermission`) using the `permissions`/`userName` props `AppShell` passes down from `resolveSession()`.
 - **Fetch full detail on dialog open, when the list endpoint's DTO is incomplete — now generalized to self-fetching the picklist too** (changed this sync): both `edit-user-dialog.tsx` and `edit-role-dialog.tsx` call a dedicated `get-*-detail-action.ts` in a `useEffect` on mount rather than trusting the row data they were opened with. This exists because the backend's list-returning service methods (`UserService.SearchAsync`/`GetAllAsync`, `RoleService.GetAllAsync` — their shared `DataMapper.cs` projection) never populate `Roles`/`Claims`; only the single-record fetch (`GetByIdAsync`) does. Relying on the row data silently produced an empty roles/claims checklist that, on save, would have wiped out anything the record actually had — worth remembering before building another list-backed feature against this backend. **New this sync**: the same "fetch on open, don't trust what the list page preloaded" idea now also covers the *picklist itself* — `users-page.tsx`/`roles-page.tsx` no longer fetch the role catalog/permission catalog and pass them down as props; instead each edit dialog runs `Promise.all([<detail fetch>, <picklist fetch>])` on open (`getAllRolesAction()`/`getPermissionsAction()` respectively), so both list pages now issue one fewer API call on page load.
 - **On-demand user search, replacing a preloaded full user list** (new this sync): `features/notifications/components/user-select.tsx` no longer takes a `users` prop or does client-side filtering over a preloaded list. It debounces (300ms) a call to `searchUsersAction({searchValue, pageNumber: 1, pageSize: 10})` once the trimmed query reaches a minimum length (`MIN_SEARCH_LENGTH = 3`, checked via `trimmedQuery.length < MIN_SEARCH_LENGTH`, matching the component's own placeholder/comment), fetching only the first page of matches — never the whole user list. Its `onValueChange` hands back the full selected `UserDto`, not just an id, so a caller needing the display name too (`send-notification-dialog.tsx`'s "From" field) doesn't need a second lookup.
@@ -610,4 +616,4 @@ Feature isolation is enforced by convention (barrel-only cross-feature imports),
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-10 (resynced — SignalR direct-to-backend connection via `NEXT_PUBLIC_SIGNALR_HUB_URL`, `next.config.ts`'s `rewrites()` deleted; `use-notifications.ts` retry-on-failed-handshake logic; new shared `refreshSessionIfNearExpiry()` (`lib/server/refresh-session.ts`) and `persistSessionCookie()` (`lib/server/persist-session-cookie.ts`) helpers, adopted by `proxy.ts`, `get-signalr-token-action.ts`, and the previously-undocumented `features/auth/api/refresh-session-action.ts`; `AccentColorProvider`'s new `black` preset and `accent-color-picker.tsx`'s `swatchColor()` helper) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-10 (resynced — SignalR direct-to-backend connection via `NEXT_PUBLIC_SIGNALR_HUB_URL`, `next.config.ts`'s `rewrites()` deleted; `use-notifications.ts` retry-on-failed-handshake logic; new shared `refreshSessionIfNearExpiry()` (`lib/server/refresh-session.ts`) and `persistSessionCookie()` (`lib/server/persist-session-cookie.ts`) helpers, adopted by `proxy.ts`, `get-signalr-token-action.ts`, and the previously-undocumented `features/auth/api/refresh-session-action.ts`; `AccentColorProvider`'s new `black` preset and `accent-color-picker.tsx`'s `swatchColor()` helper; further resynced same day — `ClaimDto` split out of the former global `types/user.ts` into a new `types/claim.ts`; `UserDto`/`CreateUserRequest`/`SearchUsersParams` moved into a new `features/users/types/user.ts`; `TokenDto`/`GetTokenRequest`/`RefreshTokenRequest`/`DeviceDto` moved into a new `features/auth/types/token.ts`; both re-exported via their owning feature's barrel, with cross-feature consumers (`get-current-user.ts`, `user-select.tsx`) now importing the type through the barrel instead of a global `types/` file) — scope: client app "admin" — see .claude/CLAUDE.md for update rules._

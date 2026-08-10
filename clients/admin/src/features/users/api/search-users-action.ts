@@ -2,7 +2,7 @@
 
 import { resolveSession } from "@/features/user-profile";
 import { searchUsers } from "@/features/users/api/search-users";
-import type { SearchUsersParams, UserDto } from "@/types/user";
+import type { SearchUsersParams, UserDto } from "@/features/users/types/user";
 import type { Paged } from "@/types/api";
 
 export interface SearchUsersState {

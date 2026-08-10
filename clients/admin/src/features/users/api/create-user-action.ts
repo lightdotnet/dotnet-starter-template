@@ -2,7 +2,7 @@
 
 import { resolveSession } from "@/features/user-profile";
 import { createUser } from "@/features/users/api/create-user";
-import type { CreateUserRequest } from "@/types/user";
+import type { CreateUserRequest } from "@/features/users/types/user";
 
 export interface CreateUserFormState {
   error?: string;

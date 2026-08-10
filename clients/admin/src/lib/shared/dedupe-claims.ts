@@ -1,4 +1,4 @@
-import type { ClaimDto } from "@/types/user";
+import type { ClaimDto } from "@/types/claim";
 
 export function dedupeClaims(claims: ClaimDto[]): ClaimDto[] {
   const seen = new Set<string>();

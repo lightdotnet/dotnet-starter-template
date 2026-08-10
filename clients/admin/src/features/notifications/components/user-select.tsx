@@ -15,7 +15,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { searchUsersAction } from "@/features/users/api/search-users-action";
 import { getDisplayName } from "@/lib/shared/user-display";
-import type { UserDto } from "@/types/user";
+import type { UserDto } from "@/features/users";
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;

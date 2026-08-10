@@ -2,7 +2,7 @@ import { requestJson } from "@/lib/server/http";
 import { guardCall } from "@/lib/server/call-guard";
 import { explicitBearerTokenHandler } from "@/lib/server/http-handlers/bearer-token-handler";
 import type { Result } from "@/types/api";
-import type { UserDto } from "@/types/user";
+import type { UserDto } from "@/features/users";
 
 /**
  * Takes the access token explicitly rather than reading it from the ambient

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { deleteUserAction } from "@/features/users/api/delete-user-action";
-import type { UserDto } from "@/types/user";
+import type { UserDto } from "@/features/users/types/user";
 
 interface DeleteUserDialogProps {
   open: boolean;

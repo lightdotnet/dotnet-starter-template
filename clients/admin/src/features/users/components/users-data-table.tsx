@@ -23,7 +23,7 @@ import { DeleteUserDialog } from "@/features/users/components/delete-user-dialog
 import { EditUserDialog } from "@/features/users/components/edit-user-dialog";
 import { UserStatusBadge } from "@/features/user-profile/components/user-status-badge";
 import { getDisplayName, getInitials } from "@/lib/shared/user-display";
-import type { UserDto } from "@/types/user";
+import type { UserDto } from "@/features/users/types/user";
 
 interface UsersDataTableProps {
   records: UserDto[];

@@ -30,7 +30,8 @@ import {
 } from "@/features/users/api/update-user-action";
 import { getAllRolesAction } from "@/features/roles/api/get-all-roles-action";
 import type { RoleDto } from "@/features/roles/types/role";
-import type { ClaimDto, UserDto } from "@/types/user";
+import type { ClaimDto } from "@/types/claim";
+import type { UserDto } from "@/features/users/types/user";
 
 const STATUS_OPTIONS = ["Active", "Locked"];
 const AUTH_PROVIDER_OPTIONS = ["Local", "AD"];
