@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { deleteUser } from "@/features/users/api/delete-user";
 
@@ -20,5 +21,6 @@ export async function deleteUserAction(id: string): Promise<DeleteUserActionStat
     return { error: result.message || "Failed to delete user." };
   }
 
+  revalidatePath("/identity/users");
   return { success: true };
 }

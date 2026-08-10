@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { createRole } from "@/features/roles/api/create-role";
 import type { CreateRoleRequest } from "@/features/roles/types/role";
@@ -35,5 +36,6 @@ export async function createRoleAction(
     return { error: result.message || "Failed to create role." };
   }
 
+  revalidatePath("/identity/roles");
   return { success: true };
 }

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { ApiClients, type ApiClientName } from "@/lib/server/api-clients";
 
 function requireEnv(name: string): string {

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { refreshToken } from "@/features/auth/api/refresh-token";
 import { extractPermissions, extractRoles } from "@/lib/server/jwt";
 import { REFRESH_LEAD_MS } from "@/lib/server/session-cookie";

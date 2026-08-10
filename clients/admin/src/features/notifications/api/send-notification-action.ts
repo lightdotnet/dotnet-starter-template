@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { sendNotification } from "@/features/notifications/api/send-notification";
 import { getDisplayName } from "@/lib/shared/user-display";
@@ -47,5 +48,6 @@ export async function sendNotificationAction(
     return { error: result.message || "Failed to send notification." };
   }
 
+  revalidatePath("/notifications");
   return { success: true };
 }

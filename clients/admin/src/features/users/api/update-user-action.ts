@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { updateUser } from "@/features/users/api/update-user";
 import type { ClaimDto } from "@/types/claim";
@@ -52,5 +53,6 @@ export async function updateUserAction(
     return { error: result.message || "Failed to update user." };
   }
 
+  revalidatePath("/identity/users");
   return { success: true };
 }

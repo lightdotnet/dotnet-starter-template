@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { deleteRole } from "@/features/roles/api/delete-role";
 
@@ -22,5 +23,6 @@ export async function deleteRoleAction(
     return { error: result.message || "Failed to delete role." };
   }
 
+  revalidatePath("/identity/roles");
   return { success: true };
 }

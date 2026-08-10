@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getSession } from "@/lib/server/session";
 import type { HttpRequestHandler } from "@/lib/server/http";
 

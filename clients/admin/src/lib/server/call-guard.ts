@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { ApiResponse, Result } from "@/types/api";
 
 function describeError(error: unknown): string {

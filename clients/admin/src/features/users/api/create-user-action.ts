@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { createUser } from "@/features/users/api/create-user";
 import type { CreateUserRequest } from "@/features/users/types/user";
@@ -40,5 +41,6 @@ export async function createUserAction(
     return { error: result.message || "Failed to create user." };
   }
 
+  revalidatePath("/identity/users");
   return { success: true };
 }

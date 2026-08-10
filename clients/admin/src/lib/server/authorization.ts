@@ -1,3 +1,5 @@
+import "server-only";
+
 import * as shared from "@/lib/shared/authorization";
 import type { SessionData } from "@/types/session";
 

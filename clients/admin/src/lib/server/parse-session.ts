@@ -1,3 +1,5 @@
+import "server-only";
+
 import { decrypt } from "@/lib/server/token-cipher";
 import type { SessionData } from "@/types/session";
 

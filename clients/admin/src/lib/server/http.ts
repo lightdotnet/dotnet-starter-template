@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getApiBaseUrl } from "@/lib/server/config";
 import { ApiClients, type ApiClientName } from "@/lib/server/api-clients";
 

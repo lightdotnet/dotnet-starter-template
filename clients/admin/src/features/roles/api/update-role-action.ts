@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { getRoleById } from "@/features/roles/api/get-role-by-id";
 import { updateRole } from "@/features/roles/api/update-role";
@@ -53,5 +54,6 @@ export async function updateRoleAction(
     return { error: result.message || "Failed to update role." };
   }
 
+  revalidatePath("/identity/roles");
   return { success: true };
 }

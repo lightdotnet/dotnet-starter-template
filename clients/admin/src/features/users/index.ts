@@ -2,7 +2,6 @@ export { UsersPage } from "./components/users-page";
 export { searchUsers } from "./api/search-users";
 export { getAllUsers } from "./api/get-all-users";
 export { getUserById } from "./api/get-user-by-id";
-export { getUserByUsername } from "./api/get-user-by-username";
 export { createUser } from "./api/create-user";
 export { updateUser } from "./api/update-user";
 export { deleteUser } from "./api/delete-user";

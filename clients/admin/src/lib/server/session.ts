@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cookies } from "next/headers";
 import { parseSessionCookie } from "@/lib/server/parse-session";
 import { SESSION_COOKIE_NAME } from "@/lib/server/session-cookie";

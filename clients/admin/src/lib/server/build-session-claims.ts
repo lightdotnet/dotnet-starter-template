@@ -1,3 +1,5 @@
+import "server-only";
+
 import { extractAllClaims } from "@/lib/server/jwt";
 import { dedupeClaims } from "@/lib/shared/dedupe-claims";
 import type { ClaimDto } from "@/types/claim";

@@ -1,3 +1,5 @@
+import "server-only";
+
 export const SESSION_COOKIE_NAME = "admin_session";
 
 /** Hard cap on session lifetime, counted from login — not extended by refresh. */

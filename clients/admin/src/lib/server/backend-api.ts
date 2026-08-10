@@ -1,3 +1,5 @@
+import "server-only";
+
 import {
   requestJson as httpRequestJson,
   requestVoid as httpRequestVoid,

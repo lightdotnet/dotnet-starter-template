@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { getTokenEncryptionKey } from "@/lib/server/config";
 
