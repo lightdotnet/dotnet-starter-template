@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { markNotificationRead } from "@/features/notifications/api/mark-notification-read";
+import { markNotificationRead } from "@/features/notifications/api/user-notifications.api";
 
 export async function markNotificationReadAction(id: string): Promise<boolean> {
   const session = await resolveSession();

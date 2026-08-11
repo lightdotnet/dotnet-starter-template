@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { login } from "@/features/auth/api/login";
+import { getToken } from "@/features/auth/api/token.api";
 import { getCurrentUser } from "@/features/user-profile";
 import { encrypt } from "@/lib/server/token-cipher";
 import { extractPermissions, extractRoles } from "@/lib/server/jwt";
@@ -29,7 +29,7 @@ export async function loginAction(
     return { error: "Username and password are required." };
   }
 
-  const tokenResult = await login({ username, password });
+  const tokenResult = await getToken({ username, password });
 
   if (!tokenResult.isSuccess || !tokenResult.data) {
     return { error: tokenResult.message || "Login failed." };

@@ -8,7 +8,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
-import { getNotifications } from "@/features/notifications/api/get-notifications";
+import { getNotifications } from "@/features/notifications/api/notifications.api";
 import { NotificationsDataTable } from "@/features/notifications/components/notifications-data-table";
 import { hasPermission } from "@/lib/server/authorization";
 import { NOTIFICATIONS_PERMISSIONS } from "@/features/notifications/constants/permissions";

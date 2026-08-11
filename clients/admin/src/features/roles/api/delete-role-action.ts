@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
-import { deleteRole } from "@/features/roles/api/delete-role";
+import { deleteRole } from "@/features/roles/api/roles.api";
 
 export interface DeleteRoleActionState {
   error?: string;

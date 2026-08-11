@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { getDomainUser } from "@/features/users/api/get-domain-user";
+import { getDomainUser } from "@/features/users/api/users.api";
 import type { DomainUserDto } from "@/features/users/types/user";
 
 export interface GetDomainUserState {

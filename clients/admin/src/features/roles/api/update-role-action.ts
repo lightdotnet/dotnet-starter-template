@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
-import { getRoleById } from "@/features/roles/api/get-role-by-id";
-import { updateRole } from "@/features/roles/api/update-role";
+import { getRoleById, updateRole } from "@/features/roles/api/roles.api";
 import type { RoleDto } from "@/features/roles/types/role";
 
 export interface UpdateRoleFormState {

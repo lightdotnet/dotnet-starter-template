@@ -3,7 +3,7 @@ import { ShieldOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
-import { searchUsers } from "@/features/users/api/search-users";
+import { searchUsers } from "@/features/users/api/users.api";
 import { UsersDataTable } from "@/features/users/components/users-data-table";
 import { hasPermission } from "@/lib/server/authorization";
 import { USERS_PERMISSIONS } from "@/features/users/constants/permissions";

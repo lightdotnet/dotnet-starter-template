@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { forcePassword } from "@/features/users/api/force-password";
+import { forcePassword } from "@/features/users/api/users.api";
 
 export interface ForcePasswordFormState {
   error?: string;

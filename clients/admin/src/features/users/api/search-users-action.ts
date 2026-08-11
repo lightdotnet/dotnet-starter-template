@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { searchUsers } from "@/features/users/api/search-users";
+import { searchUsers } from "@/features/users/api/users.api";
 import type { SearchUsersParams, UserDto } from "@/features/users/types/user";
 import type { Paged } from "@/types/api";
 

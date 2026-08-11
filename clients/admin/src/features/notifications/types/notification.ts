@@ -23,3 +23,12 @@ export interface NotificationLookupParams {
   pageNumber?: number;
   pageSize?: number;
 }
+
+export interface SendNotificationRequest {
+  fromUserId: string;
+  fromName?: string | null;
+  toUserId: string;
+  title: string;
+  message?: string;
+  url?: string;
+}

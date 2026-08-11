@@ -8,7 +8,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { resolveSession } from "@/features/user-profile";
-import { getAllRoles } from "@/features/roles/api/get-all-roles";
+import { getAllRoles } from "@/features/roles/api/roles.api";
 import { RolesDataTable } from "@/features/roles/components/roles-data-table";
 import { ROLES_PERMISSIONS } from "@/features/roles/constants/permissions";
 import { hasPermission } from "@/lib/server/authorization";

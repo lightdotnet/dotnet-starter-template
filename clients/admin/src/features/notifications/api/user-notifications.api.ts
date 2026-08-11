@@ -1,6 +1,6 @@
 import { requestJson } from "@/lib/server/backend-api";
 import { guardCall } from "@/lib/server/call-guard";
-import type { PagedResult } from "@/types/api";
+import type { Result, PagedResult } from "@/types/api";
 import type {
   NotificationDto,
   NotificationLookupParams,
@@ -18,5 +18,18 @@ export function getMyNotifications(
         pageSize: String(params.pageSize ?? 10),
       },
     }),
+  );
+}
+
+export function getUnreadCount() {
+  return guardCall(() =>
+    requestJson<Result<number>>("user_notification/count_unread"),
+  );
+}
+
+/** `Get(entryId)` marks the entry as read as a side effect and returns the updated record. */
+export function markNotificationRead(id: string) {
+  return guardCall(() =>
+    requestJson<Result<NotificationDto | null>>(`user_notification/${id}`),
   );
 }

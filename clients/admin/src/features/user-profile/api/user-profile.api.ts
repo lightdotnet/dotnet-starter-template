@@ -1,8 +1,10 @@
+import { requestJson as requestJsonBackend, requestVoid } from "@/lib/server/backend-api";
 import { requestJson } from "@/lib/server/http";
-import { guardCall } from "@/lib/server/call-guard";
+import { guardCall, guardRawCall } from "@/lib/server/call-guard";
 import { explicitBearerTokenHandler } from "@/lib/server/http-handlers/bearer-token-handler";
 import type { Result } from "@/types/api";
 import type { UserDto } from "@/features/users";
+import type { UserSessionDto } from "@/features/user-profile/types/user-session";
 
 /**
  * Takes the access token explicitly rather than reading it from the ambient
@@ -15,5 +17,17 @@ export function getCurrentUser(accessToken: string) {
     requestJson<Result<UserDto>>("user_profile", {
       handlers: [explicitBearerTokenHandler(accessToken)],
     }),
+  );
+}
+
+export function listSessions() {
+  return guardRawCall(() =>
+    requestJsonBackend<UserSessionDto[]>("user_profile/token/list"),
+  );
+}
+
+export function revokeSession(tokenId: string) {
+  return guardRawCall(() =>
+    requestVoid("user_profile/token/revoke", { method: "PUT", body: tokenId }),
   );
 }

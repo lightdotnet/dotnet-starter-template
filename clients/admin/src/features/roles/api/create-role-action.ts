@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
-import { createRole } from "@/features/roles/api/create-role";
+import { createRole } from "@/features/roles/api/roles.api";
 import type { CreateRoleRequest } from "@/features/roles/types/role";
 
 export interface CreateRoleFormState {

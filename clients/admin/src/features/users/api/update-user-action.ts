@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
-import { updateUser } from "@/features/users/api/update-user";
+import { updateUser } from "@/features/users/api/users.api";
 import type { ClaimDto } from "@/types/claim";
 import type { UserDto } from "@/features/users/types/user";
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
-import { sendNotification } from "@/features/notifications/api/send-notification";
+import { sendNotification } from "@/features/notifications/api/notifications.api";
 import { getDisplayName } from "@/lib/shared/user-display";
 
 export interface SendNotificationFormState {

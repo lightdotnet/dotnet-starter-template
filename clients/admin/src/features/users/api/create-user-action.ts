@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
-import { createUser } from "@/features/users/api/create-user";
+import { createUser } from "@/features/users/api/users.api";
 import type { CreateUserRequest } from "@/features/users/types/user";
 
 export interface CreateUserFormState {

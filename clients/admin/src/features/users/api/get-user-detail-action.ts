@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { getUserById } from "@/features/users/api/get-user-by-id";
+import { getUserById } from "@/features/users/api/users.api";
 import type { UserDto } from "@/features/users/types/user";
 
 export interface GetUserDetailState {

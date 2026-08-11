@@ -1,6 +1,6 @@
 import "server-only";
 
-import { refreshToken } from "@/features/auth/api/refresh-token";
+import { refreshToken } from "@/features/auth/api/token.api";
 import { extractPermissions, extractRoles } from "@/lib/server/jwt";
 import { REFRESH_LEAD_MS } from "@/lib/server/session-cookie";
 import type { SessionData } from "@/types/session";

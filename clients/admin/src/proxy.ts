@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getCurrentUser } from "@/features/user-profile/api/get-current-user";
+import { getCurrentUser } from "@/features/user-profile/api/user-profile.api";
 import { encrypt } from "@/lib/server/token-cipher";
 import { buildSessionClaims } from "@/lib/server/build-session-claims";
 import { refreshSessionIfNearExpiry } from "@/lib/server/refresh-session";

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
-import { deleteUser } from "@/features/users/api/delete-user";
+import { deleteUser } from "@/features/users/api/users.api";
 
 export interface DeleteUserActionState {
   error?: string;

@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { getUnreadCount } from "@/features/notifications/api/get-unread-count";
+import { getUnreadCount } from "@/features/notifications/api/user-notifications.api";
 
 export async function getUnreadCountAction(): Promise<number> {
   const session = await resolveSession();

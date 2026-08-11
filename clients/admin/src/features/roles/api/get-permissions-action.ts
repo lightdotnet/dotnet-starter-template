@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { getPermissions } from "@/features/roles/api/get-permissions";
+import { getPermissions } from "@/features/roles/api/roles.api";
 import type { PermissionDefinition } from "@/features/roles/types/permission-definition";
 
 export interface GetPermissionsState {

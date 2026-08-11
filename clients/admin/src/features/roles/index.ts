@@ -1,10 +1,12 @@
 export { RolesPage } from "./components/roles-page";
-export { getAllRoles } from "./api/get-all-roles";
-export { getRoleById } from "./api/get-role-by-id";
-export { getPermissions } from "./api/get-permissions";
-export { createRole } from "./api/create-role";
-export { updateRole } from "./api/update-role";
-export { deleteRole } from "./api/delete-role";
+export {
+  getAllRoles,
+  getPermissions,
+  getRoleById,
+  createRole,
+  updateRole,
+  deleteRole,
+} from "./api/roles.api";
 export { ROLES_PERMISSIONS } from "./constants/permissions";
 export { ROLES_NAV_ITEM } from "./constants/nav-item";
 export type { RoleDto, CreateRoleRequest } from "./types/role";

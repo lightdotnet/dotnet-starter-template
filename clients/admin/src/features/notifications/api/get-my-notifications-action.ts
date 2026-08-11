@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveSession } from "@/features/user-profile";
-import { getMyNotifications } from "@/features/notifications/api/get-my-notifications";
+import { getMyNotifications } from "@/features/notifications/api/user-notifications.api";
 import type {
   NotificationDto,
   NotificationLookupParams,

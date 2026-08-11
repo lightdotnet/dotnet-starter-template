@@ -1,12 +1,14 @@
 export { UsersPage } from "./components/users-page";
-export { searchUsers } from "./api/search-users";
-export { getAllUsers } from "./api/get-all-users";
-export { getUserById } from "./api/get-user-by-id";
-export { createUser } from "./api/create-user";
-export { updateUser } from "./api/update-user";
-export { deleteUser } from "./api/delete-user";
-export { forcePassword } from "./api/force-password";
-export { getDomainUser } from "./api/get-domain-user";
+export {
+  getAllUsers,
+  getDomainUser,
+  getUserById,
+  searchUsers,
+  createUser,
+  updateUser,
+  forcePassword,
+  deleteUser,
+} from "./api/users.api";
 export { USERS_PERMISSIONS } from "./constants/permissions";
 export { USERS_NAV_ITEM } from "./constants/nav-item";
 export type { UserDto, CreateUserRequest, SearchUsersParams, DomainUserDto } from "./types/user";
