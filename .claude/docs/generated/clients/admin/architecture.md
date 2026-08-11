@@ -187,9 +187,15 @@ components/theme/accent-color-picker.tsx -> components/ui/{button,dropdown-menu}
 
 features/auth/index.ts              -> ./components/login-page, ./api/login, ./api/refresh-token, ./types/token
                                         (does NOT export logoutAction — see components/layout/user-menu.tsx above)
-features/auth/components/login-page.tsx  -> components/ui/card, ./login-form (async; reads `searchParams` for `redirect`)
-features/auth/components/login-form.tsx  -> components/ui/{button,input,label,alert}, features/auth/api/login-action
-                                        (takes `{ redirect? }`, renders it as a hidden form field when present)
+features/auth/components/login-page.tsx  -> ./login-form only (async; reads `searchParams` for `redirect`; changed this
+                                        sync — no longer imports components/ui/card, the Card markup moved into
+                                        login-form.tsx below)
+features/auth/components/login-form.tsx  -> components/ui/{card,button,input,label,alert,spinner}, features/auth/api/login-action
+                                        (takes `{ redirect? }`, renders it as a hidden form field when present;
+                                        changed this sync — now a Client Component owning the full Card markup
+                                        (moved from login-page.tsx above) so it can render a dimmed, centered
+                                        Spinner overlay + `aria-busy` on the Card, plus a `<fieldset disabled={pending}>`
+                                        around the inputs, while `loginAction` is pending)
 features/auth/api/login-action.ts   -> "use server"; features/auth/api/login, features/user-profile (getCurrentUser —
                                         via the barrel, unchanged), lib/server/jwt (extractPermissions/extractRoles),
                                         lib/server/build-session-claims, lib/server/token-cipher (encrypt),
