@@ -9,5 +9,7 @@
         -->
 		<!-- Remove this to turn on warnings packages with vulnerabilities -->
 	    <NoWarn>NU1903</NoWarn>
+		<!-- Evaluation of this argument may be expensive and unnecessary if logging is disabled -->
+		<NoWarn>CA1873</NoWarn>
     </PropertyGroup>
   </Project>
