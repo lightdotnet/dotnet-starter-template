@@ -29,17 +29,13 @@ import {
   type UpdateUserFormState,
 } from "@/features/users/api/update-user-action";
 import { getAllRolesAction } from "@/features/roles/api/get-all-roles-action";
+import { AUTH_PROVIDER_SELECT_OPTIONS } from "@/features/users/constants/auth-provider";
 import type { RoleDto } from "@/features/roles/types/role";
 import type { ClaimDto } from "@/types/claim";
 import type { UserDto } from "@/features/users/types/user";
 
 const STATUS_OPTIONS = ["Active", "Locked"];
-const AUTH_PROVIDER_OPTIONS = ["Local", "AD"];
 const STATUS_SELECT_OPTIONS = STATUS_OPTIONS.map((option) => ({ value: option, label: option }));
-const AUTH_PROVIDER_SELECT_OPTIONS = AUTH_PROVIDER_OPTIONS.map((option) => ({
-  value: option,
-  label: option,
-}));
 
 const updateInitialState: UpdateUserFormState = {};
 const passwordInitialState: ForcePasswordFormState = {};
@@ -89,7 +85,7 @@ export function EditUserDialog({
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [status, setStatus] = useState("active");
-  const [authProvider, setAuthProvider] = useState("Local");
+  const [authProvider, setAuthProvider] = useState("");
   const [roles, setRoles] = useState<RoleDto[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [claimRows, setClaimRows] = useState<ClaimRow[]>([]);
@@ -120,7 +116,7 @@ export function EditUserDialog({
       }
 
       setStatus(detailResult.data.status ?? "active");
-      setAuthProvider(detailResult.data.authProvider ?? "Local");
+      setAuthProvider(detailResult.data.authProvider ?? "");
       setSelectedRoles(detailResult.data.roles);
       setClaimRows(toClaimRows(detailResult.data.claims));
       setRoles(rolesResult.data ?? []);
@@ -171,7 +167,7 @@ export function EditUserDialog({
 
   if (!user) return null;
 
-  const isLocalAccount = authProvider.toLowerCase() === "local";
+  const isLocalAccount = authProvider === "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

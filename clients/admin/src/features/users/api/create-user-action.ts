@@ -21,8 +21,9 @@ export async function createUserAction(
 
   const userName = String(formData.get("new-userName") ?? "").trim();
   const password = String(formData.get("new-password") ?? "");
+  const authProvider = String(formData.get("authProvider") ?? "") || undefined;
 
-  if (!userName || !password) {
+  if (!userName || (!password && authProvider !== "AD")) {
     return { error: "Username and password are required." };
   }
 
@@ -33,6 +34,7 @@ export async function createUserAction(
     lastName: String(formData.get("lastName") ?? "") || undefined,
     email: String(formData.get("email") ?? "") || undefined,
     phoneNumber: String(formData.get("phoneNumber") ?? "") || undefined,
+    authProvider,
   };
 
   const result = await createUser(request);

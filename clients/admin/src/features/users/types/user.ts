@@ -29,3 +29,11 @@ export interface SearchUsersParams {
   pageNumber?: number;
   pageSize?: number;
 }
+
+export interface DomainUserDto {
+  userName: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
+}

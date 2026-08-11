@@ -6,6 +6,7 @@ export { createUser } from "./api/create-user";
 export { updateUser } from "./api/update-user";
 export { deleteUser } from "./api/delete-user";
 export { forcePassword } from "./api/force-password";
+export { getDomainUser } from "./api/get-domain-user";
 export { USERS_PERMISSIONS } from "./constants/permissions";
 export { USERS_NAV_ITEM } from "./constants/nav-item";
-export type { UserDto, CreateUserRequest, SearchUsersParams } from "./types/user";
+export type { UserDto, CreateUserRequest, SearchUsersParams, DomainUserDto } from "./types/user";
