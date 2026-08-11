@@ -5,5 +5,4 @@ namespace StarterKit.Identity.Api.Events;
 public record UserCreatedEvent(
     string UserId,
     string? UserName,
-    string? Email)
-    : DomainEvent;
+    string? Email) : DomainEvent;

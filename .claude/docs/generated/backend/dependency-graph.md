@@ -10,6 +10,7 @@
 | `src/Identity.Api/Identity.Api.csproj` | `src/Identity.Contracts/Identity.Contracts.csproj` | |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Infrastructure/Infrastructure.csproj` | |
 | `src/Identity.Api/Identity.Api.csproj` | `src/Persistence/Persistence.csproj` | |
+| `src/Identity.Api/Identity.Api.csproj` | `src/Notifications.Contracts/Notifications.Contracts.csproj` | **New this sync** — `Application/Users/EventHandlers/UserCreatedEventHandler.cs` takes a DI-injected `IMailService` (from `Notifications.Contracts.Services`) and sends a welcome email on user creation. First-ever cross-module reference between `Identity` and `Notifications` in either direction; compliant with the module-boundary rule since it targets only `Notifications.Contracts` (the seam), never `Notifications.Api`'s internals. See `modules/Identity.md` and `modules/Notifications.md`. |
 | `src/Notifications.Contracts/Notifications.Contracts.csproj` | `src/Shared/Shared.csproj` | Only project reference in `Notifications.Contracts` — a true leaf, unlike `Identity.Contracts`. |
 | `src/Notifications.Api/Notifications.Api.csproj` | `src/Notifications.Contracts/Notifications.Contracts.csproj` | |
 | `src/Notifications.Api/Notifications.Api.csproj` | `src/Infrastructure/Infrastructure.csproj` | |
@@ -24,7 +25,7 @@
 | `tests/Identity.Tests/Identity.Tests.csproj` | `src/Identity.Api/Identity.Api.csproj` | |
 | `tests/Identity.Tests/Identity.Tests.csproj` | `src/Shared/Shared.csproj` | |
 
-`src/Shared/Shared.csproj` and `src/Notifications.Contracts/Notifications.Contracts.csproj` have no project references beyond `Shared` itself (both leaves in the "only depends on `Shared`" sense — `Shared` has none at all). `src/Identity.Contracts/Identity.Contracts.csproj` is **not a leaf** — it references `Shared` purely to reach one transitive package (see row above; full detail in `modules/Identity.md`). `Identity.Api.csproj` declares `<InternalsVisibleTo Include="Identity.Tests" />` (mirroring the pattern `Shared`/`Infrastructure`/`Persistence` use for `Framework.Tests`), giving `Identity.Tests` access to the module's `internal` JWT orchestration classes. `Notifications.Api` has no equivalent test project or `InternalsVisibleTo` entry yet.
+`src/Shared/Shared.csproj` has no project references beyond itself (a true leaf — `Shared` has none at all). `src/Notifications.Contracts/Notifications.Contracts.csproj` is also a true leaf (only references `Shared`). `src/Identity.Contracts/Identity.Contracts.csproj` is **not a leaf** — it references `Shared` purely to reach one transitive package (see row above; full detail in `modules/Identity.md`). `Identity.Api.csproj` **is also no longer a "only its own module's seam + shared building blocks" project** as of this sync — alongside `Identity.Contracts`/`Infrastructure`/`Persistence`, it now also references `Notifications.Contracts` (see row above). `Identity.Api.csproj` declares `<InternalsVisibleTo Include="Identity.Tests" />` (mirroring the pattern `Shared`/`Infrastructure`/`Persistence` use for `Framework.Tests`), giving `Identity.Tests` access to the module's `internal` JWT orchestration classes. `Notifications.Api` has no equivalent test project or `InternalsVisibleTo` entry yet.
 
 ## Package References
 
@@ -52,6 +53,7 @@
 | Identity.Api | Lightsoft.ActiveDirectory | 1.10.2-preview1 | Referenced; usage not verified in this pass. |
 | Identity.Api | Lightsoft.SharedKernel | 1.10.2 | `Light.Domain` base types for entities. |
 | Identity.Api | Microsoft.AspNetCore.Identity.EntityFrameworkCore | 10.0.10 | `IdentityUser`/`IdentityRole`/`IdentityDbContext<...>` base types. |
+| Notifications.Api | Lightsoft.SmtpMail | 1.1.1-preview3 | **New this sync** — `ISmtpMailSender`/`SmtpMailKitOptions` backing the new `MailService`. `Notifications.Api`'s first-ever **direct** `<PackageReference>` — every other vendor type it uses still rides in transitively (see below). |
 | StarterKit.WebApi | AspNetCore.HealthChecks.UI.Client | 9.0.0 | Health check endpoint wiring at the host. |
 | StarterKit.WebApi | FluentValidation.DependencyInjectionExtensions | 12.1.1 | Registers `IValidator<T>` implementations with DI. |
 | StarterKit.WebApi | Lightsoft.AspNetCore.Swagger | 10.1.1-preview1 | Swagger/OpenAPI setup (host only). |
@@ -67,7 +69,7 @@
 
 `SQLitePCLRaw.bundle_e_sqlite3` (3.0.5, Sqlite native bundle) is centrally pinned in `Directory.Packages.props` but not directly referenced by any `<PackageReference>` observed in this pass (likely a transitive dependency of `Microsoft.EntityFrameworkCore.Sqlite`).
 
-`Notifications.Api.csproj` and `Notifications.Contracts.csproj` declare **no direct `<PackageReference>` of their own** — every vendor type they use (`Light.AspNetCore.Authorization`, `Light.EntityFrameworkCore.Extensions`, `Light.Specification`, `Mapster`, `Microsoft.AspNetCore.SignalR` — the last a shared-framework reference, not a package) rides in transitively via `ProjectReference`s to `Shared`/`Infrastructure`/`Persistence`. See below.
+`Notifications.Contracts.csproj` declares **no direct `<PackageReference>` of its own** — every vendor type it uses (`Light.AspNetCore.Authorization`) rides in transitively via its `ProjectReference` to `Shared`. **Changed this sync**: `Notifications.Api.csproj` is no longer in the same position — it now declares one direct `<PackageReference>` (`Lightsoft.SmtpMail`, see Package References above), its first ever. Every other vendor type `Notifications.Api` uses (`Light.EntityFrameworkCore.Extensions`, `Light.Specification`, `Mapster`, `Microsoft.AspNetCore.SignalR` — the last a shared-framework reference, not a package) still rides in transitively via `ProjectReference`s to `Shared`/`Infrastructure`/`Persistence`. See below.
 
 **Undeclared transitive dependency**: `UserService.SearchAsync` (`src/Identity.Api/Services/UserService.cs`) uses `Light.EntityFrameworkCore.Extensions`' `WhereIf` — supplied by the `Lightsoft.EntityFrameworkCore` package, which `Identity.Api.csproj` does **not** declare as a `<PackageReference>` itself; it rides in transitively via the `ProjectReference` to `Persistence` (which does declare it). Works today because `CentralPackageTransitivePinningEnabled=false` doesn't block it, but it's an implicit coupling — if `Persistence` ever drops that package, `Identity.Api` would silently break. `Notifications.Api`'s `NotificationService` uses the same `WhereIf` helper the same way, transitively via its own `ProjectReference` to `Persistence`.
 
@@ -85,11 +87,11 @@ None — all packages are centrally managed via `Directory.Packages.props` (`Fra
 
 ## Cross-Module Boundary Violations (backend only)
 
-None found. `Identity.Api` references only `Identity.Contracts`, `Infrastructure`, and `Persistence`; `Notifications.Api` references only `Notifications.Contracts`, `Infrastructure`, and `Persistence` — neither reaches into the other's internals, and neither references the other's `Contracts` either (no coupling at all between the two business modules). **Now verified with a second module**, not just structurally assumed.
+None found. `Identity.Api` references `Identity.Contracts`, `Infrastructure`, `Persistence`, and — **new this sync** — `Notifications.Contracts`; `Notifications.Api` references only `Notifications.Contracts`, `Infrastructure`, and `Persistence`. The new `Identity.Api → Notifications.Contracts` edge is the first real cross-module dependency between the two business modules, and it is compliant with the module-boundary rule: it reaches only `Notifications`'s `Contracts` seam (the `IMailService` interface), never `Notifications.Api`'s internals (`MailService`, `NotificationDbContext`, controllers, etc.). The reverse direction still holds exactly as before — `Notifications.Api`/`Notifications.Contracts` reference nothing belonging to `Identity`. So: no longer "neither module references the other at all," but still zero boundary violations — the seam worked as designed the first time it was actually used cross-module.
 
 ## Notes
 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added `Notifications`/`Notifications.Contracts` project and package references; cross-module boundary check now verified against a second module) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Generated: 2026-08-03 (resynced — added `Notifications`/`Notifications.Contracts` project and package references; cross-module boundary check now verified against a second module). Resynced 2026-08-11 — added the new `Identity.Api → Notifications.Contracts` project reference (welcome-email `IMailService` dependency) and the new `Notifications.Api → Lightsoft.SmtpMail` direct package reference; updated the "no direct PackageReference" note and the Cross-Module Boundary Violations section accordingly — scope: Backend — see .claude/CLAUDE.md for update rules._
