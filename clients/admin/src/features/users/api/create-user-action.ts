@@ -19,8 +19,8 @@ export async function createUserAction(
     return { error: "Your session has expired. Please sign in again." };
   }
 
-  const userName = String(formData.get("userName") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
+  const userName = String(formData.get("new-userName") ?? "").trim();
+  const password = String(formData.get("new-password") ?? "");
 
   if (!userName || !password) {
     return { error: "Username and password are required." };
