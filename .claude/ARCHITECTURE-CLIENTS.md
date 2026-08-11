@@ -16,7 +16,7 @@
 
 | App | Router | Data fetching | State management | Styling |
 |---|---|---|---|---|
-| admin | App Router, rooted at `src/app/` — see [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#layering) | Server-only, hand-written per endpoint (`features/*/api/*.ts` via `lib/server/http.ts`), Server Actions for writes, plus a direct SignalR WebSocket for real-time notifications — no client-side data-fetching library — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md#backend-integration) | Local component state + React Context, no global state library — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md#structure) | Tailwind CSS v4, CSS-first config (confirmed) |
+| admin | App Router, rooted at `src/app/` — see [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#layering) | Server-only, hand-written per feature (`features/*/api/<feature>.api.ts`, e.g. `users.api.ts`, via `lib/server/backend-api.ts`/`lib/server/http.ts`), Server Actions for writes, plus a direct SignalR WebSocket for real-time notifications — no client-side data-fetching library — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md#backend-integration) | Local component state + React Context, no global state library — see [docs/generated/clients/admin/overview.md](docs/generated/clients/admin/overview.md#structure) | Tailwind CSS v4, CSS-first config (confirmed) |
 
 ## Clients — Key Areas (per app)
 
@@ -33,4 +33,4 @@
 - See [docs/generated/clients/admin/architecture.md](docs/generated/clients/admin/architecture.md#known-architectural-risks--debt) for the full, maintained list (e.g. `proxy.ts`'s runtime pin is unverified, no automated test suite, `/settings` nav entry has no route). Not duplicated here to avoid drift between two copies of the same list.
 
 ---
-_Last updated: 2026-08-10 (ROT resync — removed the stale "dashboard still mock data" item: the Dashboard feature was deleted and replaced by a real Home page on 2026-08-10)._
+_Last updated: 2026-08-11 (resynced — the `admin` row's "Data fetching" column referenced the old per-endpoint `features/*/api/*.ts` file convention via `lib/server/http.ts`; corrected to the current per-feature `<feature>.api.ts` convention (e.g. `users.api.ts`) via `lib/server/backend-api.ts`/`lib/server/http.ts`, matching the API-file consolidation documented in docs/generated/clients/admin/*.md)._
