@@ -2,15 +2,16 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
 
 const HIDDEN_KEY = "admin.sidebar.hidden";
-const EXPANDED_KEY = "admin.sidebar.expanded";
 
 interface SidebarContextValue {
   hidden: boolean;
@@ -52,14 +53,6 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     const storedHidden = localStorage.getItem(HIDDEN_KEY);
     if (storedHidden !== null) setHidden(storedHidden === "true");
 
-    const storedExpanded = localStorage.getItem(EXPANDED_KEY);
-    if (storedExpanded) {
-      try {
-        setExpandedOverrides(new Map(JSON.parse(storedExpanded) as [string, boolean][]));
-      } catch {
-        // ignore malformed persisted state
-      }
-    }
     setHydrated(true);
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -68,32 +61,37 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     if (hydrated) localStorage.setItem(HIDDEN_KEY, String(hidden));
   }, [hidden, hydrated]);
 
-  useEffect(() => {
-    if (hydrated)
-      localStorage.setItem(
-        EXPANDED_KEY,
-        JSON.stringify([...expandedOverrides.entries()]),
-      );
-  }, [expandedOverrides, hydrated]);
+  const toggleSidebar = useCallback(() => setHidden((prev) => !prev), []);
 
-  const toggleExpanded = (href: string, current: boolean) =>
-    setExpandedOverrides((prev) => {
-      const next = new Map(prev);
-      next.set(href, !current);
-      return next;
-    });
+  const isExpanded = useCallback(
+    (href: string) => expandedOverrides.get(href),
+    [expandedOverrides],
+  );
+
+  const toggleExpanded = useCallback(
+    (href: string, current: boolean) =>
+      setExpandedOverrides((prev) => {
+        const next = new Map(prev);
+        next.set(href, !current);
+        return next;
+      }),
+    [],
+  );
+
+  const value = useMemo(
+    () => ({
+      hidden,
+      toggleSidebar,
+      isExpanded,
+      toggleExpanded,
+      mobileOpen,
+      setMobileOpen,
+    }),
+    [hidden, toggleSidebar, isExpanded, toggleExpanded, mobileOpen],
+  );
 
   return (
-    <SidebarContext.Provider
-      value={{
-        hidden,
-        toggleSidebar: () => setHidden((prev) => !prev),
-        isExpanded: (href) => expandedOverrides.get(href),
-        toggleExpanded,
-        mobileOpen,
-        setMobileOpen,
-      }}
-    >
+    <SidebarContext.Provider value={value}>
       {children}
     </SidebarContext.Provider>
   );
