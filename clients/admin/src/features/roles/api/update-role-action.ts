@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/features/user-profile";
 import { getRoleById, updateRole } from "@/features/roles/api/roles.api";
+import { dedupeClaims } from "@/lib/shared/dedupe-claims";
 import type { RoleDto } from "@/features/roles/types/role";
+import type { ClaimDto } from "@/types/claim";
 
 export interface UpdateRoleFormState {
   error?: string;
@@ -33,8 +35,9 @@ export async function updateRoleAction(
     return { error: current.message || "Failed to load the current role." };
   }
 
-  const nonPermissionClaims = current.data.claims.filter(
-    (claim) => claim.type !== PERMISSION_CLAIM_TYPE,
+  const otherClaims = parseOtherClaims(
+    formData.get("otherClaims"),
+    current.data.claims,
   );
   const permissionClaims = formData
     .getAll("permissions")
@@ -44,7 +47,7 @@ export async function updateRoleAction(
     id,
     name,
     description: String(formData.get("description") ?? "") || undefined,
-    claims: [...nonPermissionClaims, ...permissionClaims],
+    claims: dedupeClaims([...otherClaims, ...permissionClaims]),
   };
 
   const result = await updateRole(role);
@@ -55,4 +58,30 @@ export async function updateRoleAction(
 
   revalidatePath("/identity/roles");
   return { success: true };
+}
+
+// The client reclassifies claims (e.g. a "permission" claim whose value
+// isn't among the fetched permission definitions falls through to the Other
+// claims section), so this may legitimately include "permission"-type
+// claims too. `dedupeClaims` collapses any overlap with the checked
+// permission checkboxes when the two lists are merged above.
+function parseOtherClaims(
+  raw: FormDataEntryValue | null,
+  fallbackClaims: ClaimDto[],
+): ClaimDto[] {
+  if (typeof raw !== "string") return fallbackClaims;
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return fallbackClaims;
+
+    return parsed.filter(
+      (claim): claim is ClaimDto =>
+        !!claim &&
+        typeof claim.type === "string" &&
+        typeof claim.value === "string",
+    );
+  } catch {
+    return fallbackClaims;
+  }
 }

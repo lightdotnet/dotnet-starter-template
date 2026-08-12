@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +25,7 @@ import {
 } from "@/features/roles/api/update-role-action";
 import type { PermissionDefinition } from "@/features/roles/types/permission-definition";
 import type { RoleDto } from "@/features/roles/types/role";
+import type { ClaimDto } from "@/types/claim";
 
 const updateInitialState: UpdateRoleFormState = {};
 const PERMISSION_CLAIM_TYPE = "permission";
@@ -66,6 +68,10 @@ export function EditRoleDialog({
   const [detail, setDetail] = useState<RoleDto | null>(null);
   const [permissions, setPermissions] = useState<PermissionDefinition[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [otherClaims, setOtherClaims] = useState<ClaimDto[]>([]);
+  const [newClaimType, setNewClaimType] = useState("");
+  const [newClaimValue, setNewClaimValue] = useState("");
+  const [claimError, setClaimError] = useState("");
 
   // The roles list only carries name/description — claims aren't populated
   // there, so load the full record (plus the assignable permission list)
@@ -91,13 +97,30 @@ export function EditRoleDialog({
         return;
       }
 
+      // A "permission"-type claim only renders as a checkbox if its value is
+      // among the fetched permission definitions — anything else (including
+      // every permission claim when the fetch itself fails) falls through to
+      // the Other claims section instead of being silently dropped on save.
+      const permissionDefinitions = permissionsResult.data ?? [];
+      const knownPermissionNames = new Set(
+        permissionDefinitions.map((permission) => permission.name),
+      );
+      const isKnownPermissionClaim = (claim: ClaimDto) =>
+        claim.type === PERMISSION_CLAIM_TYPE &&
+        knownPermissionNames.has(claim.value);
+
       setDetail(detailResult.data);
       setSelectedPermissions(
         detailResult.data.claims
-          .filter((claim) => claim.type === PERMISSION_CLAIM_TYPE)
+          .filter(isKnownPermissionClaim)
           .map((claim) => claim.value),
       );
-      setPermissions(permissionsResult.data ?? []);
+      setOtherClaims(
+        detailResult.data.claims.filter(
+          (claim) => !isKnownPermissionClaim(claim),
+        ),
+      );
+      setPermissions(permissionDefinitions);
       setLoading(false);
     })();
 
@@ -118,6 +141,31 @@ export function EditRoleDialog({
         ? [...previous, name]
         : previous.filter((value) => value !== name),
     );
+  }
+
+  function addOtherClaim() {
+    const type = newClaimType.trim();
+    const value = newClaimValue.trim();
+
+    if (!type || !value) {
+      setClaimError("Both type and value are required.");
+      return;
+    }
+    if (
+      otherClaims.some((claim) => claim.type === type && claim.value === value)
+    ) {
+      setClaimError("This claim already exists.");
+      return;
+    }
+
+    setOtherClaims((previous) => [...previous, { type, value }]);
+    setNewClaimType("");
+    setNewClaimValue("");
+    setClaimError("");
+  }
+
+  function removeOtherClaim(index: number) {
+    setOtherClaims((previous) => previous.filter((_, i) => i !== index));
   }
 
   if (!role) return null;
@@ -145,6 +193,11 @@ export function EditRoleDialog({
           detail && (
             <form action={formAction} className="flex flex-col gap-4">
               <input type="hidden" name="id" value={detail.id} />
+              <input
+                type="hidden"
+                name="otherClaims"
+                value={JSON.stringify(otherClaims)}
+              />
 
               {state.error && (
                 <Alert variant="destructive">
@@ -206,6 +259,68 @@ export function EditRoleDialog({
                         ))}
                       </div>
                     ))
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>Other claims</Label>
+                <div className="flex flex-col gap-2 rounded-md border border-border p-3">
+                  {otherClaims.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No custom claims.
+                    </p>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      {otherClaims.map((claim, index) => (
+                        <div
+                          key={`${claim.type}:${claim.value}:${index}`}
+                          className="flex items-center justify-between gap-2 text-sm"
+                        >
+                          <span className="truncate">
+                            {claim.type}: {claim.value}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`Remove claim ${claim.type}: ${claim.value}`}
+                            onClick={() => removeOtherClaim(index)}
+                          >
+                            <X />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-end gap-2 border-t border-border pt-2">
+                    <div className="flex flex-1 flex-col gap-1.5">
+                      <Label htmlFor="newClaimType">Type</Label>
+                      <Input
+                        id="newClaimType"
+                        value={newClaimType}
+                        onChange={(event) =>
+                          setNewClaimType(event.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-1.5">
+                      <Label htmlFor="newClaimValue">Value</Label>
+                      <Input
+                        id="newClaimValue"
+                        value={newClaimValue}
+                        onChange={(event) =>
+                          setNewClaimValue(event.target.value)
+                        }
+                      />
+                    </div>
+                    <Button type="button" variant="outline" onClick={addOtherClaim}>
+                      Add
+                    </Button>
+                  </div>
+                  {claimError && (
+                    <p className="text-sm text-destructive">{claimError}</p>
                   )}
                 </div>
               </div>
