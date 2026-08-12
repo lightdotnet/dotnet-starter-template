@@ -1,45 +1,15 @@
-import { redirect } from "next/navigation";
-import { ShieldOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { resolveSession } from "@/features/user-profile";
 import { getAllRoles } from "@/features/roles/api/roles.api";
 import { RolesDataTable } from "@/features/roles/components/roles-data-table";
 import { ROLES_PERMISSIONS } from "@/features/roles/constants/permissions";
 import { hasPermission } from "@/lib/server/authorization";
+import { requirePermission } from "@/lib/server/require-permission";
 
 export async function RolesPage() {
-  const session = await resolveSession();
-  if (!session) {
-    redirect("/login");
-  }
+  const { session, denied } = await requirePermission(ROLES_PERMISSIONS.View);
+  if (denied) return denied;
 
-  if (
-    !hasPermission(session, session.profile?.userName, ROLES_PERMISSIONS.View)
-  ) {
-    return (
-      <Empty>
-        <EmptyMedia variant="icon">
-          <ShieldOff />
-        </EmptyMedia>
-        <EmptyTitle>Access denied</EmptyTitle>
-        <EmptyDescription>
-          You don&apos;t have the {ROLES_PERMISSIONS.View} permission.
-        </EmptyDescription>
-      </Empty>
-    );
-  }
-
-  const canManage = hasPermission(
-    session,
-    session.profile?.userName,
-    ROLES_PERMISSIONS.Manage,
-  );
+  const canManage = hasPermission(session, ROLES_PERMISSIONS.Manage);
 
   const result = await getAllRoles();
 

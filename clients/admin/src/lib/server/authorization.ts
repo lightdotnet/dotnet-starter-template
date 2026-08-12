@@ -7,25 +7,22 @@ export const SUPER_ADMIN_USERNAMES = shared.SUPER_ADMIN_USERNAMES;
 export const isSuperAdminUser = shared.isSuperAdminUser;
 
 export function hasPermission(
-  session: Pick<SessionData, "permissions">,
-  userName: string | null | undefined,
+  session: Pick<SessionData, "permissions" | "profile">,
   permission: string,
 ): boolean {
-  return shared.hasPermission(session.permissions, userName, permission);
+  return shared.hasPermission(session.permissions, session.profile?.userName, permission);
 }
 
 export function hasAnyPermission(
-  session: Pick<SessionData, "permissions">,
-  userName: string | null | undefined,
+  session: Pick<SessionData, "permissions" | "profile">,
   permissions: string[],
 ): boolean {
-  return shared.hasAnyPermission(session.permissions, userName, permissions);
+  return shared.hasAnyPermission(session.permissions, session.profile?.userName, permissions);
 }
 
 export function hasAllPermissions(
-  session: Pick<SessionData, "permissions">,
-  userName: string | null | undefined,
+  session: Pick<SessionData, "permissions" | "profile">,
   permissions: string[],
 ): boolean {
-  return shared.hasAllPermissions(session.permissions, userName, permissions);
+  return shared.hasAllPermissions(session.permissions, session.profile?.userName, permissions);
 }

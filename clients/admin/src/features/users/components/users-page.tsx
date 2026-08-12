@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
-import { ShieldOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { resolveSession } from "@/features/user-profile";
 import { searchUsers } from "@/features/users/api/users.api";
 import { UsersDataTable } from "@/features/users/components/users-data-table";
 import { hasPermission } from "@/lib/server/authorization";
+import { requirePermission } from "@/lib/server/require-permission";
 import { USERS_PERMISSIONS } from "@/features/users/constants/permissions";
 
 const PAGE_SIZE = 10;
@@ -15,40 +12,12 @@ interface UsersPageProps {
 }
 
 export async function UsersPage({ searchParams }: UsersPageProps) {
-  const session = await resolveSession();
-  if (!session) {
-    redirect("/login");
-  }
+  const { session, denied } = await requirePermission(USERS_PERMISSIONS.View);
+  if (denied) return denied;
 
-  if (!hasPermission(session, session.profile?.userName, USERS_PERMISSIONS.View)) {
-    return (
-      <Empty>
-        <EmptyMedia variant="icon">
-          <ShieldOff />
-        </EmptyMedia>
-        <EmptyTitle>Access denied</EmptyTitle>
-        <EmptyDescription>
-          You don&apos;t have the {USERS_PERMISSIONS.View} permission.
-        </EmptyDescription>
-      </Empty>
-    );
-  }
-
-  const canCreate = hasPermission(
-    session,
-    session.profile?.userName,
-    USERS_PERMISSIONS.Create,
-  );
-  const canUpdate = hasPermission(
-    session,
-    session.profile?.userName,
-    USERS_PERMISSIONS.Update,
-  );
-  const canDelete = hasPermission(
-    session,
-    session.profile?.userName,
-    USERS_PERMISSIONS.Delete,
-  );
+  const canCreate = hasPermission(session, USERS_PERMISSIONS.Create);
+  const canUpdate = hasPermission(session, USERS_PERMISSIONS.Update);
+  const canDelete = hasPermission(session, USERS_PERMISSIONS.Delete);
 
   const { q, page } = await searchParams;
   const pageNumber = Math.max(Number(page) || 1, 1);
