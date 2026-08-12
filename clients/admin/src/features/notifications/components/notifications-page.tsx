@@ -1,16 +1,8 @@
-import { redirect } from "next/navigation";
-import { ShieldOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { resolveSession } from "@/features/user-profile";
 import { getNotifications } from "@/features/notifications/api/notifications.api";
 import { NotificationsDataTable } from "@/features/notifications/components/notifications-data-table";
 import { hasPermission } from "@/lib/server/authorization";
+import { requirePermission } from "@/lib/server/require-permission";
 import { NOTIFICATIONS_PERMISSIONS } from "@/features/notifications/constants/permissions";
 import { NotificationStatus } from "@/features/notifications/types/notification";
 
@@ -27,30 +19,10 @@ function parseStatusFilter(value: string | undefined): NotificationStatus | unde
 }
 
 export async function NotificationsPage({ searchParams }: NotificationsPageProps) {
-  const session = await resolveSession();
-  if (!session) {
-    redirect("/login");
-  }
+  const { session, denied } = await requirePermission(NOTIFICATIONS_PERMISSIONS.Read);
+  if (denied) return denied;
 
-  if (!hasPermission(session, session.profile?.userName, NOTIFICATIONS_PERMISSIONS.Read)) {
-    return (
-      <Empty>
-        <EmptyMedia variant="icon">
-          <ShieldOff />
-        </EmptyMedia>
-        <EmptyTitle>Access denied</EmptyTitle>
-        <EmptyDescription>
-          You don&apos;t have the {NOTIFICATIONS_PERMISSIONS.Read} permission.
-        </EmptyDescription>
-      </Empty>
-    );
-  }
-
-  const canSend = hasPermission(
-    session,
-    session.profile?.userName,
-    NOTIFICATIONS_PERMISSIONS.Send,
-  );
+  const canSend = hasPermission(session, NOTIFICATIONS_PERMISSIONS.Send);
 
   const { page, toUserId, status } = await searchParams;
   const pageNumber = Math.max(Number(page) || 1, 1);
