@@ -8,7 +8,7 @@ tools: Glob, Grep, Read, Bash
 
 ## Responsibilities
 
-- Review/design entity models, `DbContext` configuration (Fluent API or attributes), and relationships, scoped to the module's own `Infrastructure` project.
+- Review/design entity models, `DbContext` configuration (Fluent API or attributes), and relationships, scoped to the module's own project (its `Data/` folder for a single-project module, or the `<Module>.Infrastructure` project for a split module).
 - Review migrations for correctness, safety (data loss risk), and reversibility.
 - Diagnose query performance issues: N+1 queries, missing indexes, unnecessary tracking, over-fetching.
 - Flag any query or relationship that reaches across module boundaries (joining another module's tables directly) — in a Modular Monolith, cross-module data needs go through that module's public contract, not a shared join.
@@ -24,7 +24,7 @@ tools: Glob, Grep, Read, Bash
 
 - The specific module's `DbContext` relevant to the task — do not assume a repo-wide single context.
 - Entity classes and their configuration (`IEntityTypeConfiguration<T>`, attributes, `OnModelCreating`).
-- Migration files under the relevant module's `Infrastructure/Migrations/` folder, focusing on the ones relevant to the change.
+- Migration files: design-time EF migration projects live separately under top-level `src/Migrations/{Sqlite,PostgreSQL,MSSQL}/` (one per provider), not colocated with any module — focus on the ones relevant to the change.
 - Actual LINQ query shapes when diagnosing performance — check for `.Include`, `AsNoTracking`, projection usage, and client-vs-server evaluation.
 - Shared base entities/conventions in the building-blocks project, and whether modules extend them consistently.
 

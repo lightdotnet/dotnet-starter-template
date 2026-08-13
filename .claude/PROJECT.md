@@ -29,4 +29,4 @@
 - None currently open cross-cutting. (The prior "full-stack integration hasn't been designed yet" item is resolved — see [PROJECT-CLIENTS.md § Client Open Questions / Gaps](PROJECT-CLIENTS.md#client-open-questions--gaps) and `docs/generated/clients/admin/overview.md` § Auth Flow / Backend Integration for the built state.)
 
 ---
-_Last updated: 2026-08-10 (ROT resync — corrected Status/Open Questions, stale since 2026-08-01: added the `Notifications` module, corrected `clients/admin/`'s status from UI-shell to actively-integrated, resolved the full-stack-integration open question)._
+_Last synced: 2026-08-13_

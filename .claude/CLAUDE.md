@@ -55,6 +55,7 @@ Treat this table as intent for a template, not yet-verified fact — cross-check
 - Manually-authored documentation (anything a human wrote and didn't come from a generate/sync workflow) must be preserved during sync — never silently overwritten. See [sync-documentation workflow](workflows/sync-documentation.md).
 - Outdated generated content should be removed during an explicit sync, not left to drift silently.
 - The `.claude/` configuration itself (agents/skills/workflows/templates/core docs) is reviewed on its own recurring schedule for redundant/outdated/trivial content — see [ROT.md](ROT.md). This is separate from syncing generated docs against application code.
+- `.claude/docs/KNOWN_DEBT.md` is the single, current-state-only list of open backend technical debt/pending architecture decisions. Update it directly when debt is found or resolved — don't re-scatter items back into `ARCHITECTURE-BACKEND.md`/`PROJECT-BACKEND.md`, and don't keep resolved items around (git history covers that).
 
 ## 4. Agent Usage
 

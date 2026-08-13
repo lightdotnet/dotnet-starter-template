@@ -25,4 +25,4 @@ This file aggregates **verified** architectural facts that are genuinely cross-c
 | _unknown_ | | | |
 
 ---
-_Last updated: 2026-08-01 — split into [ARCHITECTURE-BACKEND.md](ARCHITECTURE-BACKEND.md) and [ARCHITECTURE-CLIENTS.md](ARCHITECTURE-CLIENTS.md); this root file now holds only Scope, Intended Shape, and Integration (cross-cutting)._
+_Last synced: 2026-08-13. This root file holds only Scope, Intended Shape, and Integration (cross-cutting) — see [ARCHITECTURE-BACKEND.md](ARCHITECTURE-BACKEND.md)/[ARCHITECTURE-CLIENTS.md](ARCHITECTURE-CLIENTS.md) for the split-out detail._

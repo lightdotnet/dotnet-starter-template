@@ -1,5 +1,7 @@
 # Backend Project Analysis & Refactor Proposals — 2026-07-30
 
+> **Archival.** This file is a point-in-time analysis, kept for context on already-resolved items. The live, current-state list of open backend debt/pending decisions is [docs/KNOWN_DEBT.md](../docs/KNOWN_DEBT.md) — update that file, not this one, when debt is found or resolved.
+
 **Scope**: all backend projects under `src/` on branch `feat-dev/identity-module`, including `Identity.Api` / `Identity.Contracts`. `src/Migrations/**` generally excluded from analysis per request (exceptions noted inline where a change elsewhere forced a mechanical edit there).
 
 This file now tracks **pending items only**. Resolved/implemented items (module-structure convention, N1–N6 naming, P2/P3 Schemas removal, Sqlite/PostgreSQL migration fix, the `IdentityDbContext`/framework name-collision bug, D3's `TokenService`/`JwtTokenManager` rename+split into `AuthenticationService`/`JwtTokenIssuer`/`UserSessionService` which also resolved P7/P8/P9/P11, and P14 — `GetUserTokensAsync`/`RevokeAsync` now wired into `UserProfileController`'s `token/list`/`token/revoke` endpoints) have been removed — see `ARCHITECTURE.md` § Backend — Module Structure Convention and git history for that work. Post-D3, the user further renamed `GenerateTokenByAsync`→`GenerateTokenAsync` and swapped the ad-hoc `TimeNow` seam for `TimeProvider` — see new findings P15/P16 below (the `TimeProvider` swap introduced a DI registration gap and a duplicate clock abstraction).

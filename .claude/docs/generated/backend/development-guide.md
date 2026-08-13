@@ -17,7 +17,7 @@ dotnet build StarterKit.slnx
 dotnet run --project src/StarterKit.WebApi/StarterKit.WebApi.csproj
 ```
 
-`src/StarterKit.WebApi/Program.cs` boots the host: configures Serilog, calls `ConfigureServices`, wires MVC/JSON options, then `ConfigurePipelines()` + `MapEndpoints(...)`. By default (`appsettings.json`) `DbProvider` is `MSSQL`, pointing `ConnectionStrings:DefaultConnection` at a local `(localdb)\mssqllocaldb` instance — switch to `InMemory`/`Sqlite`/`PostgreSQL` via `IConfiguration["DbProvider"]` (and matching `ConnectionStrings:DefaultConnection`, commented-out examples for PostgreSQL/Sqlite are already present in `appsettings.json`) if you don't have SQL Server LocalDB available. `AllowAnonymous: true` is set by default in `appsettings.json`.
+`src/StarterKit.WebApi/Program.cs` boots the host: configures Serilog, calls `ConfigureServices`, wires MVC/JSON options, then `ConfigurePipelines()` + `MapEndpoints(...)`. By default (`appsettings.json`) `DbProvider` is `MSSQL`, pointing `ConnectionStrings:DefaultConnection` at a local `(localdb)\mssqllocaldb` instance — switch to `InMemory`/`Sqlite`/`PostgreSQL` via `IConfiguration["DbProvider"]` (and matching `ConnectionStrings:DefaultConnection`, commented-out examples for PostgreSQL/Sqlite are already present in `appsettings.json`) if you don't have SQL Server LocalDB available. `AllowAnonymous` is `false` by default in `appsettings.json` (`appsettings.Development.json` does not override it) — requests need a valid JWT unless the endpoint is explicitly anonymous.
 
 ## Running Tests
 
@@ -26,7 +26,7 @@ dotnet test tests/Framework.Tests/Framework.Tests.csproj
 dotnet test tests/Identity.Tests/Identity.Tests.csproj
 ```
 
-No special setup needed — all current tests are unit tests using EF Core's InMemory/Sqlite providers directly (no external database/services required). `Framework.Tests` covers `Shared`, `Infrastructure`, and `Persistence`; `Identity.Tests` covers the `Identity` module (`Identity.Api`) — 98 tests spanning extensions, JWT orchestration, entities, services, and controllers. `Notifications` has no dedicated test project yet.
+No special setup needed — all current tests are unit tests using EF Core's InMemory/Sqlite providers directly (no external database/services required). `Framework.Tests` covers `Shared`, `Infrastructure`, and `Persistence`; `Identity.Tests` covers the `Identity` module (`Identity.Api`) — spanning extensions, JWT orchestration, entities, services, and controllers. `Notifications` has no dedicated test project yet.
 
 ## Local Setup
 
@@ -38,7 +38,7 @@ No special setup needed — all current tests are unit tests using EF Core's InM
 
 | Task | How |
 |---|---|
-| Add a backend migration | `dotnet ef migrations add <Name> --project src/Migrations/<Provider>/<Provider>.csproj --context IdentityDbContext --output-dir Identity` where `<Provider>` is `MSSQL`, `PostgreSQL`, or `Sqlite` — run once per provider (design-time EF migration projects live under top-level `src/Migrations/{MSSQL,PostgreSQL,Sqlite}`). Confirmed working this session for a real change (`AddUserCreatedIndex` on Sqlite/PostgreSQL; a full-baseline `CreateIdentitySchema` reset on MSSQL after its old model snapshot went stale — see `docs/migrations.md` for the general pattern and `reviews/2026-07-30-backend-project-analysis.md` for that incident). |
+| Add a backend migration | `dotnet ef migrations add <Name> --project src/Migrations/<Provider>/<Provider>.csproj --context IdentityDbContext --output-dir Identity` where `<Provider>` is `MSSQL`, `PostgreSQL`, or `Sqlite` — run once per provider (design-time EF migration projects live under top-level `src/Migrations/{MSSQL,PostgreSQL,Sqlite}`). MSSQL currently has a single baseline migration (`CreateIdentitySchema`); Sqlite/PostgreSQL each have that same baseline plus one incremental migration (`AddUserCreatedIndex`) on top of it. |
 | Run the API locally | `dotnet run --project src/StarterKit.WebApi/StarterKit.WebApi.csproj` |
 | Run the backend test suite | `dotnet test tests/Framework.Tests/Framework.Tests.csproj` and `dotnet test tests/Identity.Tests/Identity.Tests.csproj` |
 | Build the whole solution | `dotnet build StarterKit.slnx` |
@@ -58,4 +58,4 @@ No special setup needed — all current tests are unit tests using EF Core's InM
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added `Notifications` module pointer) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Last synced: 2026-08-13_
