@@ -1,4 +1,6 @@
-import { requestJson } from "@/lib/server/backend-api";
+import { identityApi } from "@/lib/server/backend-api";
+
+const { requestJson } = identityApi;
 import { guardCall, guardResponseCall } from "@/lib/server/call-guard";
 import type { ApiResponse, Result } from "@/types/api";
 import type { CreateRoleRequest, RoleDto } from "@/features/roles/types/role";

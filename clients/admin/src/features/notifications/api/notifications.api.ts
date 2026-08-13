@@ -1,4 +1,6 @@
-import { requestJson } from "@/lib/server/backend-api";
+import { notificationsApi } from "@/lib/server/backend-api";
+
+const { requestJson } = notificationsApi;
 import { guardResponseCall, guardCall } from "@/lib/server/call-guard";
 import type { ApiResponse, PagedResult } from "@/types/api";
 import type {

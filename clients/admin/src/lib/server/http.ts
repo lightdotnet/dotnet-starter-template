@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getApiBaseUrl } from "@/lib/server/config";
-import { ApiClients, type ApiClientName } from "@/lib/server/api-clients";
+import { type ApiClientName } from "@/lib/server/api-clients";
 
 export interface HttpRequestContext {
   headers: Record<string, string>;
@@ -14,15 +14,15 @@ export interface RequestOptions {
   query?: Record<string, string | undefined>;
   body?: unknown;
   handlers?: HttpRequestHandler[];
-  client?: ApiClientName;
+  client: ApiClientName;
 }
 
 function buildUrl(
   path: string,
-  query?: Record<string, string | undefined>,
-  client: ApiClientName = ApiClients.Backend,
+  query: Record<string, string | undefined> | undefined,
+  client: ApiClientName,
 ): URL {
-  const url = new URL(`api/v1/${path}`, getApiBaseUrl(client));
+  const url = new URL(path, getApiBaseUrl(client));
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined) url.searchParams.set(key, value);
@@ -78,7 +78,7 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
 
 export async function requestJson<T>(
   path: string,
-  options: RequestOptions = {},
+  options: RequestOptions,
 ): Promise<T> {
   const response = await send(path, options);
   return (await response.json()) as T;
@@ -86,7 +86,7 @@ export async function requestJson<T>(
 
 export async function requestVoid(
   path: string,
-  options: RequestOptions = {},
+  options: RequestOptions,
 ): Promise<void> {
   await send(path, options);
 }

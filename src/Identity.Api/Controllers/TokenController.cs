@@ -7,6 +7,7 @@ using StarterKit.Infrastructure.Endpoints;
 namespace StarterKit.Identity.Api.Controllers;
 
 [ApiExplorerSettings(GroupName = "identity")]
+[Route("api/v{version:apiVersion}/auth")]
 public class TokenController(
     IAuthenticationService authenticationService) : VersionedApiController
 {

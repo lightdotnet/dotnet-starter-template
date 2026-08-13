@@ -1,5 +1,6 @@
 import { requestJson } from "@/lib/server/http";
 import { guardCall } from "@/lib/server/call-guard";
+import { ApiClients } from "@/lib/server/api-clients";
 import type { Result } from "@/types/api";
 import type {
   DeviceDto,
@@ -12,7 +13,8 @@ export function getToken(request: GetTokenRequest, device?: Pick<DeviceDto, "id"
   // TokenController's own route ("token") plus its action route ("token/get")
   // combine into a doubled "token/token" path segment on the backend.
   return guardCall(() =>
-    requestJson<Result<TokenDto>>("token/token/get", {
+    requestJson<Result<TokenDto>>("auth/token/get", {
+      client: ApiClients.Identity,
       method: "POST",
       body: request,
       query: {
@@ -25,7 +27,8 @@ export function getToken(request: GetTokenRequest, device?: Pick<DeviceDto, "id"
 
 export function refreshToken(request: RefreshTokenRequest) {
   return guardCall(() =>
-    requestJson<Result<TokenDto>>("token/token/refresh", {
+    requestJson<Result<TokenDto>>("auth/token/refresh", {
+      client: ApiClients.Identity,
       method: "POST",
       body: request,
     }),

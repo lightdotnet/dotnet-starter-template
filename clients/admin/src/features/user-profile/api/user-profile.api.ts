@@ -1,7 +1,8 @@
-import { requestJson as requestJsonBackend, requestVoid } from "@/lib/server/backend-api";
+import { identityApi } from "@/lib/server/backend-api";
 import { requestJson } from "@/lib/server/http";
 import { guardCall, guardRawCall } from "@/lib/server/call-guard";
 import { explicitBearerTokenHandler } from "@/lib/server/http-handlers/bearer-token-handler";
+import { ApiClients } from "@/lib/server/api-clients";
 import type { Result } from "@/types/api";
 import type { UserDto } from "@/features/users";
 import type { UserSessionDto } from "@/features/user-profile/types/user-session";
@@ -15,6 +16,7 @@ import type { UserSessionDto } from "@/features/user-profile/types/user-session"
 export function getCurrentUser(accessToken: string) {
   return guardCall(() =>
     requestJson<Result<UserDto>>("user_profile", {
+      client: ApiClients.Identity,
       handlers: [explicitBearerTokenHandler(accessToken)],
     }),
   );
@@ -22,12 +24,12 @@ export function getCurrentUser(accessToken: string) {
 
 export function listSessions() {
   return guardRawCall(() =>
-    requestJsonBackend<UserSessionDto[]>("user_profile/token/list"),
+    identityApi.requestJson<UserSessionDto[]>("user_profile/token/list"),
   );
 }
 
 export function revokeSession(tokenId: string) {
   return guardRawCall(() =>
-    requestVoid("user_profile/token/revoke", { method: "PUT", body: tokenId }),
+    identityApi.requestVoid("user_profile/token/revoke", { method: "PUT", body: tokenId }),
   );
 }
