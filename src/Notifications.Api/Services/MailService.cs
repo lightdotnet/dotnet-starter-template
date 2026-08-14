@@ -1,5 +1,4 @@
-﻿using Light.Mail;
-using Light.SmtpMail;
+﻿using Light.Smtp;
 using StarterKit.Notifications.Contracts.Services;
 
 namespace StarterKit.Notifications.Api.Services;
@@ -18,14 +17,12 @@ internal class MailService(
         var systemEmail = options.UserName;
 
         return smtpMailSender.SendAsync(
-            new MailFrom(systemEmail, "System"),
-            new MailMessage
-            {
-                Recipients = recipients,
-                Subject = subject,
-                Content = body,
-            },
-            cancellationToken);
+            systemEmail,
+            "System",
+            recipients,
+            subject,
+            body,
+            cancellationToken: cancellationToken);
     }
 
     public Task SendAsync(
@@ -36,13 +33,11 @@ internal class MailService(
         CancellationToken cancellationToken = default)
     {
         return smtpMailSender.SendAsync(
-            new MailFrom(from),
-            new MailMessage
-            {
-                Recipients = recipients,
-                Subject = subject,
-                Content = body,
-            },
-            cancellationToken);
+            from,
+            from,
+            recipients,
+            subject,
+            body,
+            cancellationToken: cancellationToken);
     }
 }

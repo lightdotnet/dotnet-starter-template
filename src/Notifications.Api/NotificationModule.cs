@@ -1,6 +1,6 @@
 using Light.AspNetCore.Authorization;
 using Light.Extensions.DependencyInjection;
-using Light.SmtpMail;
+using Light.Smtp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StarterKit.Infrastructure.Modularity;
