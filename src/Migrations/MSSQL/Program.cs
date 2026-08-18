@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Light.Domain;
+using Microsoft.Extensions.DependencyInjection;
 using MSSQL;
 
 // set Environment
