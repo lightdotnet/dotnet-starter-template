@@ -22,7 +22,7 @@ This file aggregates **verified** architectural facts that are genuinely cross-c
 
 | App | Client generation strategy | Base URL / env config | Auth flow |
 |---|---|---|---|
-| _unknown_ | | | |
+| admin | Hand-written, one file per feature (`features/<name>/api/<feature>.api.ts`) — no OpenAPI-generated client | Two named backend clients (`identityApi`/`notificationsApi` via `lib/server/api-clients.ts`), each with its own server-only base-URL env var (`IDENTITY_API_BASE_URL`/`NOTIFICATIONS_API_BASE_URL`, base URL owns the version prefix); real-time notifications need client-exposed `NEXT_PUBLIC_SIGNALR_HUB_URL` | Encrypted httpOnly cookie session (`admin_session`, AES-256-GCM), permissions/roles decoded from the access-token JWT; `src/proxy.ts` proactively refreshes a near-expiry token; SignalR handshake gets a short-lived token via a dedicated Server Action — see [DEVELOPMENT.md § Full-Stack Integration Conventions](DEVELOPMENT.md#full-stack-integration-conventions) for detail |
 
 ---
-_Last synced: 2026-08-13. This root file holds only Scope, Intended Shape, and Integration (cross-cutting) — see [ARCHITECTURE-BACKEND.md](ARCHITECTURE-BACKEND.md)/[ARCHITECTURE-CLIENTS.md](ARCHITECTURE-CLIENTS.md) for the split-out detail._
+_Last synced: 2026-08-19. This root file holds only Scope, Intended Shape, and Integration (cross-cutting) — see [ARCHITECTURE-BACKEND.md](ARCHITECTURE-BACKEND.md)/[ARCHITECTURE-CLIENTS.md](ARCHITECTURE-CLIENTS.md) for the split-out detail._

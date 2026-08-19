@@ -36,4 +36,4 @@ _Only if this module/client app deviates from conventions documented elsewhere (
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: <Backend | client app "<app-name>"> — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

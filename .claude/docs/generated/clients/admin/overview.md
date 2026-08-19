@@ -91,4 +91,4 @@ Note: `token-cipher.ts` uses Node's built-in `crypto` module (`createCipheriv`/`
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Last synced: 2026-08-13_
+_Last synced: 2026-08-19_

@@ -1,7 +1,10 @@
 <!--
 Template: Module Overview (Backend, Modular Monolith)
 Used by: skills/analyze-module.md, agents/architecture-reviewer.md
-Output location: .claude/docs/generated/backend/modules/<ModuleName>/overview.md
+Output location: .claude/docs/generated/backend/modules/<ModuleName>.md for a single-project module (the common case —
+  see ARCHITECTURE-BACKEND.md § Module Structure Convention). Only use the nested
+  .claude/docs/generated/backend/modules/<ModuleName>/overview.md form for a split module that also has a
+  domain-model.md and/or per-project overview.md files alongside it.
 Do not populate this file itself — copy its structure into the generated output.
 -->
 
@@ -13,12 +16,16 @@ _What business capability this module owns, in business terms._
 
 ## Internal Layering
 
+For a split module (`<ModuleName>.Domain`/`.Application`/`.Infrastructure`/`.Api`), use one row per project:
+
 | Project | Responsibility | Notes |
 |---|---|---|
 | `<ModuleName>.Domain` | | |
 | `<ModuleName>.Application` | | |
 | `<ModuleName>.Infrastructure` | | |
 | `<ModuleName>.Api` | | |
+
+For a single-project module (the common case), replace the table above with one row per internal folder instead (e.g. `Entities/`, `Data/`, `Services/`, `Controllers/`) — see `docs/generated/backend/modules/Identity.md`/`Notifications.md` for the actual pattern used.
 
 ## Public Contract
 
@@ -47,4 +54,4 @@ _Anything distinct about this module's conventions vs. other modules._
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: module "<ModuleName>" — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

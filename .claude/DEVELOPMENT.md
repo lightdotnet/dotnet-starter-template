@@ -83,7 +83,7 @@
 
 #### Build & Tooling
 
-- **Next.js version / router**: 16.2.12, App Router, rooted at `src/app/` (no `pages/` directory).
+- **Next.js version / router**: 16.3.0, App Router, rooted at `src/app/` (no `pages/` directory).
 - **Package manager**: pnpm (`pnpm-lock.yaml`). A `pnpm-workspace.yaml` exists but only configures build-script approval, not a multi-package workspace.
 - **`tsconfig.json` strictness**: `"strict": true`, target `ES2017`, module resolution `"bundler"`, path alias `"@/*"` → `"./src/*"`.
 
@@ -123,4 +123,4 @@
 - **Changelog convention**: _unknown_
 
 ---
-_Last synced: 2026-08-13. Versioning & Release section remains unpopulated — no evidence observed yet._
+_Last synced: 2026-08-19. Versioning & Release section remains unpopulated — no evidence observed yet._

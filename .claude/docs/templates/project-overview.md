@@ -37,4 +37,4 @@ _Anything distinct about this project's conventions vs. the rest of the module._
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: project "<ProjectName>" — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

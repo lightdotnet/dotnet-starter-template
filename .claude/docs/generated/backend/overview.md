@@ -24,31 +24,7 @@ Each module now has its own deep-dive doc under `modules/<ModuleName>.md` — th
 
 ## Dependency Graph
 
-Verified from actual `.csproj` `ProjectReference` entries:
-
-```text
-Infrastructure -> Shared
-Persistence -> Shared
-Identity.Contracts -> Shared
-Identity.Api -> Identity.Contracts
-Identity.Api -> Infrastructure
-Identity.Api -> Persistence
-Notifications.Contracts -> Shared
-Notifications.Api -> Notifications.Contracts
-Notifications.Api -> Infrastructure
-Notifications.Api -> Persistence
-StarterKit.WebApi -> Identity.Api
-StarterKit.WebApi -> Notifications.Api
-StarterKit.WebApi -> Infrastructure
-StarterKit.WebApi -> Shared
-Framework.Tests (tests/) -> Shared
-Framework.Tests (tests/) -> Infrastructure
-Framework.Tests (tests/) -> Persistence
-Identity.Tests (tests/) -> Identity.Api
-Identity.Tests (tests/) -> Shared
-```
-
-`Shared` remains a leaf. `Notifications.Contracts` is a true leaf (only references `Shared`). `Identity.Contracts` is **not** a leaf — it also references `Shared`, purely to reach its transitive `Lightsoft.AspNetCore.Authorization` package (see `modules/Identity.md`). No cross-module boundary violations found — neither module references the other's internals, and `Notifications` doesn't reference `Identity` at all (opaque user-id strings, no FK/cross-module call). `Identity.Tests` is a second, separate test project (alongside `Framework.Tests`) covering the Identity module; `Notifications` has no dedicated test project yet.
+One-way throughout: `Api`/`Contracts` projects → `Infrastructure`/`Persistence` → `Shared`, and `StarterKit.WebApi` (composition-root host) → both business modules. `Shared` is a leaf; `Notifications.Contracts` is a true leaf; `Identity.Contracts` is not (references `Shared` to reach a transitive package). No circular references or cross-module boundary violations found — see [dependency-graph.md](dependency-graph.md) for the full project-reference diagram and package references.
 
 ## Entry Points
 
@@ -83,4 +59,4 @@ One `DbContext` per module is the intended default.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added `Notifications` module; split per-module deep-dive detail out to `modules/Identity.md` and `modules/Notifications.md`) — scope: backend solution — see .claude/CLAUDE.md for update rules._
+_Last synced: 2026-08-19_

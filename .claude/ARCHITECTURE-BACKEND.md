@@ -4,7 +4,7 @@
 
 ## Backend — Module Structure Convention
 
-> Adopted 2026-07-30, replacing the earlier (never-built) `src/Modules/<Name>/{Domain,Application,Infrastructure,Api}` idea. See [reviews/2026-07-30-backend-project-analysis.md](reviews/2026-07-30-backend-project-analysis.md) (archival) for the analysis that prompted this.
+> Adopted 2026-07-30, replacing the earlier (never-built) `src/Modules/<Name>/{Domain,Application,Infrastructure,Api}` idea.
 
 - Every module lives as one or more **flat projects directly under `src/`** — never nested under a `src/Modules/` folder.
 - **Single-project module**: for a module simple enough not to need assembly-level isolation between layers, use one project internally organized by folder (`Entities/` or `Domain/`, `Application/`, `Data/` or `Infrastructure/`, `Controllers/` or `Api/`). Name it `<Module>` by default — or `<Module>.Api` (e.g. `src/Identity.Api`) when the module is deliberately kept as a candidate for future extraction into an independent microservice: the `.Api` suffix then already previews the name that standalone service's own API project would have, minimizing rename churn if/when that extraction happens. Pick the naming style per module on purpose (default vs. extraction candidate), not by accident.
@@ -62,4 +62,4 @@
 See [docs/KNOWN_DEBT.md](docs/KNOWN_DEBT.md) for the current, maintained list of open backend debt/pending decisions. Resolved items aren't repeated here — see git history.
 
 ---
-_Last synced: 2026-08-13_
+_Last synced: 2026-08-19_

@@ -20,7 +20,7 @@ Produce new documentation for a specific module/project/frontend area that doesn
 2. **Read the template**: load the matching file from `.claude/docs/templates/` for structure.
 3. **Delegate**: invoke [documentation-writer](../agents/documentation-writer.md) with the scope and template.
 4. **Verify facts**: every claim in the generated doc must trace to actual code inspected for this scope — mark anything unverifiable as `unknown` rather than guessing.
-5. **Write output**: place the result under `.claude/docs/generated/backend/<scope>/<doc-type>.md` or `.claude/docs/generated/frontend/<scope>/<doc-type>.md`.
+5. **Write output**: place the result under `.claude/docs/generated/backend/<scope>/<doc-type>.md` or `.claude/docs/generated/clients/<app-name>/<doc-type>.md` — see [docs/generated/README.md](../docs/generated/README.md) for the exact layout convention.
 6. **Report**: summarize what was generated and flag any gaps found during generation.
 
 ## Expected Outputs
@@ -33,3 +33,6 @@ Produce new documentation for a specific module/project/frontend area that doesn
 - Don't generate docs for scopes not requested, even if adjacent.
 - Don't carry over assumptions from similar modules — verify per-scope.
 - If a doc already exists for this scope, use [sync-docs](sync-docs.md) instead of blindly overwriting it.
+- Write present-tense facts only — a freshly generated doc has no sync history to narrate, so there's nothing to say beyond a single `_Last synced: <date>_` footer; don't invent "new"/"changed" framing for a first-time write.
+- Don't duplicate a project-reference/import diagram or exact package version numbers across multiple docs — put that in `dependency-graph.md` (its template) and have `overview.md`/`architecture.md` link to it instead.
+- A single-project backend module gets a flat `docs/generated/backend/modules/<ModuleName>.md`; only use the nested `modules/<ModuleName>/overview.md` form for a split (Domain/Application/Infrastructure/Api) module.

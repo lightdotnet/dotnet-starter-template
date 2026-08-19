@@ -39,4 +39,4 @@ _Only verified/observed facts — indexes actually configured, known slow querie
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: backend database — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

@@ -34,4 +34,4 @@ _Rules actually enforced in code (e.g. validation, guard clauses) — cite file:
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: module "<ModuleName>" — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_
