@@ -50,4 +50,4 @@ See [api-contract-reviewer](../../agents/api-contract-reviewer.md) for drift che
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: backend API — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

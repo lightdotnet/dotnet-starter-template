@@ -25,7 +25,7 @@ _What this backend is for, in one or two sentences._
 
 ## Dependency Graph
 
-_Module-to-module and key package dependencies, verified from actual `.csproj`/`.sln` content. Flag any cross-module boundary violation found._
+_One or two sentences: overall direction and whether any circular reference/cross-module boundary violation was found. Link to [dependency-graph.md](dependency-graph.md) for the full diagram and package list rather than repeating it here._
 
 ## Entry Points
 
@@ -48,4 +48,4 @@ _Which client app(s) under `clients/` consume this backend and how — see [../f
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: backend solution — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

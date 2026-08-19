@@ -15,31 +15,7 @@ Below the module layer, `src/Shared` (leaf) and `src/Persistence` (depends on `S
 
 ## Dependency Direction
 
-Verified via `ProjectReference` entries in each `.csproj`:
-
-```text
-Infrastructure -> Shared
-Persistence -> Shared
-Identity.Contracts -> Shared
-Identity.Api -> Identity.Contracts
-Identity.Api -> Infrastructure
-Identity.Api -> Persistence
-Notifications.Contracts -> Shared
-Notifications.Api -> Notifications.Contracts
-Notifications.Api -> Infrastructure
-Notifications.Api -> Persistence
-StarterKit.WebApi -> Identity.Api
-StarterKit.WebApi -> Notifications.Api
-StarterKit.WebApi -> Infrastructure
-StarterKit.WebApi -> Shared
-Framework.Tests -> Shared
-Framework.Tests -> Infrastructure
-Framework.Tests -> Persistence
-Identity.Tests -> Identity.Api
-Identity.Tests -> Shared
-```
-
-Expected direction `Api → Application → Domain`; not enforceable by the compiler since both modules are single projects — but the discipline holds informally: `Controllers/` in both modules call only into services/`Mediator`, never directly into `Entities`/`Data`/DbContext. The "modules must not reference another module's internals" rule **is now verified with a second module**: `Identity` and `Notifications` don't reference each other at all (`Notifications` uses opaque `fromUserId`/`toUserId` strings, no FK or cross-module service call) — no cross-module boundary violation found.
+Expected direction `Api → Application → Domain`; not enforceable by the compiler since both modules are single projects — but the discipline holds informally: `Controllers/` in both modules call only into services/`Mediator`, never directly into `Entities`/`Data`/DbContext. The "modules must not reference another module's internals" rule **is now verified with a second module**: `Identity` and `Notifications` don't reference each other at all (`Notifications` uses opaque `fromUserId`/`toUserId` strings, no FK or cross-module service call) — no cross-module boundary violation found. See [dependency-graph.md](dependency-graph.md) for the full project-reference diagram, verified via each `.csproj`'s `ProjectReference` entries.
 
 ## Key Design Patterns
 
@@ -75,4 +51,4 @@ Module-specific risks/debt now live in each module's own doc (see `modules/Ident
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added `Notifications` module; module-specific layering/risks split out to `modules/Identity.md` and `modules/Notifications.md`) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Last synced: 2026-08-19_

@@ -59,4 +59,4 @@ All controllers rely on `VersionedApiController`'s default `[controller]`-token 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Last synced: 2026-08-13_
+_Last synced: 2026-08-19_

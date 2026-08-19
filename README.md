@@ -4,7 +4,7 @@ A starter template monorepo for a full-stack application: a C#/.NET backend orga
 
 ## Status — what's actually built so far
 
-Backend has a working host with two business modules; the `admin` client is a real, functioning app (not a UI shell) with only its dashboard page still on mock data.
+Backend has a working host with two business modules; the `admin` client is a real, functioning app (not a UI shell) with no mock data remaining.
 
 | Piece | Status |
 |---|---|
@@ -14,7 +14,7 @@ Backend has a working host with two business modules; the `admin` client is a re
 | `src/Migrations/{MSSQL,PostgreSQL,Sqlite}` (design-time EF Core migration projects) | ✅ built |
 | `src/StarterKit.WebApi` (composition-root host) | ✅ built — runnable API |
 | `tests/Framework.Tests` (xUnit v3, shared kernel/infra/persistence) | ✅ built — ~69 tests |
-| `clients/admin` (Next.js admin console) | ✅ built — real auth, full Users/Roles CRUD, real-time Notifications; dashboard page (`/`) still on mock data |
+| `clients/admin` (Next.js admin console) | ✅ built — real auth, full Users/Roles CRUD, real-time Notifications; Home page (`/`) shows a session-backed profile summary plus the live notification inbox |
 | Additional `clients/*` apps (e.g. a primary `clients/web` end-user app) | ❌ not yet created |
 
 ## Structure
@@ -96,7 +96,7 @@ graph TD
 | Backend data access | EF Core — provider-configurable via `DbProvider` in `appsettings.json` (`InMemory` / `PostgreSQL` / `MSSQL` / `Sqlite`), with a dedicated design-time migrations project per relational provider (`src/Migrations/{MSSQL,PostgreSQL,Sqlite}`) |
 | Vendor framework | `Lightsoft.*` package family (mediator, `Result`/`Paged` contracts, domain base types, ASP.NET Core authorization/modularity/CORS helpers, Serilog) |
 | Testing | xUnit v3 — `tests/Framework.Tests` (shared kernel/infra/persistence, ~69 tests), `tests/Identity.Tests` (Identity module, ~96 tests); no dedicated test project for Notifications yet; no mocking library — hand-written fakes |
-| Clients | `clients/admin/` — Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, pnpm. Real auth (encrypted-cookie sessions, proactive token refresh), full Users/Roles CRUD against `Identity.Api`, real-time Notifications via SignalR (browser connects directly to the backend). Currently the only client app — no other `clients/*` subfolder exists yet |
+| Clients | `clients/admin/` — Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, pnpm. Real auth (encrypted-cookie sessions, proactive token refresh), full Users/Roles CRUD against `Identity.Api`, real-time Notifications via SignalR (browser connects directly to the backend). No mock data remaining. Currently the only client app — no other `clients/*` subfolder exists yet |
 
 ## Getting Started
 

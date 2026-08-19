@@ -44,4 +44,4 @@ Module-specific deviations now live in each module's own doc (`modules/Identity.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: 2026-08-03 (resynced — added `Notifications` module; module-specific deviations split out to `modules/Identity.md` and `modules/Notifications.md`) — scope: Backend — see .claude/CLAUDE.md for update rules._
+_Last synced: 2026-08-19_

@@ -18,7 +18,8 @@ docs/generated/
 │   ├── coding-conventions.md         # from templates/coding-conventions.md
 │   ├── development-guide.md          # from templates/development-guide.md
 │   └── modules/
-│       └── <ModuleName>/
+│       ├── <ModuleName>.md           # single-project module (the common case) — from templates/module-overview.md
+│       └── <ModuleName>/             # split module only (Domain/Application/Infrastructure/Api projects)
 │           ├── overview.md           # from templates/module-overview.md
 │           ├── domain-model.md       # from templates/domain-model.md
 │           └── <ProjectName>/
@@ -35,4 +36,4 @@ docs/generated/
 
 Each generated file carries a `<!-- manual -->`-marked section (see the templates) that must be preserved verbatim during any sync.
 
-Populated so far: `backend/overview.md`, `backend/architecture.md`, `backend/coding-conventions.md`, `backend/dependency-graph.md`, `backend/development-guide.md` — scope: `src/Shared`, `src/Infrastructure`, `tests/Framework.Tests` (no modules/host/clients yet, generated 2026-07-29). `clients/admin/overview.md`, `clients/admin/architecture.md`, `clients/admin/coding-conventions.md`, `clients/admin/dependency-graph.md`, `clients/admin/development-guide.md` — scope: `clients/admin` UI shell only, no backend integration yet (generated 2026-07-31). Everything else remains unpopulated until requested for that scope.
+Not every path in the layout above is necessarily populated — a doc only exists once a `generate-docs`/`sync-docs` pass has covered that scope. Check the directory itself rather than relying on a hand-maintained list here, which would just go stale the next time a scope is added.

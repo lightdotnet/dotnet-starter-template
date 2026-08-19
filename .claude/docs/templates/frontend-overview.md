@@ -24,11 +24,11 @@ _Is there a workspace/monorepo tool (Turborepo, pnpm/yarn workspaces) at the `cl
 
 ## Backend Integration (summary)
 
-_Which apps call the backend API and how (per-app detail belongs in each app's own overview). Link to [../backend/api.md](../backend/api.md) if generated._
+_Which apps call the backend API and how (per-app detail belongs in each app's own overview). Link to [backend/api.md](backend/api.md) if generated._
 
 ## Notes
 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: all of clients/ — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

@@ -45,4 +45,4 @@ _Does this app share code/tooling with sibling apps under `clients/`, or is it f
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: client app "<app-name>" — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

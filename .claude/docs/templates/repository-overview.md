@@ -39,4 +39,4 @@ _Backend shared/building-blocks project, any shared API client/UI kit reused acr
 _Practical guidance for a newcomer: where to start reading (e.g. a specific module for backend logic, a specific client app/route for frontend UI), and where the API contract between them lives._
 
 ---
-_Generated: <date> — scope: whole repository — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

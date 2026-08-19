@@ -13,7 +13,7 @@ _Backend: layers actually observed per module (Domain/Application/Infrastructure
 
 ## Dependency Direction
 
-_Verified via project references (backend) or actual imports (client app) — direction diagram or table._
+_The conceptual rule and whether it holds (e.g. expected layer order, cross-module/cross-feature boundary verified or violated). Link to [dependency-graph.md](dependency-graph.md) for the full project-reference/import diagram and package list rather than repeating it here — this section explains what the direction means, that file proves it._
 
 ## Key Design Patterns
 
@@ -37,4 +37,4 @@ _Backend: which modules exist and their boundary rules. Client app: which route 
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Generated: <date> — scope: <Backend | client app "<app-name>"> — see .claude/CLAUDE.md for update rules._
+_Last synced: <date>_

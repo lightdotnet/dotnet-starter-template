@@ -58,4 +58,4 @@ No special setup needed — all current tests are unit tests using EF Core's InM
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Last synced: 2026-08-13_
+_Last synced: 2026-08-19_
