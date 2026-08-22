@@ -6,6 +6,7 @@ import { buildSessionClaims } from "@/lib/server/build-session-claims";
 import { refreshSessionIfNearExpiry } from "@/lib/server/refresh-session";
 import { parseSessionCookie } from "@/lib/server/parse-session";
 import {
+  MAX_REFRESH_FAILURES,
   SESSION_COOKIE_NAME,
   buildSessionCookieOptions,
 } from "@/lib/server/session-cookie";
@@ -97,11 +98,20 @@ export async function proxy(request: NextRequest) {
   let activeSession = session;
   let tokenWasRefreshed = false;
 
-  // A failed/not-due refresh is not treated as a dead session — see `refreshSessionIfNearExpiry` doc comment.
-  const refreshed = await refreshSessionIfNearExpiry(session);
-  if (refreshed) {
-    activeSession = refreshed;
+  // A transient (network/5xx) or not-yet-due refresh is not treated as a dead session —
+  // only consecutive *permanent* (401/400) failures count, see `refreshSession` doc comment.
+  const outcome = await refreshSessionIfNearExpiry(session);
+  if (outcome.status === "success") {
+    activeSession = outcome.session;
     tokenWasRefreshed = true;
+  } else if (outcome.status === "failed" && outcome.permanent) {
+    const failureCount = (session.refreshFailureCount ?? 0) + 1;
+    if (failureCount >= MAX_REFRESH_FAILURES) {
+      const response = loginRedirect(request);
+      response.cookies.delete(SESSION_COOKIE_NAME);
+      return response;
+    }
+    activeSession = { ...session, refreshFailureCount: failureCount };
   }
 
   // Profile display data (name/email/claims) is only refetched on a real page

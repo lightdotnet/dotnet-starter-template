@@ -20,8 +20,9 @@ export async function getSignalRTokenAction(): Promise<SignalRTokenState | null>
   const session = await resolveSession();
   if (!session) return null;
 
-  const refreshed = await refreshSessionIfNearExpiry(session);
-  if (refreshed) await persistSessionCookie(refreshed);
+  const outcome = await refreshSessionIfNearExpiry(session);
+  const activeSession = outcome.status === "success" ? outcome.session : session;
+  if (outcome.status === "success") await persistSessionCookie(activeSession);
 
-  return { accessToken: (refreshed ?? session).accessToken };
+  return { accessToken: activeSession.accessToken };
 }

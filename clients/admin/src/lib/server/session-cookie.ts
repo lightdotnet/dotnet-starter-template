@@ -8,6 +8,9 @@ export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 /** How long before access-token expiry the middleware proactively refreshes it. */
 export const REFRESH_LEAD_MS = 5 * 60 * 1000;
 
+/** Consecutive permanent (401/400) refresh failures before a session is treated as dead and force-logged-out. */
+export const MAX_REFRESH_FAILURES = 3;
+
 /** Shared `cookies().set()` options for the session cookie (Server Action / Route Handler context). */
 export function buildSessionCookieOptions(sessionExpiresAt: number) {
   return {

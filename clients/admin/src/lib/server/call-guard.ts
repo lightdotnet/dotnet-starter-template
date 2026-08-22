@@ -1,6 +1,7 @@
 import "server-only";
 
-import type { ApiResponse, Result } from "@/types/api";
+import { HttpError } from "@/lib/server/http";
+import type { ApiResponse, Result, ResultCode } from "@/types/api";
 
 function describeError(error: unknown): string {
   return error instanceof Error
@@ -8,10 +9,19 @@ function describeError(error: unknown): string {
     : "Unexpected error while calling the API.";
 }
 
+/** Maps a thrown `HttpError`'s status to the backend's own `ResultCode` vocabulary; anything else (network failure, timeout, non-JSON body) is just "error". */
+function codeFromError(error: unknown): ResultCode {
+  if (error instanceof HttpError) {
+    if (error.status === 401) return "unauthorized";
+    if (error.status === 400) return "bad_request";
+  }
+  return "error";
+}
+
 function errorResponse(error: unknown): ApiResponse {
   return {
     requestId: "",
-    code: "error",
+    code: codeFromError(error),
     isSuccess: false,
     message: describeError(error),
   };

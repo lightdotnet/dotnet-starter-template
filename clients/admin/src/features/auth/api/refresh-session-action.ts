@@ -15,10 +15,10 @@ export async function refreshSessionAction(): Promise<void> {
   const session = await getSession();
   if (!session || !isSuperAdminUser(session.profile?.userName)) return;
 
-  const refreshed = await refreshSession(session);
-  if (!refreshed) return;
+  const outcome = await refreshSession(session);
+  if (outcome.status !== "success") return;
 
-  await persistSessionCookie(refreshed);
+  await persistSessionCookie(outcome.session);
 
   revalidatePath("/user-profile");
 }

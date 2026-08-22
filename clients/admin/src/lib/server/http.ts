@@ -3,6 +3,17 @@ import "server-only";
 import { getApiBaseUrl } from "@/lib/server/config";
 import { type ApiClientName } from "@/lib/server/api-clients";
 
+/** Thrown when a backend response is non-2xx; carries the HTTP status so callers can distinguish permanent (401/400) from transient (5xx/network) failures. */
+export class HttpError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
 export interface HttpRequestContext {
   headers: Record<string, string>;
 }
@@ -70,7 +81,7 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
   });
 
   if (!response.ok) {
-    throw new Error(await extractErrorMessage(response, path));
+    throw new HttpError(response.status, await extractErrorMessage(response, path));
   }
 
   return response;
