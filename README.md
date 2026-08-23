@@ -124,12 +124,11 @@ The backend must be running and reachable at `API_BASE_URL` for auth/data pages 
 
 ## Documentation
 
-- [.claude/PROJECT.md](.claude/PROJECT.md) / [.claude/ARCHITECTURE.md](.claude/ARCHITECTURE.md) — cross-cutting summary.
-- [.claude/PROJECT-BACKEND.md](.claude/PROJECT-BACKEND.md) / [.claude/ARCHITECTURE-BACKEND.md](.claude/ARCHITECTURE-BACKEND.md) — verified backend repository/module inventory, layering, dependency direction, shared kernel notes.
-- [.claude/PROJECT-CLIENTS.md](.claude/PROJECT-CLIENTS.md) / [.claude/ARCHITECTURE-CLIENTS.md](.claude/ARCHITECTURE-CLIENTS.md) — verified client app inventory and frontend architecture.
-- [.claude/DEVELOPMENT.md](.claude/DEVELOPMENT.md) — verified coding/testing conventions.
-- [.claude/docs/generated/backend/](.claude/docs/generated/backend/) — generated backend overview, per-module docs, architecture, coding conventions, dependency graph, and development guide.
-- [.claude/docs/generated/clients/admin/](.claude/docs/generated/clients/admin/) — generated `admin` client overview, architecture, coding conventions, dependency graph, and development guide.
+- [CLAUDE.md](CLAUDE.md) — repository-wide entry point (structure, AI operating rules, where things live).
+- [docs/integration.md](docs/integration.md) — cross-cutting backend ↔ clients integration contract.
+- [src/CLAUDE.md](src/CLAUDE.md) / [src/docs/](src/docs/) — backend module inventory, architecture, conventions, known debt.
+- [clients/admin/CLAUDE.md](clients/admin/CLAUDE.md) / [clients/admin/docs/](clients/admin/docs/) — admin client architecture, conventions.
+- [.claude/](.claude/) — reusable Claude development infrastructure (agents, skills, workflows, commands), not project-specific documentation.
 
 ## License
 

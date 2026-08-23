@@ -20,12 +20,12 @@ Produce new documentation for a specific module/project/frontend area that doesn
 2. **Read the template**: load the matching file from `.claude/docs/templates/` for structure.
 3. **Delegate**: invoke [documentation-writer](../agents/documentation-writer.md) with the scope and template.
 4. **Verify facts**: every claim in the generated doc must trace to actual code inspected for this scope — mark anything unverifiable as `unknown` rather than guessing.
-5. **Write output**: place the result under `.claude/docs/generated/backend/<scope>/<doc-type>.md` or `.claude/docs/generated/clients/<app-name>/<doc-type>.md` — see [docs/generated/README.md](../docs/generated/README.md) for the exact layout convention.
+5. **Write output**: each project owns its own `docs/` — for the backend, place the result under `../../src/docs/architecture/<doc-type>.md` (overview, architecture, dependency-graph, `modules/<ModuleName>.md`) or `../../src/docs/conventions/<doc-type>.md` (coding-conventions, development-guide); for a client app, under `../../clients/<app-name>/docs/architecture/<doc-type>.md` or `../../clients/<app-name>/docs/conventions/<doc-type>.md` accordingly. There is no shared `docs/generated/` staging area — don't write there.
 6. **Report**: summarize what was generated and flag any gaps found during generation.
 
 ## Expected Outputs
 
-- A new markdown file under `.claude/docs/generated/` following the template structure, populated only with verified facts.
+- A new markdown file under `src/docs/` or `clients/<app-name>/docs/` following the template structure, populated only with verified facts.
 - A short summary of what was generated and any open questions.
 
 ## Best Practices
@@ -35,4 +35,4 @@ Produce new documentation for a specific module/project/frontend area that doesn
 - If a doc already exists for this scope, use [sync-docs](sync-docs.md) instead of blindly overwriting it.
 - Write present-tense facts only — a freshly generated doc has no sync history to narrate, so there's nothing to say beyond a single `_Last synced: <date>_` footer; don't invent "new"/"changed" framing for a first-time write.
 - Don't duplicate a project-reference/import diagram or exact package version numbers across multiple docs — put that in `dependency-graph.md` (its template) and have `overview.md`/`architecture.md` link to it instead.
-- A single-project backend module gets a flat `docs/generated/backend/modules/<ModuleName>.md`; only use the nested `modules/<ModuleName>/overview.md` form for a split (Domain/Application/Infrastructure/Api) module.
+- A single-project backend module gets a flat `src/docs/architecture/modules/<ModuleName>.md`; only use the nested `modules/<ModuleName>/overview.md` form for a split (Domain/Application/Infrastructure/Api) module.

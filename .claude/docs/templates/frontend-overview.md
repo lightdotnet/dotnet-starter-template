@@ -1,7 +1,7 @@
 <!--
 Template: Frontend Overview (Clients Index)
 Used by: skills/analyze-frontend.md
-Output location: .claude/docs/generated/frontend-overview.md
+Output location: docs/frontend-overview.md (repository root — indexes all apps under clients/, not owned by a single app)
 Do not populate this file itself — copy its structure into the generated output.
 This is the index across ALL apps under clients/ — for one app's detail, see client-app-overview.md.
 -->
@@ -16,7 +16,7 @@ _What the client-side of this repo is for, in one or two sentences. Note explici
 
 | App | Path | Purpose | Stack | Docs |
 |---|---|---|---|---|
-| | `clients/<app-name>/` | | | [overview](clients/<app-name>/overview.md) |
+| | `clients/<app-name>/` | | | [overview](clients/<app-name>/docs/architecture/overview.md) |
 
 ## Shared Tooling Across Apps
 

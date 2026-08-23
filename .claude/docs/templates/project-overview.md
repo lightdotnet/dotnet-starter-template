@@ -1,7 +1,7 @@
 <!--
 Template: Project Overview
 Used by: skills/analyze-project.md
-Output location: .claude/docs/generated/backend/modules/<ModuleName>/<ProjectName>/overview.md
+Output location: src/docs/architecture/modules/<ModuleName>/<ProjectName>/overview.md
 Do not populate this file itself — copy its structure into the generated output.
 -->
 

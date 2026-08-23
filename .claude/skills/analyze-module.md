@@ -19,7 +19,7 @@ Build (or refresh) an understanding of exactly one Modular Monolith module: its 
 2. **Map internal layering**: confirm dependency direction within the module (`Api → Application → Domain`, `Infrastructure → Application`/`Domain`) — delegate to [architecture-reviewer](../agents/architecture-reviewer.md) if it needs a full assessment.
 3. **Map external dependencies**: delegate to [dependency-analyzer](../agents/dependency-analyzer.md) for what this module references (shared/building-blocks project, NuGet packages) and, importantly, whether it reaches into any other module directly (a boundary violation).
 4. **Read its public contract**: the module's `Api` project (routes/DTOs) — this is what other modules and client apps can rely on.
-5. **Update docs, if requested**: write/update a scoped entry in `.claude/PROJECT-BACKEND.md` (Backend Modules table) and/or `.claude/docs/generated/backend/modules/<Name>/overview.md` using the [module-overview template](../docs/templates/module-overview.md). Only when explicitly asked.
+5. **Update docs, if requested**: write/update a scoped entry in `src/CLAUDE.md` (Modules table) and/or `src/docs/architecture/modules/<Name>.md` using the [module-overview template](../docs/templates/module-overview.md). Only when explicitly asked.
 
 ## Expected Outputs
 

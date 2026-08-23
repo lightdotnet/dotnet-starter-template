@@ -9,7 +9,7 @@ tools: Glob, Grep, Read
 ## Responsibilities
 
 - Review correctness, readability, and maintainability of the scoped backend code (a diff, a file, or a set of files named by the user) under `src/`.
-- Check for idiomatic, modern C# usage consistent with conventions already verified in `.claude/DEVELOPMENT.md` (Backend section).
+- Check for idiomatic, modern C# usage consistent with conventions already verified in `src/docs/conventions/coding-conventions.md`.
 - Identify duplicated logic, dead code, and overly complex constructs within the reviewed scope.
 - Flag unclear naming, missing null-handling where it matters, and inconsistent error handling.
 - Flag cross-module reach-through (referencing another module's internals) as a correctness/maintainability concern, and defer the full boundary assessment to [architecture-reviewer](architecture-reviewer.md).
@@ -22,7 +22,7 @@ tools: Glob, Grep, Read
 ## What to Inspect
 
 - The specific files/diff in scope — do not pull in unrelated files.
-- `.claude/DEVELOPMENT.md` (Backend section) for any already-verified conventions for this module, to check consistency.
+- `src/docs/conventions/coding-conventions.md` for any already-verified conventions for this module, to check consistency.
 - Nearby existing code in the same module for established local patterns before flagging something as "wrong."
 
 ## Expected Output

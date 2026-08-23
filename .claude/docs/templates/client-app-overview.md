@@ -1,7 +1,7 @@
 <!--
 Template: Client App Overview
 Used by: skills/analyze-client.md, agents/nextjs-architect.md
-Output location: .claude/docs/generated/clients/<app-name>/overview.md
+Output location: clients/<app-name>/docs/architecture/overview.md
 Do not populate this file itself — copy its structure into the generated output.
 -->
 
@@ -26,7 +26,7 @@ _What this specific client app is for (e.g. the primary end-user web app, an int
 
 ## Backend Integration
 
-_This app's API client layer (e.g. `lib/api/`), how it's generated/maintained, and which backend modules it calls. Link to [../../backend/api.md](../../backend/api.md) if generated. See `.claude/ARCHITECTURE.md` (Integration section)._
+_This app's API client layer (e.g. `lib/api/`), how it's generated/maintained, and which backend modules it calls. Link to [../../../../src/docs/architecture/api.md](../../../../src/docs/architecture/api.md) if generated. See root [docs/integration.md](../../../../docs/integration.md)._
 
 ## Auth Flow
 

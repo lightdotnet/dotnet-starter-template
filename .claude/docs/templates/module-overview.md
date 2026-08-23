@@ -1,9 +1,9 @@
 <!--
 Template: Module Overview (Backend, Modular Monolith)
 Used by: skills/analyze-module.md, agents/architecture-reviewer.md
-Output location: .claude/docs/generated/backend/modules/<ModuleName>.md for a single-project module (the common case —
-  see ARCHITECTURE-BACKEND.md § Module Structure Convention). Only use the nested
-  .claude/docs/generated/backend/modules/<ModuleName>/overview.md form for a split module that also has a
+Output location: src/docs/architecture/modules/<ModuleName>.md for a single-project module (the common case —
+  see src/docs/architecture/architecture.md § Layering). Only use the nested
+  src/docs/architecture/modules/<ModuleName>/overview.md form for a split module that also has a
   domain-model.md and/or per-project overview.md files alongside it.
 Do not populate this file itself — copy its structure into the generated output.
 -->
@@ -25,7 +25,7 @@ For a split module (`<ModuleName>.Domain`/`.Application`/`.Infrastructure`/`.Api
 | `<ModuleName>.Infrastructure` | | |
 | `<ModuleName>.Api` | | |
 
-For a single-project module (the common case), replace the table above with one row per internal folder instead (e.g. `Entities/`, `Data/`, `Services/`, `Controllers/`) — see `docs/generated/backend/modules/Identity.md`/`Notifications.md` for the actual pattern used.
+For a single-project module (the common case), replace the table above with one row per internal folder instead (e.g. `Entities/`, `Data/`, `Services/`, `Controllers/`) — see `src/docs/architecture/modules/Identity.md`/`Notifications.md` for the actual pattern used.
 
 ## Public Contract
 

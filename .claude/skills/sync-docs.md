@@ -7,7 +7,7 @@ description: Playbook for updating existing generated documentation to match the
 
 ## Purpose
 
-Bring existing documentation under `.claude/docs/generated/` (and, if requested, `.claude/PROJECT.md`/`.claude/PROJECT-BACKEND.md`/`.claude/PROJECT-CLIENTS.md`/`.claude/ARCHITECTURE.md`/`.claude/ARCHITECTURE-BACKEND.md`/`.claude/ARCHITECTURE-CLIENTS.md`) up to date with the current code — additive, corrective, and stale-content-removing, never a blind rewrite.
+Bring existing documentation under `src/docs/` and `clients/<app-name>/docs/` (and, if requested, `src/CLAUDE.md`/`clients/<app-name>/CLAUDE.md`/the root `CLAUDE.md`/`docs/integration.md`) up to date with the current code — additive, corrective, and stale-content-removing, never a blind rewrite.
 
 ## Inputs
 
@@ -38,4 +38,4 @@ Bring existing documentation under `.claude/docs/generated/` (and, if requested,
 - If it's unclear whether a section is manual or previously generated, ask rather than guessing and potentially deleting someone's manual notes.
 - Write present-tense facts only — never narrate the sync itself into the doc body ("new this sync"/"changed this sync"/"unchanged" markers, chained multi-date footers). Every file ends in one `_Last synced: <date>_` line; the changelog-style summary of what changed belongs in the report to the user, not in the file.
 - Don't duplicate a project-reference/import diagram or exact package version numbers across multiple docs — `dependency-graph.md` is the one canonical home for that (see its template); other docs link to it with a short summary instead of repeating it. Point at the version-of-record file (`Directory.Packages.props` for the backend, `package.json` for a client app) rather than copying exact version numbers into prose, since those go stale on every bump.
-- A single-project backend module gets a flat `docs/generated/backend/modules/<ModuleName>.md`; only use the nested `modules/<ModuleName>/overview.md` form for a split (Domain/Application/Infrastructure/Api) module — see `docs/templates/module-overview.md`.
+- A single-project backend module gets a flat `src/docs/architecture/modules/<ModuleName>.md`; only use the nested `modules/<ModuleName>/overview.md` form for a split (Domain/Application/Infrastructure/Api) module — see `docs/templates/module-overview.md`.

@@ -38,7 +38,8 @@ No special setup needed — all current tests are unit tests using EF Core's InM
 
 | Task | How |
 |---|---|
-| Add a backend migration | `dotnet ef migrations add <Name> --project src/Migrations/<Provider>/<Provider>.csproj --context IdentityDbContext --output-dir Identity` where `<Provider>` is `MSSQL`, `PostgreSQL`, or `Sqlite` — run once per provider (design-time EF migration projects live under top-level `src/Migrations/{MSSQL,PostgreSQL,Sqlite}`). MSSQL currently has a single baseline migration (`CreateIdentitySchema`); Sqlite/PostgreSQL each have that same baseline plus one incremental migration (`AddUserCreatedIndex`) on top of it. |
+| Add a backend migration | `dotnet ef migrations add <Name> --project src/Migrations/<Provider>/<Provider>.csproj --context IdentityDbContext --output-dir Identity` where `<Provider>` is `MSSQL`, `PostgreSQL`, or `Sqlite` — run once per provider (design-time EF migration projects live under top-level `src/Migrations/{MSSQL,PostgreSQL,Sqlite}`). MSSQL currently has a single baseline migration (`CreateIdentitySchema`); Sqlite/PostgreSQL each have that same baseline plus one incremental migration (`AddUserCreatedIndex`) on top of it. Full EF CLI cheat sheet: [migrations.md](migrations.md). |
+| Run local infra (Postgres, Redis, pgAdmin) via Docker | See [docker-cli.md](docker-cli.md). |
 | Run the API locally | `dotnet run --project src/StarterKit.WebApi/StarterKit.WebApi.csproj` |
 | Run the backend test suite | `dotnet test tests/Framework.Tests/Framework.Tests.csproj` and `dotnet test tests/Identity.Tests/Identity.Tests.csproj` |
 | Build the whole solution | `dotnet build StarterKit.slnx` |
@@ -48,8 +49,8 @@ No special setup needed — all current tests are unit tests using EF Core's InM
 - Shared abstractions/base types (`ICurrentUser`, `IDateTime`, `Status`, `BaseDto`, entity wrappers, authorization): `src/Shared/`.
 - Cross-cutting infrastructure (CORS, health checks, Serilog bootstrap logging, Mapster config, module/endpoint base classes): `src/Infrastructure/`.
 - EF Core provider config, DbContext base class, audit/soft-delete tracking, domain-event dispatch: `src/Persistence/`.
-- Identity module (users, roles, claims, JWT auth): `src/Identity.Api/` (entities in `Entities/`, DbContext in `Data/`, services in `Services/` + `Jwt/`, controllers in `Controllers/`); public DTOs/service interfaces in `src/Identity.Contracts/`. Deep-dive doc: [modules/Identity.md](modules/Identity.md).
-- Notifications module (notification storage + real-time push): `src/Notifications.Api/` (entities in `Entities/`, DbContext in `Data/`, service in `Services/`, controllers in `Controllers/`, SignalR hub in `SignalR/`); public DTOs/service interface/permissions in `src/Notifications.Contracts/`. Deep-dive doc: [modules/Notifications.md](modules/Notifications.md).
+- Identity module (users, roles, claims, JWT auth): `src/Identity.Api/` (entities in `Entities/`, DbContext in `Data/`, services in `Services/` + `Jwt/`, controllers in `Controllers/`); public DTOs/service interfaces in `src/Identity.Contracts/`. Deep-dive doc: [../architecture/modules/Identity.md](../architecture/modules/Identity.md).
+- Notifications module (notification storage + real-time push): `src/Notifications.Api/` (entities in `Entities/`, DbContext in `Data/`, service in `Services/`, controllers in `Controllers/`, SignalR hub in `SignalR/`); public DTOs/service interface/permissions in `src/Notifications.Contracts/`. Deep-dive doc: [../architecture/modules/Notifications.md](../architecture/modules/Notifications.md).
 - Host wiring/startup (`Program.cs`, `appsettings*.json`): `src/StarterKit.WebApi/`.
 - Tests: `tests/Framework.Tests/<ProjectName>/...` (mirrors `Shared/`, `Infrastructure/`, `Persistence/`) and `tests/Identity.Tests/<Area>/...` (mirrors `Identity.Api`'s own `Extensions/`, `Jwt/`, `Entities/`, `Services/`, `Controllers/` folders, plus a `TestSupport/` folder for shared test infrastructure). No test project yet for `Notifications`.
 

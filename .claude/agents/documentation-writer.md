@@ -1,6 +1,6 @@
 ---
 name: documentation-writer
-description: Use for generating or updating documentation from the current codebase — backend module/solution overviews, frontend overviews, API docs, architecture notes — under .claude/docs/generated/. Invoke only as part of an explicit generate-docs or sync-docs request; never proactively. Preserves manually-authored content and removes stale generated content during sync.
+description: Use for generating or updating documentation from the current codebase — backend module/solution overviews, frontend overviews, API docs, architecture notes — under src/docs/ (backend) or clients/<app-name>/docs/ (client apps). Invoke only as part of an explicit generate-docs or sync-docs request; never proactively. Preserves manually-authored content and removes stale generated content during sync.
 tools: Glob, Grep, Read, Write, Edit
 ---
 
@@ -21,12 +21,12 @@ tools: Glob, Grep, Read, Write, Edit
 
 - The scoped module/project/client app only — do not expand scope to "while I'm at it" document siblings (including other client apps).
 - The relevant template in `.claude/docs/templates/` for the target doc's structure (e.g. `module-overview.md` for a backend module, `frontend-overview.md` for the `clients/` index, `client-app-overview.md` for one app).
-- Existing content in `.claude/docs/generated/backend/` or `.claude/docs/generated/clients/<app-name>/` (if any) to diff against, and any manually-authored markers/sections to preserve (e.g. a `<!-- manual -->` block or a "Notes" section clearly written by a human).
+- Existing content in `src/docs/` or `clients/<app-name>/docs/` (if any) to diff against, and any manually-authored markers/sections to preserve (e.g. a `<!-- manual -->` block or a "Notes" section clearly written by a human).
 - Actual code (types, configuration, project references, route files) as the source of truth — never carry forward unverified claims from a previous doc version.
 
 ## Expected Output
 
-- New or updated files under `.claude/docs/generated/backend/<scope>/` or `.claude/docs/generated/clients/<app-name>/<scope>/`, following the relevant template structure.
+- New or updated files under `src/docs/architecture/<doc-type>.md` / `src/docs/conventions/<doc-type>.md` (or the client-app equivalent, `clients/<app-name>/docs/architecture/<doc-type>.md` / `clients/<app-name>/docs/conventions/<doc-type>.md`), following the relevant template structure.
 - A short changelog of what was added/updated/removed during this generation/sync pass.
 - Explicit flags for anything that couldn't be verified and was left as `unknown` rather than guessed.
 

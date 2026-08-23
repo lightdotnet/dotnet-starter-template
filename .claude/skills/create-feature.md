@@ -13,7 +13,7 @@ Guide the addition of new functionality without assuming repo-wide impact, and w
 
 - A description of the desired feature/behavior.
 - Which side(s) it touches: a new/changed backend module, new/changed UI in one or more named client apps, or both (ask if unclear — including which client app(s), once `clients/` has more than one).
-- Any relevant existing documentation for the target scope: `.claude/PROJECT-BACKEND.md`/`.claude/ARCHITECTURE-BACKEND.md` (backend), `.claude/PROJECT-CLIENTS.md`/`.claude/ARCHITECTURE-CLIENTS.md` (clients), and `.claude/DEVELOPMENT.md`. See the `/context-backend`/`/context-frontend`/`/context-full` commands ([commands/](../commands/)) to load the right set.
+- Any relevant existing documentation for the target scope: `src/CLAUDE.md`/`src/docs/` (backend), `clients/<app-name>/CLAUDE.md`/`clients/<app-name>/docs/` (clients). See the `/context-backend`/`/context-frontend`/`/context-full` commands ([commands/](../commands/)) to load the right set.
 
 ## Workflow
 
@@ -26,7 +26,7 @@ Guide the addition of new functionality without assuming repo-wide impact, and w
    - [nextjs-architect](../agents/nextjs-architect.md) for a client app's routing/data-fetching/state decisions.
 4. **Settle the contract first** if the feature spans both stacks: agree the API shape (routes, DTOs, error cases) before writing client code against it — treat it as a small design step, not an afterthought.
 5. **Produce a plan**: outline the approach, files to add/change on each side (naming which client app(s) if more than one is touched), and any API-contract implications. Present it before writing code (see [workflows/implement-feature.md](../workflows/implement-feature.md)).
-6. **Wait for explicit approval** before implementing — this gate applies to every add/modify/feature request, not just large ones (see `.claude/CLAUDE.md` §2.9).
+6. **Wait for explicit approval** before implementing — this gate applies to every add/modify/feature request, not just large ones (see root `CLAUDE.md` §2.9).
 7. **Implement incrementally**, delegating to relevant agents/skills/workflows: backend first (confirming it builds) then each client against the real contract, or vice versa — small, reviewable steps rather than one large change across the whole stack at once. If the plan included tests, write that test code as part of this step.
 8. **Present the implemented code back to the user for review.** Stop here — don't automatically proceed to running tests or updating docs.
 9. **Run tests / check coverage only when asked**: once the user has reviewed the code and explicitly requests it, run the automated test suite and/or use [testing-reviewer](../agents/testing-reviewer.md) to check coverage of edge cases.

@@ -1,7 +1,7 @@
 <!--
 Template: Development Guide
-Used by: DEVELOPMENT.md aggregation, onboarding
-Output location: .claude/docs/generated/backend/development-guide.md or .claude/docs/generated/clients/<app-name>/development-guide.md
+Used by: onboarding
+Output location: src/docs/conventions/development-guide.md or clients/<app-name>/docs/conventions/development-guide.md
 Do not populate this file itself — copy its structure into the generated output.
 -->
 
