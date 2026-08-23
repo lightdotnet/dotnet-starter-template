@@ -17,4 +17,6 @@ export interface SessionData {
   /** Decoded from the access token's "role" claim — never from the profile API. */
   roles: string[];
   profile: ProfileData | null;
+  /** Consecutive permanent (401/400) refresh failures. Optional so cookies issued before this field existed are treated as 0. Reset to 0 on any successful refresh. */
+  refreshFailureCount?: number;
 }

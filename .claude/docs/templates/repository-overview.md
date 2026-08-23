@@ -1,7 +1,7 @@
 <!--
 Template: Repository Overview
 Used by: skills/generate-docs.md, skills/sync-docs.md
-Output location: .claude/docs/generated/repository-overview.md
+Output location: docs/repository-overview.md (repository root — whole-repo scope only)
 Do not populate this file itself — copy its structure into the generated output.
 -->
 
@@ -22,13 +22,13 @@ _What this repository is for, in one or two sentences (starter template monorepo
 
 | Module | Path | Purpose | Docs |
 |---|---|---|---|
-| | | | [overview](backend/modules/<module>/overview.md) |
+| | | | [overview](src/docs/architecture/modules/<ModuleName>.md) |
 
 ## Client Apps Index
 
 | App | Path | Purpose | Docs |
 |---|---|---|---|
-| | `clients/<app-name>/` | | [overview](clients/<app-name>/overview.md) |
+| | `clients/<app-name>/` | | [overview](clients/<app-name>/docs/architecture/overview.md) |
 
 ## Shared/Common Building Blocks
 

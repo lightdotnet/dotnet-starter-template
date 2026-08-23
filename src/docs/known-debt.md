@@ -1,8 +1,8 @@
 # Known Debt — Backend
 
-> Canonical, **current-state-only** list of open backend technical debt and pending architecture decisions. Resolved items are removed, not kept as history — `git log` covers that. Client-side debt has its own single source: [docs/generated/clients/admin/architecture.md § Known Architectural Risks / Debt](generated/clients/admin/architecture.md#known-architectural-risks--debt) — not duplicated here.
+> Canonical, **current-state-only** list of open backend technical debt and pending architecture decisions. Resolved items are removed, not kept as history — `git log` covers that. Client-side debt has its own single source: [clients/admin/docs/architecture/architecture.md § Known Architectural Risks / Debt](../../clients/admin/docs/architecture/architecture.md#known-architectural-risks--debt) — not duplicated here.
 >
-> Referenced from [ARCHITECTURE-BACKEND.md § Architectural Risks / Debt](../ARCHITECTURE-BACKEND.md#backend--architectural-risks--debt) and [PROJECT-BACKEND.md § Backend Open Questions / Gaps](../PROJECT-BACKEND.md#backend-open-questions--gaps). When an item here is resolved, delete it (don't strike it through); when a new one is found, add it here rather than back into those docs. Lessons learned from the original analysis pass (trimmed to durable diagnostic value, resolved items removed): [reviews/2026-07-30-backend-project-analysis.md](../reviews/2026-07-30-backend-project-analysis.md) (archival).
+> Referenced from [CLAUDE.md § Known Debt](../CLAUDE.md#known-debt) and [architecture/architecture.md § Architectural Risks / Debt](architecture/architecture.md#known-architectural-risks--debt). When an item here is resolved, delete it (don't strike it through); when a new one is found, add it here rather than back into those docs. Lessons learned from the original analysis pass (trimmed to durable diagnostic value, resolved items removed): [reviews/2026-07-30-backend-project-analysis.md](reviews/2026-07-30-backend-project-analysis.md) (archival).
 
 ## Architecture decisions pending
 

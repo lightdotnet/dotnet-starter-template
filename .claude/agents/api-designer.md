@@ -22,8 +22,8 @@ tools: Glob, Grep, Read
 ## What to Inspect
 
 - Existing endpoint/contract definitions across modules for naming, shape, and versioning conventions already in use.
-- `.claude/DEVELOPMENT.md` (Backend → API Conventions) for any already-verified conventions (versioning scheme, response contract shape).
-- Any existing API documentation under `.claude/docs/generated/backend/api.md`.
+- `src/docs/conventions/coding-conventions.md` (§ API Conventions) for any already-verified conventions (versioning scheme, response contract shape).
+- Any existing API documentation under `src/docs/architecture/api.md`.
 - Actual usages across `clients/*` if reviewing a change to an existing endpoint — delegate to [api-contract-reviewer](api-contract-reviewer.md) for a full per-client usage sweep.
 
 ## Expected Output

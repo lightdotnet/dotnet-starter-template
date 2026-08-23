@@ -66,6 +66,7 @@
   --z-index-dropdown: 50;
   --z-index-dialog: 60;
   --z-index-toast: 70;
+  --z-index-overlay: 80;
 }
 
 :root {

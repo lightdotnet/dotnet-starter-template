@@ -52,7 +52,7 @@ One `DbContext` per module is the intended default.
 
 ## Client Integration
 
-`clients/admin/` (a Next.js admin dashboard app) consumes both modules: `Identity` (users/roles/auth) and `Notifications` (`notification`/`user_notification` REST endpoints plus a direct WebSocket connection to `/signalr-hub`, proxied same-origin via the admin app's `next.config.ts` `rewrites()`). See `.claude/docs/generated/clients/admin/overview.md` for the frontend-side detail.
+`clients/admin/` (a Next.js admin dashboard app) consumes both modules: `Identity` (users/roles/auth) and `Notifications` (`notification`/`user_notification` REST endpoints plus a direct WebSocket connection to `/signalr-hub`, proxied same-origin via the admin app's `next.config.ts` `rewrites()`). See [../../../clients/admin/docs/architecture/overview.md](../../../clients/admin/docs/architecture/overview.md) for the frontend-side detail.
 
 ## Notes
 

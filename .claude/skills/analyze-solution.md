@@ -19,7 +19,7 @@ Build (or refresh) an understanding of the backend solution under `src/`: its mo
 2. **Map dependencies**: delegate to [dependency-analyzer](../agents/dependency-analyzer.md) to build the real project/package dependency graph, flagging any cross-module boundary violations.
 3. **Understand structure**: delegate to [architecture-reviewer](../agents/architecture-reviewer.md) if a structural/layering assessment is also wanted; otherwise just describe what's observed.
 4. **Read minimally**: open only the files needed to describe each module's responsibility (e.g. namespaces, key public types) — not every file in every module.
-5. **Update docs, if requested**: if the user wants this persisted, write/update `.claude/PROJECT-BACKEND.md` (Backend Modules table) and/or `.claude/docs/generated/backend/overview.md` using the [solution-overview template](../docs/templates/solution-overview.md). Do this only when explicitly asked.
+5. **Update docs, if requested**: if the user wants this persisted, write/update `src/CLAUDE.md` (Modules table) and/or `src/docs/architecture/overview.md` using the [solution-overview template](../docs/templates/solution-overview.md). Do this only when explicitly asked.
 
 ## Expected Outputs
 

@@ -1,7 +1,7 @@
 <!--
 Template: Database
 Used by: skills/efcore.md, agents/efcore-specialist.md
-Output location: .claude/docs/generated/backend/database.md
+Output location: src/docs/architecture/database.md
 Do not populate this file itself — copy its structure into the generated output.
 -->
 

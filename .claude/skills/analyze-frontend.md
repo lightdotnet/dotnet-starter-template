@@ -19,7 +19,7 @@ Build (or refresh) a top-level understanding of the `clients/` folder: which app
 2. **For each app found**, get a lightweight summary (name, stack, purpose) — delegate a deeper pass to [analyze-client](analyze-client.md) only if the user wants per-app detail, not automatically for every app.
 3. **Map shared conventions/tooling**: is there a root `clients/package.json`/workspace config (monorepo tooling like Turborepo/pnpm workspaces) shared across apps, or is each app fully independent? Verify, don't assume.
 4. **Map backend integration at a glance**: which apps call the backend API, and whether they share an API client package or each maintain their own.
-5. **Update docs, if requested**: write/update `.claude/PROJECT-CLIENTS.md` (Client Apps table) and/or `.claude/docs/generated/frontend-overview.md` (the clients index — see [frontend-overview template](../docs/templates/frontend-overview.md)). Only when explicitly asked.
+5. **Update docs, if requested**: write/update each app's `clients/<app-name>/CLAUDE.md` and/or root `docs/frontend-overview.md` (the clients index — see [frontend-overview template](../docs/templates/frontend-overview.md)). Only when explicitly asked.
 
 ## Expected Outputs
 

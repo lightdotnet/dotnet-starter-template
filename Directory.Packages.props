@@ -28,7 +28,7 @@
     <PackageVersion Include="Lightsoft.AspNetCore.Swagger" Version="$(LightVersion)" />
     <PackageVersion Include="Lightsoft.Caching" Version="$(LightVersion)" />
     <PackageVersion Include="Lightsoft.EntityFrameworkCore" Version="$(LightVersion)" />
-    <PackageVersion Include="Lightsoft.Extensions" Version="$(LightVersion)" />
+    <PackageVersion Include="Lightsoft.Extensions" Version="2.0.1-preview.2" />
     <PackageVersion Include="Lightsoft.EventBus" Version="0.2.1" />
     <PackageVersion Include="Lightsoft.EventBus.MassTransit.RabbitMQ" Version="0.2.1" />
     <PackageVersion Include="Lightsoft.FileGenerator" Version="$(LightVersion)" />
@@ -36,12 +36,12 @@
     <PackageVersion Include="Lightsoft.Result" Version="2.1.1" />
     <PackageVersion Include="Lightsoft.Serilog" Version="$(LightVersion)" />
     <PackageVersion Include="Lightsoft.SharedKernel" Version="$(LightVersion)" />
-    <PackageVersion Include="Lightsoft.SmtpMail" Version="$(LightVersion)" />
+    <PackageVersion Include="Lightsoft.SmtpMail" Version="2.0.1-preview.1" />
     <!-- Miscellaneous -->
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageVersion Include="Mapster" Version="10.0.11" />
+    <PackageVersion Include="Mapster" Version="10.0.12" />
     <PackageVersion Include="Spectre.Console" Version="0.57.2" />
     <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
   </ItemGroup>

@@ -25,7 +25,7 @@ tools: Glob, Grep, Read
 - Existing module structure and naming conventions directly under `src/` (via `.csproj`/`.sln`, not assumption).
 - `Directory.Build.props`/`Directory.Packages.props` if present, for shared build conventions.
 - Existing module shapes for consistency (do sibling modules follow the same internal layering?).
-- `.claude/PROJECT-BACKEND.md` and `.claude/ARCHITECTURE-BACKEND.md` for already-verified structural facts.
+- `src/CLAUDE.md` and `src/docs/architecture/architecture.md` for already-verified structural facts.
 
 ## Expected Output
 

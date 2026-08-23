@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getCurrentUser } from "@/features/user-profile/api/user-profile.api";
-import { encrypt } from "@/lib/server/token-cipher";
-import { buildSessionClaims } from "@/lib/server/build-session-claims";
-import { refreshSessionIfNearExpiry } from "@/lib/server/refresh-session";
 import { parseSessionCookie } from "@/lib/server/parse-session";
-import {
-  SESSION_COOKIE_NAME,
-  buildSessionCookieOptions,
-} from "@/lib/server/session-cookie";
-import type { ProfileData, SessionData } from "@/types/session";
+import { SESSION_COOKIE_NAME } from "@/lib/server/session-cookie";
 
 const LOGIN_PATH = "/login";
 
@@ -22,59 +14,13 @@ function loginRedirect(request: NextRequest): NextResponse {
   return NextResponse.redirect(loginUrl);
 }
 
-function setCookieOnRequest(request: NextRequest, session: SessionData): void {
-  request.cookies.set(SESSION_COOKIE_NAME, encrypt(JSON.stringify(session)));
-}
-
-function setCookieOnResponse(response: NextResponse, session: SessionData): void {
-  response.cookies.set(
-    SESSION_COOKIE_NAME,
-    encrypt(JSON.stringify(session)),
-    buildSessionCookieOptions(session.sessionExpiresAt),
-  );
-}
-
 /**
- * Refetches profile display data (name/email/status) and rebuilds `claims` as the
- * union of the access token's own claims and the profile API's raw claims — never
- * its `roles` (roles/permissions only ever come from the JWT). Returns `session`
- * unchanged on failure.
+ * Thin auth gate only — enforces the 7-day session cap and keeps `/login`
+ * unreachable once authenticated. Token refresh and profile freshness are no
+ * longer handled here: they're driven client-side by `SessionGate` (a Server
+ * Action + loading skeleton), since middleware blocks the whole navigation
+ * with no way to show UI while it runs. See `ensure-fresh-session-action.ts`.
  */
-async function refetchProfile(session: SessionData): Promise<SessionData> {
-  const result = await getCurrentUser(session.accessToken);
-  if (!result.isSuccess || !result.data) return session;
-
-  const profileDto = result.data;
-  const profile: ProfileData = {
-    id: profileDto.id,
-    userName: profileDto.userName,
-    firstName: profileDto.firstName,
-    lastName: profileDto.lastName,
-    email: profileDto.email,
-    phoneNumber: profileDto.phoneNumber,
-    status: profileDto.status,
-    authProvider: profileDto.authProvider,
-    isDeleted: profileDto.isDeleted,
-  };
-
-  return {
-    ...session,
-    claims: buildSessionClaims(session.accessToken, profileDto.claims),
-    profile,
-  };
-}
-
-/**
- * A real browser navigation (typed URL, bookmark, new tab, F5) sends
- * `Sec-Fetch-Dest: document`. Next.js's own client-side route transitions use
- * `fetch()` under the hood and don't. Treat a missing header as a hard
- * navigation too (fail open toward refetching, not toward staleness).
- */
-function isHardNavigation(request: NextRequest): boolean {
-  const dest = request.headers.get("sec-fetch-dest");
-  return dest === null || dest === "document";
-}
-
 export async function proxy(request: NextRequest) {
   const isLoginPath = request.nextUrl.pathname === LOGIN_PATH;
   const session = parseSessionCookie(request.cookies.get(SESSION_COOKIE_NAME)?.value);
@@ -94,33 +40,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  let activeSession = session;
-  let tokenWasRefreshed = false;
-
-  // A failed/not-due refresh is not treated as a dead session — see `refreshSessionIfNearExpiry` doc comment.
-  const refreshed = await refreshSessionIfNearExpiry(session);
-  if (refreshed) {
-    activeSession = refreshed;
-    tokenWasRefreshed = true;
-  }
-
-  // Profile display data (name/email/claims) is only refetched on a real page
-  // load or right after a token refresh — not on every in-app navigation.
-  if (isHardNavigation(request) || tokenWasRefreshed) {
-    activeSession = await refetchProfile(activeSession);
-  }
-
-  if (activeSession !== session) {
-    setCookieOnRequest(request, activeSession);
-  }
-
-  const response = NextResponse.next({ request: { headers: request.headers } });
-
-  if (activeSession !== session) {
-    setCookieOnResponse(response, activeSession);
-  }
-
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

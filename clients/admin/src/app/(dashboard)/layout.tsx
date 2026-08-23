@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { SessionGate } from "@/components/layout/session-gate";
 import { resolveSession } from "@/features/user-profile";
 
 export default async function DashboardLayout({
@@ -9,12 +10,14 @@ export default async function DashboardLayout({
   const session = await resolveSession();
 
   return (
-    <AppShell
-      permissions={session?.permissions ?? []}
-      userName={session?.profile?.userName ?? null}
-      user={session?.profile ?? null}
-    >
-      {children}
-    </AppShell>
+    <SessionGate>
+      <AppShell
+        permissions={session?.permissions ?? []}
+        userName={session?.profile?.userName ?? null}
+        user={session?.profile ?? null}
+      >
+        {children}
+      </AppShell>
+    </SessionGate>
   );
 }

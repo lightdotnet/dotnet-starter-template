@@ -25,7 +25,7 @@ tools: Glob, Grep, Read
 - **Every** client app under `clients/*` that plausibly calls the affected endpoint — don't check just one and assume the others are unaffected once more than one exists.
 - Each client's API client/wrapper layer (commonly `clients/<app-name>/lib/api/` or similar) and direct call sites using it.
 - Any OpenAPI/Swagger spec or generated client, if a project uses one, to check it matches current controller code.
-- `.claude/ARCHITECTURE.md` (Integration section) for the documented client-generation strategy per app.
+- Root `docs/integration.md` for the documented client-generation strategy per app.
 
 ## Expected Output
 

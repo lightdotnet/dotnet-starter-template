@@ -1,7 +1,7 @@
 <!--
 Template: Domain Model
 Used by: skills/analyze-module.md, skills/analyze-solution.md
-Output location: .claude/docs/generated/backend/modules/<ModuleName>/domain-model.md (or backend/domain-model.md for a cross-module summary)
+Output location: src/docs/architecture/modules/<ModuleName>/domain-model.md (or src/docs/architecture/domain-model.md for a cross-module summary)
 Do not populate this file itself — copy its structure into the generated output.
 -->
 

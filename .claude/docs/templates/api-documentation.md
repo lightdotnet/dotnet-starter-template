@@ -1,7 +1,7 @@
 <!--
 Template: API Documentation
 Used by: skills/api.md, agents/api-designer.md, agents/api-contract-reviewer.md
-Output location: .claude/docs/generated/backend/api.md
+Output location: src/docs/architecture/api.md
 Do not populate this file itself — copy its structure into the generated output.
 -->
 

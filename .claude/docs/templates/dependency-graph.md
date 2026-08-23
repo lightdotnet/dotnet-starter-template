@@ -1,7 +1,7 @@
 <!--
 Template: Dependency Graph
 Used by: agents/dependency-analyzer.md
-Output location: .claude/docs/generated/backend/dependency-graph.md (or .claude/docs/generated/clients/<app-name>/dependency-graph.md)
+Output location: src/docs/architecture/dependency-graph.md (or clients/<app-name>/docs/architecture/dependency-graph.md)
 Do not populate this file itself — copy its structure into the generated output.
 -->
 

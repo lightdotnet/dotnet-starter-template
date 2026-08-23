@@ -1,7 +1,7 @@
 <!--
 Template: Solution Overview (Backend)
 Used by: skills/analyze-solution.md, workflows/analyze-solution.md
-Output location: .claude/docs/generated/backend/overview.md
+Output location: src/docs/architecture/overview.md
 Do not populate this file itself — copy its structure into the generated output.
 -->
 
@@ -41,7 +41,7 @@ _Notable third-party NuGet packages and why they're used._
 
 ## Client Integration
 
-_Which client app(s) under `clients/` consume this backend and how — see [../frontend-overview.md](../frontend-overview.md) (clients index) and `.claude/ARCHITECTURE.md` (Integration section)._
+_Which client app(s) under `clients/` consume this backend and how — see [../../../docs/frontend-overview.md](../../../docs/frontend-overview.md) (clients index) and root [docs/integration.md](../../../docs/integration.md)._
 
 ## Notes
 

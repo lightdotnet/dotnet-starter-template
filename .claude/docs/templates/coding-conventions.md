@@ -1,7 +1,7 @@
 <!--
 Template: Coding Conventions
-Used by: DEVELOPMENT.md aggregation, skills/sync-docs.md
-Output location: .claude/docs/generated/backend/coding-conventions.md or .claude/docs/generated/clients/<app-name>/coding-conventions.md
+Used by: skills/sync-docs.md
+Output location: src/docs/conventions/coding-conventions.md or clients/<app-name>/docs/conventions/coding-conventions.md
 Do not populate this file itself — copy its structure into the generated output.
 -->
 

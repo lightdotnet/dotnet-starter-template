@@ -22,4 +22,4 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Docs
 
-See `.claude/docs/generated/clients/admin/` for generated overview, architecture, coding conventions, dependency graph, and development guide docs.
+See [CLAUDE.md](CLAUDE.md) for project-specific rules, and `docs/` for architecture and convention docs.

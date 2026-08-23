@@ -10,7 +10,7 @@ tools: Glob, Grep, Read
 
 - Review correctness, readability, and maintainability of the scoped frontend code (a diff, a component, a hook) under the relevant `clients/<app-name>/`.
 - Check for idiomatic React/Next.js usage: correct hooks usage (deps arrays, no conditional hooks), appropriate Server/Client Component boundaries, no unnecessary re-renders from obvious causes (new object/function literals passed as props without memoization where it actually matters).
-- Check TypeScript quality: no unnecessary `any`, types that actually constrain the shape they claim to, consistent with conventions in `.claude/DEVELOPMENT.md` (Clients section, for that specific app).
+- Check TypeScript quality: no unnecessary `any`, types that actually constrain the shape they claim to, consistent with conventions in `clients/<app-name>/docs/conventions/coding-conventions.md` (for that specific app).
 - Flag basic accessibility issues (missing alt text, non-semantic interactive elements, missing form labels) at a review level — not a full a11y audit.
 - Identify duplicated logic, dead code, and overly complex components within the reviewed scope.
 
@@ -22,7 +22,7 @@ tools: Glob, Grep, Read
 ## What to Inspect
 
 - The specific files/diff in scope — do not pull in unrelated files, and don't assume which client app if more than one exists and it's not obvious from the files given.
-- `.claude/DEVELOPMENT.md` (Clients section, for that app) for any already-verified conventions, to check consistency.
+- `clients/<app-name>/docs/conventions/coding-conventions.md` for any already-verified conventions, to check consistency.
 - Nearby existing components/hooks in the same app for established local patterns before flagging something as "wrong" — conventions can differ between client apps.
 
 ## Expected Output

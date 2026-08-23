@@ -12,7 +12,7 @@ tools: Glob, Grep, Read
 - Verify module boundaries: flag any module referencing another module's internals directly (its `Domain`/`Infrastructure`/`Api` projects, or a single-project module's internals) instead of going through that module's `Contracts` seam.
 - Identify circular or inappropriate dependencies between modules or between layers within a module, using actual project references — not naming conventions.
 - Evaluate whether the shared/building-blocks project has become a dumping ground that couples modules together indirectly.
-- Flag architectural drift from patterns already documented in `.claude/ARCHITECTURE-BACKEND.md`.
+- Flag architectural drift from patterns already documented in `src/docs/architecture/architecture.md`.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ tools: Glob, Grep, Read
 - Namespace-to-project alignment within the scoped module(s).
 - Presence and usage of the shared/building-blocks project.
 - The composition-root host project and how it wires module DI registrations together.
-- Existing `.claude/ARCHITECTURE-BACKEND.md` entries for the scope, to compare current state against previously verified facts.
+- Existing `src/docs/architecture/architecture.md` entries for the scope, to compare current state against previously verified facts.
 
 ## Expected Output
 
