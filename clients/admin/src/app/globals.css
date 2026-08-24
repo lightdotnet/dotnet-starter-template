@@ -285,6 +285,25 @@
   }
 }
 
+/* Liquid-glass panel material — frosted, translucent card used by the
+   session-gate overlays (session-loading-overlay, session-unreachable-overlay)
+   shown during the hard-navigation (F5 / revisit) session check. */
+.glass-panel {
+  background: linear-gradient(
+    155deg,
+    color-mix(in oklch, var(--card) 65%, transparent),
+    color-mix(in oklch, var(--card) 35%, transparent)
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+  border-radius: var(--radius-3xl);
+  box-shadow:
+    var(--shadow-soft-lg),
+    inset 0 1px 0 0 color-mix(in oklch, white 45%, transparent),
+    inset 0 -1px 0 0 color-mix(in oklch, black 8%, transparent);
+}
+
 /* Hide native up/down spinner arrows on number inputs. */
 @layer base {
   input[type="number"] {
