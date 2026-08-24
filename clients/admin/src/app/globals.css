@@ -250,33 +250,38 @@
   }
 }
 
-/* Periodic bell wiggle while there's an unread notification (features/notifications). Mostly at
-   rest so it reads as an occasional "ring" rather than a continuous animation. */
+/* Periodic bell ring while there's an unread notification (features/notifications): a strike
+   followed by a slow, decaying pendulum-like swing, then at rest for the remainder of the cycle
+   so it reads as a distinct "ring" rather than a rapid buzz. */
 @keyframes bell-ring {
   0%,
-  82%,
+  45%,
   100% {
     transform: rotate(0deg);
   }
 
-  84% {
-    transform: rotate(12deg);
+  4% {
+    transform: rotate(20deg);
   }
 
-  87% {
-    transform: rotate(-10deg);
+  12% {
+    transform: rotate(-17deg);
   }
 
-  90% {
-    transform: rotate(8deg);
+  20% {
+    transform: rotate(13deg);
   }
 
-  93% {
-    transform: rotate(-6deg);
+  28% {
+    transform: rotate(-9deg);
   }
 
-  96% {
-    transform: rotate(3deg);
+  35% {
+    transform: rotate(5deg);
+  }
+
+  41% {
+    transform: rotate(-2deg);
   }
 }
 
