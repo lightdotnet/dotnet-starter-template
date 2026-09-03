@@ -19,7 +19,7 @@ export function AppShell({
     <SidebarProvider>
       <NotificationsProvider>
         <div className="flex min-h-full flex-col">
-          <TopBar user={user} />
+          <TopBar user={user} permissions={permissions} userName={userName} />
           <div className="flex flex-1">
             <Sidebar permissions={permissions} userName={userName} />
             <main className="min-w-0 flex-1 bg-sidebar p-4 sm:p-6">

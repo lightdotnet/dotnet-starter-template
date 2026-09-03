@@ -13,7 +13,15 @@ import { UserMenu } from "@/components/layout/user-menu";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import type { ProfileData } from "@/types/session";
 
-export function TopBar({ user }: { user: ProfileData | null }) {
+export function TopBar({
+  user,
+  permissions,
+  userName,
+}: {
+  user: ProfileData | null;
+  permissions: string[];
+  userName: string | null;
+}) {
   const scrolled = useScrolled();
   const { hidden, toggleSidebar, setMobileOpen } = useSidebar();
 
@@ -55,7 +63,7 @@ export function TopBar({ user }: { user: ProfileData | null }) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <SearchBox />
+        <SearchBox permissions={permissions} userName={userName} />
         <AccentColorPicker />
         <ThemeToggle />
 
