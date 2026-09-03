@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import {
   Alert,
@@ -9,6 +9,12 @@ import {
   AlertAction,
 } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DeploymentRecoveryNotice } from "@/components/layout/deployment-recovery-notice";
+import {
+  isRecoverableDeploymentError,
+  peekDeploymentRecoveryExhausted,
+  runDeploymentRecovery,
+} from "@/lib/shared/deployment-recovery";
 
 export default function DashboardError({
   error,
@@ -17,9 +23,28 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const recoverable = isRecoverableDeploymentError(error);
+  // Seed from the counter at mount, before recovery bumps it.
+  const [recoveryExhausted, setRecoveryExhausted] = useState(
+    () => recoverable && peekDeploymentRecoveryExhausted(),
+  );
+
   useEffect(() => {
-    console.error(error);
-  }, [error]);
+    if (!recoverable) {
+      console.error(error);
+      return;
+    }
+    if (recoveryExhausted) return;
+    return runDeploymentRecovery(() => setRecoveryExhausted(true));
+  }, [error, recoverable, recoveryExhausted]);
+
+  if (recoverable) {
+    return (
+      <div className="py-12">
+        <DeploymentRecoveryNotice exhausted={recoveryExhausted} />
+      </div>
+    );
+  }
 
   return (
     <div className="py-12">
