@@ -250,34 +250,58 @@
   }
 }
 
-/* Periodic bell wiggle while there's an unread notification (features/notifications). Mostly at
-   rest so it reads as an occasional "ring" rather than a continuous animation. */
+/* Periodic bell ring while there's an unread notification (features/notifications): a strike
+   followed by a slow, decaying pendulum-like swing, then at rest for the remainder of the cycle
+   so it reads as a distinct "ring" rather than a rapid buzz. */
 @keyframes bell-ring {
   0%,
-  82%,
+  45%,
   100% {
     transform: rotate(0deg);
   }
 
-  84% {
-    transform: rotate(12deg);
+  4% {
+    transform: rotate(20deg);
   }
 
-  87% {
-    transform: rotate(-10deg);
+  12% {
+    transform: rotate(-17deg);
   }
 
-  90% {
-    transform: rotate(8deg);
+  20% {
+    transform: rotate(13deg);
   }
 
-  93% {
-    transform: rotate(-6deg);
+  28% {
+    transform: rotate(-9deg);
   }
 
-  96% {
-    transform: rotate(3deg);
+  35% {
+    transform: rotate(5deg);
   }
+
+  41% {
+    transform: rotate(-2deg);
+  }
+}
+
+/* Liquid-glass panel material — frosted, translucent card used by the
+   session-gate overlays (session-loading-overlay, session-unreachable-overlay)
+   shown during the hard-navigation (F5 / revisit) session check. */
+.glass-panel {
+  background: linear-gradient(
+    155deg,
+    color-mix(in oklch, var(--card) 65%, transparent),
+    color-mix(in oklch, var(--card) 35%, transparent)
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+  border-radius: var(--radius-3xl);
+  box-shadow:
+    var(--shadow-soft-lg),
+    inset 0 1px 0 0 color-mix(in oklch, white 45%, transparent),
+    inset 0 -1px 0 0 color-mix(in oklch, black 8%, transparent);
 }
 
 /* Hide native up/down spinner arrows on number inputs. */

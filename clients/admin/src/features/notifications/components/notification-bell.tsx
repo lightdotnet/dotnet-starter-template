@@ -63,15 +63,15 @@ export function NotificationBell() {
           <Bell
             className={cn(
               unreadCount > 0 &&
-                "origin-top [animation:bell-ring_3s_ease-in-out_infinite] motion-reduce:animate-none",
+                "origin-top [animation:bell-ring_1.5s_ease-in-out_infinite] motion-reduce:animate-none",
             )}
           />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 size-4 justify-center rounded-full p-0 text-[0.65rem]"
+              className="absolute -top-1 -right-1 h-4 min-w-4 justify-center rounded-full px-1 py-0 text-[0.65rem] leading-none"
             >
-              {unreadCount}
+              <span className="translate-y-px">{unreadCount > 99 ? "99+" : unreadCount}</span>
             </Badge>
           )}
         </Button>
