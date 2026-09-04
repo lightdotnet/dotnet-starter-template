@@ -6,15 +6,15 @@
 
 ## Architecture decisions pending
 
-- **D1 — CQRS vs. service classes inside `Identity`.** `Identity.Api` has both: `UserService`/`RoleService` (traditional service classes, used directly by controllers) and a single CQRS command (`Application/Users/Commands/CreateUser.cs`) that wraps `IUserService.CreateAsync` to publish `UserCreatedEvent`. Every other operation bypasses the command pattern. Pick one: drop the CQRS wrapper (publish `UserCreatedEvent` directly from `UserService.CreateAsync`), or commit to CQRS for all `Identity` writes and demote services to internal/read-only helpers. *(User: to be implemented separately.)*
+- **D1 — `Identity` CQRS handlers are thin pass-throughs to the service classes.** All `Identity` writes and user search now dispatch through mediator commands/queries (`Identity.Api/Application/Users/{Commands,Queries}`, `Identity.Api/Application/Roles/Commands`), and controllers only bind the `Identity.Contracts` DTO and wrap it into the command/query. But every command handler just forwards to `IUserService`/`IRoleService`, which still hold the logic — the one exception is `SearchUserQueryHandler`, which queries `UserManager<User>` directly. Decide: inline the service logic into the handlers and demote `UserService`/`RoleService` to internal read-only helpers (the `SearchUserQueryHandler` model), or keep the services as the logic layer and treat the handlers as a deliberate uniform entrypoint (worth it for the shared `LoggingBehaviour`/`ValidationBehaviour` pipeline). *(User: to be implemented separately.)*
 - **D2 — Soft-delete is wired up but disabled.** `IdentityDbContext` calls `AuditEntries(..., enableSoftDelete: false)` even though `User` implements `ISoftDelete` and `AuthenticationService.CheckInvalidUser` checks `user.Deleted != null` (currently dead code — `AuthenticationService` short-circuits on `user is null` first, so this is an audit-trail/anonymization gap, not a login-bypass risk). `UserService.DeleteAsync` (`Services/UserService.cs`) hard-deletes immediately after `User.Delete()` anonymizes the row, wasting that work; a hard-deleted user's `Id` also orphans any FK/audit field that referenced it (e.g. `UserSessions.UserId`). Decide: flip `enableSoftDelete: true` in `IdentityDbContext.SaveChanges[Async]` (one-line change — `TrackingExtensions.AuditEntries` already does the stamping), or remove `ISoftDelete`/`Deleted`/`DeletedBy` if hard delete is genuinely intended.
-- **D4 — `GET user` vs. `GET user/search` coexist.** `UserController` exposes both an unbounded `GET user` (`IEnumerable<UserDto>`) and a paginated `GET user/search` (`PagedResult<UserDto>`, via `Identity.Contracts/SearchUserQuery.cs`) for the same read use case. Decide whether `GET user` is an intentional "admin/all" escape hatch or should be deprecated now that paginated search exists — currently organic drift, not a documented decision, and a future module has no precedent to follow.
+- **D4 — `GET user` vs. `GET user/search` coexist.** `UserController` exposes both an unbounded `GET user` (`IEnumerable<UserDto>`) and a paginated `GET user/search` (`PagedResult<UserDto>`, query params via `Identity.Contracts/SearchUserRequest.cs`) for the same read use case. Decide whether `GET user` is an intentional "admin/all" escape hatch or should be deprecated now that paginated search exists — currently organic drift, not a documented decision, and a future module has no precedent to follow.
 
 ## Correctness / performance
 
 - **P4 — `IServiceClaimService` has no registered implementation** (commented out in `Identity.Api/DependencyInjection.cs`; interface in `Identity.Contracts/Services/IServiceClaimService.cs`). Either implement and register it, or remove the unused contract. *(User: later.)*
 - **P5 — `IdentityClaimQueryExtensions.CheckUserHasClaimAsync` is dead code** (`Identity.Api/Services/IdentityClaimQueryExtensions.cs`, never called). Wire it into a permission check or remove it. *(User: later.)*
-- **P6 — Domain-event dispatch convention bypassed in `Identity`.** `DispatchDomainEventsExtensions.DispatchDomainEvents` (`src/Persistence/Extensions/`) is never called from `IdentityDbContext.SaveChanges[Async]`; `UserCreatedEvent` is instead published manually via the mediator from the `CreateUser` command handler. Related to D1 — once a CQRS-vs-service pattern is picked, make dispatch consistent.
+- **P6 — Domain-event dispatch convention bypassed in `Identity`.** `DispatchDomainEventsExtensions.DispatchDomainEvents` (`src/Persistence/Extensions/`) is never called from `IdentityDbContext.SaveChanges[Async]`; `UserCreatedEvent` is instead published manually via the mediator from the `CreateUserCommandHandler`. Related to D1 — once the CQRS handler / service split is settled, make dispatch consistent.
 - **`Notifications`: no index on `Status`.** `NotificationDbContext`'s only index is `HasIndex(x => x.ToUserId)`, but both list queries and `CountUnreadAsync` filter on `Status` (often combined with `ToUserId`). Performance follow-up candidate at scale, not proven today.
 - **`NotificationConstants.SERVER_NOTIFICATION` is unused.** Defined but the actual `SendAsync<T>` calls use `typeof(T).Name` for the SignalR event name instead — don't assume the constant is the real event name.
 - **`HubService.NotifyAsync` (broadcast) has zero callers** — dead capability.
@@ -22,22 +22,22 @@
 
 ## Structural / code quality
 
-- **`Identity` predates the module structure convention** (adopted 2026-07-30) and doesn't fully conform: internal layering is informal (folder-based, not compiler-enforced) and CQRS/service-class patterns coexist (see D1). Treat as pending `Identity` cleanup, not a second convention. `Notifications` (built after the convention) does conform.
+- **`Identity` predates the module structure convention** (adopted 2026-07-30) and doesn't fully conform: internal layering is informal (folder-based, not compiler-enforced) and CQRS handlers still delegate to the traditional service classes (see D1). Treat as pending `Identity` cleanup, not a second convention. `Notifications` (built after the convention) does conform.
 - **`ApiControllerBase`/`VersionedApiController` duplicate a `_mediator` backing-field + lazy `Mediator` property** (`src/Infrastructure/Endpoints/`). Likely unavoidable since they derive from two different vendor base classes; revisit if the vendor library ever offers a shared base to consolidate into.
 - **`UserSession` extends the plain vendor `Entity` base type, not `AuditableEntity`** — no decision made on whether it should carry an audit trail.
 - **`Entities/UserToken.cs`** (ASP.NET Core Identity's built-in `IdentityUserToken<string>`, external-login-provider token store, no business logic touches it) sits in the same `Entities/` folder as `UserSession` (this module's actual JWT/session entity) — "token" means two unrelated things in this module. Low-cost mitigation if it comes up again: a one-line comment on `UserToken.cs`, or grouping ASP.NET Identity's built-in entities separately from module-specific ones.
 
 ## Test coverage
 
-- **No `tests/Notifications.Tests` project** — `Identity` has `tests/Identity.Tests` (98 tests), `Notifications` has no automated coverage yet.
+- **No `tests/Notifications.Tests` project** — `Identity` has `tests/Identity.Tests` (100 tests), `Notifications` has no automated coverage yet.
 
 ## Dependency hygiene
 
 - **Likely dead package references** (no source usage found): `Lightsoft.EventBus` (`Shared.csproj`), `Lightsoft.FileGenerator` (`Infrastructure.csproj`). Verify and remove if confirmed unused.
 - **Undeclared transitive dependencies** — compile only because a `ProjectReference` happens to bring the package along:
   - `Infrastructure` uses `Mapster` and `Lightsoft.AspNetCore.Authorization`/`Lightsoft.Result` without declaring either (rides on `Shared`).
-  - `Identity.Api` uses `Lightsoft.AspNetCore.Authorization`, `Lightsoft.Result`, `Lightsoft.Extensions` (via `GlobalUsings.cs`) without declaring any of them.
-  - `Identity.Api`'s `UserService.SearchAsync` uses `Light.Specification` (`WhereIf`), provided by `Lightsoft.EntityFrameworkCore` — declared by `Persistence.csproj`, not `Identity.Api.csproj`, riding in transitively.
+  - `Identity.Api` uses `Lightsoft.AspNetCore.Authorization`, `Lightsoft.Result`, `Lightsoft.Extensions`, `Lightsoft.Mediator` (via `GlobalUsings.cs`) without declaring any of them.
+  - `Identity.Api`'s `SearchUserQueryHandler` uses `Light.Specification` (`WhereIf`), provided by `Lightsoft.EntityFrameworkCore` — declared by `Persistence.csproj`, not `Identity.Api.csproj`, riding in transitively.
   - `StarterKit.WebApi` uses `Lightsoft.Serilog` without declaring it (only `Infrastructure.csproj` does).
   - Fragile: if an upstream project ever drops one of these packages, downstream projects break with no direct signal why. Recommend each project explicitly declare what it directly uses.
 
@@ -46,4 +46,4 @@
 - **`src/Identity.Api/obj/` and `src/Identity.Contracts/obj/` contain stale build artifacts** referencing pre-refactor assembly names (`Identity.Core.AssemblyInfo.cs`, `StaterKit.Identity.EntityFrameworkCore.*`). Run `dotnet clean` (or delete `bin`/`obj`) to clear.
 
 ---
-_Last synced: 2026-08-13_
+_Last synced: 2026-09-04_

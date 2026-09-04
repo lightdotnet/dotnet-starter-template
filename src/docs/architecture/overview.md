@@ -10,14 +10,14 @@ Each module now has its own deep-dive doc under `modules/<ModuleName>.md` — th
 
 | Module | Path | Responsibility | Status |
 |---|---|---|---|
-| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance, plus a permission catalog (`PermissionsController`, `GET permissions`). See [modules/Identity.md](modules/Identity.md). | Built, tested (`tests/Identity.Tests`, 98 tests). Internal layering still informal — CQRS commands and traditional service classes coexist for what should be one pattern. |
+| Identity | `src/Identity.Api/Identity.Api.csproj` + `src/Identity.Contracts/Identity.Contracts.csproj` | Users, roles, claims, JWT auth/token issuance, plus a permission catalog (`PermissionsController`, `GET permissions`). See [modules/Identity.md](modules/Identity.md). | Built, tested (`tests/Identity.Tests`, 100 tests). Internal layering still informal — all writes + user search go through mediator commands/queries whose handlers still delegate to the service classes (see modules/Identity.md, D1). |
 | Notifications | `src/Notifications.Api/Notifications.Api.csproj` + `src/Notifications.Contracts/Notifications.Contracts.csproj` | Notification storage + real-time push over SignalR; admin "browse + send" surface (permission-gated) and a self-service "my notifications" surface (auto-scoped, no permission). See [modules/Notifications.md](modules/Notifications.md). | Built. No automated test coverage yet. Two known gaps: no "mark all read" endpoint, no path ever sets `Archived` status. |
 
 ## Shared/Host Projects
 
 | Project | Path | Responsibility |
 |---|---|---|
-| Shared | `src/Shared` | Shared kernel: base entity/DTO wrappers over vendor `Light.Domain` types, `ICurrentUser`/`IDateTime` abstractions, permission-based authorization building blocks (`SuperUserPolicy`, `AccessControl`, `CurrentUserBase`, `AuthorizationHandler`), FluentValidation pipeline behavior, constants. Leaf project — no dependencies. |
+| Shared | `src/Shared` | Shared kernel: base entity/DTO wrappers over vendor `Light.Domain` types, `ICurrentUser`/`IDateTime` abstractions, `PageQuery`/`SearchQuery`, permission-based authorization building blocks (`SuperUserPolicy`, `AccessControl`, `CurrentUserBase`, `AuthorizationHandler`), mediator pipeline behaviors (`LoggingBehaviour`, `ValidationBehaviour`), constants. Leaf project — no dependencies. |
 | Infrastructure | `src/Infrastructure` | Cross-cutting infrastructure: CORS, health checks, Serilog bootstrap logging (`AppLogging`), Mapster config, module/endpoint base classes (`AppModule`, `AppModuleEndpoint`), API controller base classes, Basic Auth attribute. Depends on `Shared`. EF Core/DbContext concerns moved out to `Persistence` during the 2026-07 refactor — no longer here. |
 | Persistence | `src/Persistence` | EF Core provider configuration (`DbContextExtensions`/`DbProvider`, Sqlite `DateTimeOffset` workaround), DbContext base class (`Context/BaseDbContext`), audit/soft-delete tracking + domain-event dispatch (meant to run inside each module's `SaveChangesAsync`), generic paging/result helpers, migration-time runtime support. Depends on `Shared`. |
 | StarterKit.WebApi | `src/StarterKit.WebApi` | Composition-root host — the only executable/deployable project. Depends on `Identity.Api`, `Infrastructure`, `Shared`. |
@@ -59,4 +59,4 @@ One `DbContext` per module is the intended default.
 <!-- manual: content below this line is human-authored and must be preserved verbatim during sync -->
 
 ---
-_Last synced: 2026-08-19_
+_Last synced: 2026-09-04_

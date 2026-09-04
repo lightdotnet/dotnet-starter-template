@@ -32,7 +32,10 @@ public static class ConfigureExtensions
 
         // Light Framework
         services.AddMediatorFromAssemblies(assemblies);
-        services.AddBehaviors(typeof(ValidationBehaviour<,>));
+        services.AddBehaviors(
+            typeof(LoggingBehaviour<,>),
+            typeof(ValidationBehaviour<,>)
+            );
         services.AddOptions<RequestLoggingOptions>().BindConfiguration("RequestLogging");
         services.AddGlobalExceptionHandler();
         services.AddApiVersion(1);
