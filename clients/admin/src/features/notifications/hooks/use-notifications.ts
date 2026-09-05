@@ -16,8 +16,6 @@ import {
   type NotificationDto,
 } from "@/features/notifications/types/notification";
 
-const SIGNALR_HUB_URL = process.env.NEXT_PUBLIC_SIGNALR_HUB_URL!;
-
 // SignalR embeds the raw negotiate response body in the error message. When
 // the URL is misconfigured, that body is an HTML error page instead of
 // JSON/XML — strip it so the console isn't flooded with a full HTML document.
@@ -69,7 +67,7 @@ export function useNotifications() {
       if (cancelled || !tokenState) return;
 
       const connection = new HubConnectionBuilder()
-        .withUrl(SIGNALR_HUB_URL, {
+        .withUrl(tokenState.hubUrl, {
           accessTokenFactory: () => tokenState.accessToken,
           transport: HttpTransportType.WebSockets,
         })

@@ -7,8 +7,8 @@ import { refreshSessionIfNearExpiry } from "@/lib/server/refresh-session";
 import { refetchProfile } from "@/lib/server/refetch-profile";
 import { persistSessionCookie } from "@/lib/server/persist-session-cookie";
 import {
+  ALL_SESSION_COOKIE_NAMES,
   MAX_REFRESH_FAILURES,
-  SESSION_COOKIE_NAME,
 } from "@/lib/server/session-cookie";
 
 export type EnsureFreshSessionResult =
@@ -36,7 +36,8 @@ export async function ensureFreshSessionAction(options: {
   if (outcome.status === "failed" && outcome.permanent) {
     const failureCount = (session.refreshFailureCount ?? 0) + 1;
     if (failureCount >= MAX_REFRESH_FAILURES) {
-      (await cookies()).delete(SESSION_COOKIE_NAME);
+      const cookieStore = await cookies();
+      for (const name of ALL_SESSION_COOKIE_NAMES) cookieStore.delete(name);
       redirect("/login");
     }
     await persistSessionCookie({ ...session, refreshFailureCount: failureCount });

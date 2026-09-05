@@ -29,3 +29,13 @@ export function getApiBaseUrl(client: ApiClientName): string {
 export function getTokenEncryptionKey(): string {
   return requireEnv("TOKEN_ENCRYPTION_KEY");
 }
+
+/**
+ * Absolute URL of the backend's SignalR notification hub. Read server-side and
+ * handed to the browser at runtime (via a Server Action) rather than
+ * `NEXT_PUBLIC_`-inlined, so it can be changed by editing the deployed
+ * server's `.env` and restarting — no rebuild.
+ */
+export function getSignalRHubUrl(): string {
+  return requireEnv("SIGNALR_HUB_URL");
+}

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { parseSessionCookie } from "@/lib/server/parse-session";
-import { SESSION_COOKIE_NAME } from "@/lib/server/session-cookie";
+import { decodeSessionCookies } from "@/lib/server/cookie-codec";
+import { ALL_SESSION_COOKIE_NAMES } from "@/lib/server/session-cookie";
 
 const LOGIN_PATH = "/login";
 
@@ -23,7 +23,7 @@ function loginRedirect(request: NextRequest): NextResponse {
  */
 export async function proxy(request: NextRequest) {
   const isLoginPath = request.nextUrl.pathname === LOGIN_PATH;
-  const session = parseSessionCookie(request.cookies.get(SESSION_COOKIE_NAME)?.value);
+  const session = decodeSessionCookies((name) => request.cookies.get(name)?.value);
 
   const now = Date.now();
   const sessionExpired = !session || session.sessionExpiresAt <= now;
@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
     if (isLoginPath) return NextResponse.next();
 
     const response = loginRedirect(request);
-    response.cookies.delete(SESSION_COOKIE_NAME);
+    for (const name of ALL_SESSION_COOKIE_NAMES) response.cookies.delete(name);
     return response;
   }
 

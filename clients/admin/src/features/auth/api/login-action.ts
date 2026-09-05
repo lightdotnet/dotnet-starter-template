@@ -1,17 +1,12 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getToken } from "@/features/auth/api/token.api";
 import { getCurrentUser } from "@/features/user-profile";
-import { encrypt } from "@/lib/server/token-cipher";
 import { extractPermissions, extractRoles } from "@/lib/server/jwt";
 import { buildSessionClaims } from "@/lib/server/build-session-claims";
-import {
-  SESSION_COOKIE_NAME,
-  SESSION_TTL_MS,
-  buildSessionCookieOptions,
-} from "@/lib/server/session-cookie";
+import { persistSessionCookie } from "@/lib/server/persist-session-cookie";
+import { SESSION_TTL_MS } from "@/lib/server/session-cookie";
 import type { ProfileData, SessionData } from "@/types/session";
 
 export interface LoginFormState {
@@ -74,12 +69,7 @@ export async function loginAction(
     profile,
   };
 
-  const cookieStore = await cookies();
-  cookieStore.set(
-    SESSION_COOKIE_NAME,
-    encrypt(JSON.stringify(session)),
-    buildSessionCookieOptions(sessionExpiresAt),
-  );
+  await persistSessionCookie(session);
 
   const redirectTo = String(formData.get("redirect") ?? "");
   // Only allow same-site relative paths — reject "//host/..." to avoid an open redirect.
