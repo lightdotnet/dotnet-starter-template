@@ -34,6 +34,9 @@ public static class ClaimsPrincipalExtensions
     public static string? GetPhoneNumber(this ClaimsPrincipal principal) =>
         principal?.FindFirstValue(ClaimTypeConstants.PhoneNumber);
 
+    public static string? GetEmployeeId(this ClaimsPrincipal principal) =>
+        principal?.FindFirstValue(ClaimTypeConstants.EmployeeId);
+
     public static DateTimeOffset GetExpiration(this ClaimsPrincipal principal) =>
         DateTimeOffset.FromUnixTimeSeconds(
             Convert.ToInt64(principal.FindFirstValue(ClaimTypeConstants.Expiration)));

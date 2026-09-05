@@ -4,7 +4,9 @@ using Organization.Tests.TestSupport;
 using StarterKit.Identity.Contracts;
 using StarterKit.Identity.Contracts.Services;
 using StarterKit.Organization.Api.Application.Employees.Commands;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.Companies;
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 using StarterKit.Organization.Contracts.Employees;
 using Xunit;
 

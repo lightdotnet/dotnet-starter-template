@@ -7,6 +7,12 @@ export enum EmploymentStatus {
   Terminated = "Terminated",
 }
 
+/** Mirrors `Organization.Contracts/Employees/AssignmentType.cs` — serialized by name. */
+export enum AssignmentType {
+  Current = "Current",
+  Acting = "Acting",
+}
+
 export interface EmployeeMembershipDto {
   orgUnitId: string;
   orgUnitName: string;
@@ -14,6 +20,8 @@ export interface EmployeeMembershipDto {
   levelId?: string | null;
   levelName?: string | null;
   isPrimary: boolean;
+  assignmentType: AssignmentType;
+  isManager: boolean;
   startDate: string;
   endDate?: string | null;
 }
@@ -66,11 +74,15 @@ export interface AssignEmployeeOrgUnitRequest {
   orgUnitId: string;
   levelId?: string;
   isPrimary: boolean;
+  assignmentType: AssignmentType;
+  isManager: boolean;
 }
 
 export interface UpdateEmployeeMembershipRequest {
   levelId?: string;
   isPrimary: boolean;
+  assignmentType: AssignmentType;
+  isManager: boolean;
 }
 
 export interface CreateEmployeeLoginRequest {

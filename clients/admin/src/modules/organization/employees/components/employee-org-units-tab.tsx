@@ -15,7 +15,7 @@ import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { removeEmployeeOrgUnitAction } from "@/modules/organization/employees/api/remove-employee-org-unit-action";
 import { AssignOrgUnitDialog } from "@/modules/organization/employees/components/assign-org-unit-dialog";
 import { UpdateMembershipDialog } from "@/modules/organization/employees/components/update-membership-dialog";
-import type { EmployeeMembershipDto } from "@/modules/organization/employees/types/employee";
+import { AssignmentType, type EmployeeMembershipDto } from "@/modules/organization/employees/types/employee";
 import type { OrgUnitTreeNodeDto } from "@/modules/organization/departments/types/org-unit";
 import type { EmployeeLevelDto } from "@/modules/organization/departments/types/employee-level";
 
@@ -77,6 +77,10 @@ export function EmployeeOrgUnitsTab({
                   <span className="font-medium">{membership.orgUnitName}</span>
                   <Badge variant="outline">{membership.orgUnitType}</Badge>
                   {membership.isPrimary && <Badge>Primary</Badge>}
+                  {membership.assignmentType === AssignmentType.Acting && (
+                    <Badge variant="secondary">Acting</Badge>
+                  )}
+                  {membership.isManager && <Badge variant="outline">Manager</Badge>}
                 </div>
                 <span className="text-xs text-muted-foreground">
                   {membership.levelName ?? "No level"}

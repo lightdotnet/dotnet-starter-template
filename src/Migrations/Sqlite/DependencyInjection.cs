@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StarterKit.Approval.Api.Data;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Infrastructure;
 using StarterKit.Organization.Api.Data;
@@ -21,6 +22,8 @@ public static class DependencyInjection
         services.AddIdentity(configuration);
 
         services.AddOrganization(configuration);
+
+        services.AddApproval(configuration);
 
         return services;
     }
@@ -77,5 +80,20 @@ public static class DependencyInjection
                 .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
         services.AddScoped<OrganizationContextInitialiser>();
+    }
+
+    private static void AddApproval(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString(DbConnectionNames.Approval);
+
+        services.AddDbContext<ApprovalDbContext>(options =>
+            options
+                .UseSqlite(connectionString, o =>
+                {
+                    o.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
+                })
+                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
+
+        services.AddScoped<ApprovalContextInitialiser>();
     }
 }

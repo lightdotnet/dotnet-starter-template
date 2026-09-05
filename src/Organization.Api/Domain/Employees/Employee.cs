@@ -1,6 +1,7 @@
+using StarterKit.Organization.Api.Domain.OrgUnits;
 using StarterKit.Shared.Entities;
 
-namespace StarterKit.Organization.Api.Entities;
+namespace StarterKit.Organization.Api.Domain.Employees;
 
 public class Employee : AuditableEntity
 {

@@ -1,4 +1,5 @@
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.Employees;
 
 namespace StarterKit.Organization.Api.Application.Employees.Commands;
 
@@ -12,7 +13,8 @@ internal class DeleteEmployeeCommandHandler(OrganizationDbContext context)
         CancellationToken cancellationToken)
     {
         var entity = await context.Employees
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .Where(new EmployeeByIdSpec(request.Id))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null)
             return Result.NotFound($"Employee {request.Id} not found");

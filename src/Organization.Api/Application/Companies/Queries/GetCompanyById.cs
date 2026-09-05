@@ -1,5 +1,6 @@
 using Mapster;
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.Companies;
 
 namespace StarterKit.Organization.Api.Application.Companies.Queries;
 
@@ -14,7 +15,7 @@ internal class GetCompanyByIdQueryHandler(OrganizationDbContext context)
     {
         var dto = await context.Companies
             .AsNoTracking()
-            .Where(x => x.Id == request.Id)
+            .Where(new CompanyByIdSpec(request.Id))
             .ProjectToType<CompanyDto>()
             .SingleOrDefaultAsync(cancellationToken);
 

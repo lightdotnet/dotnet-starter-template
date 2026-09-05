@@ -1,6 +1,6 @@
 using StarterKit.Shared.Entities;
 
-namespace StarterKit.Organization.Api.Entities;
+namespace StarterKit.Organization.Api.Domain.Employees;
 
 public class EmployeeLevel : AuditableEntity
 {

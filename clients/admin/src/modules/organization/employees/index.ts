@@ -14,7 +14,7 @@ export {
 } from "./api/employees.api";
 export { EMPLOYEES_PERMISSIONS } from "./constants/permissions";
 export { EMPLOYEES_NAV_ITEM } from "./constants/nav-item";
-export { EmploymentStatus } from "./types/employee";
+export { EmploymentStatus, AssignmentType } from "./types/employee";
 export type {
   EmployeeDto,
   EmployeeMembershipDto,

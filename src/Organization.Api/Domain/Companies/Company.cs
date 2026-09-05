@@ -1,6 +1,6 @@
 using StarterKit.Shared.Entities;
 
-namespace StarterKit.Organization.Api.Entities;
+namespace StarterKit.Organization.Api.Domain.Companies;
 
 public class Company : AuditableEntity
 {

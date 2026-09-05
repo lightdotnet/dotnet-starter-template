@@ -1,4 +1,5 @@
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.Companies;
 
 namespace StarterKit.Organization.Api.Application.Companies.Commands;
 
@@ -14,7 +15,8 @@ internal class UpdateCompanyCommandHandler(OrganizationDbContext context)
         var model = request.Model;
 
         var entity = await context.Companies
-            .FirstOrDefaultAsync(x => x.Id == model.Id, cancellationToken);
+            .Where(new CompanyByIdSpec(request.Model.Id))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null)
             return Result.NotFound($"Company {model.Id} not found");

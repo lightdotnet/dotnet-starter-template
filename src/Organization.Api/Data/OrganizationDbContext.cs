@@ -1,4 +1,6 @@
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.Companies;
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 using StarterKit.Persistence.Context;
 using StarterKit.Persistence.Extensions;
 using StarterKit.Shared;

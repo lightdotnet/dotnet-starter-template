@@ -1,6 +1,8 @@
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Organization.Contracts.Employees;
 using StarterKit.Shared.Entities;
 
-namespace StarterKit.Organization.Api.Entities;
+namespace StarterKit.Organization.Api.Domain.OrgUnits;
 
 public class EmployeeOrgUnitMembership : AuditableEntity
 {
@@ -17,6 +19,10 @@ public class EmployeeOrgUnitMembership : AuditableEntity
     public EmployeeLevel? Level { get; set; }
 
     public bool IsPrimary { get; set; }
+
+    public AssignmentType AssignmentType { get; set; } = AssignmentType.Current;
+
+    public bool IsManager { get; set; }
 
     public DateTimeOffset StartDate { get; set; }
 

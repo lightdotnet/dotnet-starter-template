@@ -1,4 +1,5 @@
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.Employees;
 
 namespace StarterKit.Organization.Api.Application.Employees.Commands;
 
@@ -14,7 +15,8 @@ internal class UpdateEmployeeCommandHandler(OrganizationDbContext context)
         var model = request.Model;
 
         var entity = await context.Employees
-            .FirstOrDefaultAsync(x => x.Id == model.Id, cancellationToken);
+            .Where(new EmployeeByIdSpec(model.Id))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null)
             return Result.NotFound($"Employee {model.Id} not found");

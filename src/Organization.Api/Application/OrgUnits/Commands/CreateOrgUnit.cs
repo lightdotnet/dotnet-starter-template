@@ -1,5 +1,5 @@
 using StarterKit.Organization.Api.Data;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 
 namespace StarterKit.Organization.Api.Application.OrgUnits.Commands;
 
@@ -22,7 +22,8 @@ internal class CreateOrgUnitCommandHandler(OrganizationDbContext context)
         if (!string.IsNullOrEmpty(model.ParentId))
         {
             var parent = await context.OrgUnits
-                .FirstOrDefaultAsync(x => x.Id == model.ParentId, cancellationToken);
+                .Where(new OrgUnitByIdSpec(model.ParentId))
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (parent is null)
                 return Result<string>.NotFound($"Parent org unit {model.ParentId} not found");

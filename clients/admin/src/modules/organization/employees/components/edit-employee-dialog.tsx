@@ -290,6 +290,8 @@ export function EditEmployeeDialog({
                   <EmployeeLoginTab
                     employeeId={detail.id}
                     userId={detail.userId}
+                    defaultEmail={detail.email}
+                    defaultPhoneNumber={detail.phoneNumber}
                     onChanged={refetchDetail}
                   />
                 </TabsContent>

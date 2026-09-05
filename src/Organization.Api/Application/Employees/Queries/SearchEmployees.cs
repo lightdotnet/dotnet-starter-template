@@ -6,7 +6,8 @@ using StarterKit.Persistence.Extensions;
 
 namespace StarterKit.Organization.Api.Application.Employees.Queries;
 
-internal sealed record SearchEmployeesQuery(EmployeeSearchRequest Request) : IQuery<PagedResult<EmployeeDto>>;
+internal sealed record SearchEmployeesQuery(
+    EmployeeSearchRequest Request) : IQuery<PagedResult<EmployeeDto>>;
 
 internal class SearchEmployeesQueryHandler(OrganizationDbContext context)
     : IQueryHandler<SearchEmployeesQuery, PagedResult<EmployeeDto>>
@@ -34,6 +35,6 @@ internal class SearchEmployeesQueryHandler(OrganizationDbContext context)
         return query
             .OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
             .ProjectToType<EmployeeDto>()
-            .ToPagedResultAsync(lookup);
+            .ToPagedResultAsync(lookup, cancellationToken);
     }
 }

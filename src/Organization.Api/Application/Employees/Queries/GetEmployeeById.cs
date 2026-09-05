@@ -1,5 +1,6 @@
 using Mapster;
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.Employees;
 
 namespace StarterKit.Organization.Api.Application.Employees.Queries;
 
@@ -14,7 +15,7 @@ internal class GetEmployeeByIdQueryHandler(OrganizationDbContext context)
     {
         var dto = await context.Employees
             .AsNoTracking()
-            .Where(x => x.Id == request.Id)
+            .Where(new EmployeeByIdSpec(request.Id))
             .ProjectToType<EmployeeDto>()
             .SingleOrDefaultAsync(cancellationToken);
 

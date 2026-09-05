@@ -9,4 +9,6 @@ public abstract class DbConnectionNames
     public const string Catalog = Default;
 
     public const string Organization = Default;
+
+    public const string Approval = Default;
 }

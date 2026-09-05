@@ -1,5 +1,6 @@
 using StarterKit.Organization.Api.Data;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 using StarterKit.Shared;
 
 namespace StarterKit.Organization.Api.Application.Employees.Commands;
@@ -15,7 +16,8 @@ internal class AssignEmployeeToOrgUnitCommandHandler(OrganizationDbContext conte
         CancellationToken cancellationToken)
     {
         var employee = await context.Employees
-            .FirstOrDefaultAsync(x => x.Id == request.EmployeeId, cancellationToken);
+            .Where(new EmployeeByIdSpec(request.EmployeeId))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (employee is null)
             return Result.NotFound($"Employee {request.EmployeeId} not found");
@@ -23,7 +25,8 @@ internal class AssignEmployeeToOrgUnitCommandHandler(OrganizationDbContext conte
         var model = request.Model;
 
         var orgUnit = await context.OrgUnits
-            .FirstOrDefaultAsync(x => x.Id == model.OrgUnitId, cancellationToken);
+            .Where(new OrgUnitByIdSpec(model.OrgUnitId))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (orgUnit is null)
             return Result.NotFound($"Org unit {model.OrgUnitId} not found");
@@ -41,8 +44,8 @@ internal class AssignEmployeeToOrgUnitCommandHandler(OrganizationDbContext conte
         }
 
         var alreadyAssigned = await context.EmployeeOrgUnitMemberships
-            .AnyAsync(x => x.EmployeeId == request.EmployeeId && x.OrgUnitId == model.OrgUnitId && x.EndDate == null,
-                cancellationToken);
+            .Where(new ActiveEmployeeOrgUnitMembershipSpec(request.EmployeeId, model.OrgUnitId))
+            .AnyAsync(cancellationToken);
 
         if (alreadyAssigned)
             return Result.Error("Employee is already assigned to this org unit.");
@@ -56,6 +59,8 @@ internal class AssignEmployeeToOrgUnitCommandHandler(OrganizationDbContext conte
             OrgUnitId = model.OrgUnitId,
             LevelId = model.LevelId,
             IsPrimary = model.IsPrimary,
+            AssignmentType = model.AssignmentType,
+            IsManager = model.IsManager,
             StartDate = clock.UtcNow,
         };
 

@@ -15,16 +15,18 @@ Package versions are centrally managed via the root `Directory.Packages.props` (
 | Notifications.Api | Lightsoft.SmtpMail | Its only direct package reference; everything else it uses (`Light.EntityFrameworkCore.Extensions`, `Light.Specification`, `Mapster`, `Microsoft.AspNetCore.SignalR` — the last a shared-framework reference, not a NuGet package) rides in transitively via `Infrastructure`/`Persistence`/`Shared`. |
 | Organization.Contracts | Lightsoft.AspNetCore.Authorization | Declared directly (for `IPermissionDefinitionProvider`/`OrganizationPermissionProvider`) — unlike `Notifications.Contracts`, which uses the same vendor type transitively without declaring it. |
 | Organization.Api | Lightsoft.AspNetCore.Authorization, Lightsoft.EntityFrameworkCore, Lightsoft.Mediator, Lightsoft.Result, Mapster | Every vendor package the project directly uses is declared directly — no undeclared-transitive-dependency instance here, unlike `Identity.Api`/`Notifications.Api` (see `../known-debt.md`). |
+| Approval.Contracts | Lightsoft.AspNetCore.Authorization, Lightsoft.Result | Declared directly (for `IPermissionDefinitionProvider`/`ApprovalPermissionProvider` and `IResult`/`IResult<T>`) — same "declare what you use" discipline as `Organization.Contracts`. |
+| Approval.Api | Lightsoft.AspNetCore.Authorization, Lightsoft.EntityFrameworkCore, Lightsoft.Mediator, Lightsoft.Result, Mapster | Every vendor package the project directly uses is declared directly — same positive pattern as `Organization.Api`, no undeclared-transitive-dependency instance. |
 | StarterKit.WebApi | AspNetCore.HealthChecks.UI.Client, FluentValidation.DependencyInjectionExtensions, Lightsoft.AspNetCore.Swagger, Microsoft.VisualStudio.Azure.Containers.Tools.Targets, Spectre.Console | Uses `Lightsoft.Serilog` too, without declaring it directly — rides in via `Infrastructure`. |
 | Framework.Tests | xunit.v3, xunit.runner.visualstudio, Microsoft.NET.Test.Sdk | Opts out of central package management and pins these directly. |
 | Identity.Tests | xunit.v3, xunit.runner.visualstudio, Microsoft.NET.Test.Sdk, Moq | Same opt-out as `Framework.Tests`, plus `Moq`. |
 | Organization.Tests | xunit.v3, xunit.runner.visualstudio, Microsoft.NET.Test.Sdk, Moq | Same opt-out/package set as `Identity.Tests`. Uses `Moq` to mock `Identity.Contracts.Services.IUserService` in the employee-login command tests; everything else runs against a real Sqlite in-memory `OrganizationDbContext` (`OrganizationTestHost`). |
 
-This undeclared-transitive-dependency pattern (a project using a vendor type without declaring the package itself, riding in via a `ProjectReference`) recurs three times in the repo — `Identity.Api`, `Identity.Contracts`, and `Notifications.Contracts` each have one instance. `Organization.Contracts`/`Organization.Api` do not repeat it — both declare every vendor package they directly use. See `../known-debt.md` for the full list and the recommendation to declare packages a project actually uses directly.
+This undeclared-transitive-dependency pattern (a project using a vendor type without declaring the package itself, riding in via a `ProjectReference`) recurs three times in the repo — `Identity.Api`, `Identity.Contracts`, and `Notifications.Contracts` each have one instance. `Organization.Contracts`/`Organization.Api` and `Approval.Contracts`/`Approval.Api` do not repeat it — all four declare every vendor package they directly use. See `../known-debt.md` for the full list and the recommendation to declare packages a project actually uses directly.
 
 ## Circular References
 
-None found. `Shared` and `Notifications.Contracts` are true leaves (no `ProjectReference`s of their own); `Identity.Contracts` is not a true leaf — it references `Shared` solely to reach a transitive package (see Package References above); `Organization.Contracts` also references only `Shared`. Dependency direction is one-way throughout: `Api`/`Contracts` projects → `Infrastructure`/`Persistence` → `Shared`, and `StarterKit.WebApi` (composition-root host) → all three business modules. No project reference cycle exists anywhere in the graph.
+None found. `Shared` and `Notifications.Contracts` are true leaves (no `ProjectReference`s of their own); `Identity.Contracts` is not a true leaf — it references `Shared` solely to reach a transitive package (see Package References above); `Organization.Contracts`/`Approval.Contracts` also reference only `Shared`. Dependency direction is one-way throughout: `Api`/`Contracts` projects → `Infrastructure`/`Persistence` → `Shared`, and `StarterKit.WebApi` (composition-root host) → all four business modules. No project reference cycle exists anywhere in the graph.
 
 ```text
 Infrastructure -> Shared
@@ -43,9 +45,15 @@ Organization.Api -> Organization.Contracts
 Organization.Api -> Infrastructure
 Organization.Api -> Persistence
 Organization.Api -> Identity.Contracts
+Approval.Contracts -> Shared
+Approval.Api -> Approval.Contracts
+Approval.Api -> Infrastructure
+Approval.Api -> Persistence
+Approval.Api -> Notifications.Contracts
 StarterKit.WebApi -> Identity.Api
 StarterKit.WebApi -> Notifications.Api
 StarterKit.WebApi -> Organization.Api
+StarterKit.WebApi -> Approval.Api
 StarterKit.WebApi -> Infrastructure
 StarterKit.WebApi -> Shared
 Framework.Tests -> Shared
@@ -60,12 +68,13 @@ Organization.Tests -> Shared
 
 ## Cross-Module Boundary Violations (backend only)
 
-None found. Two business-module-to-business-module dependencies exist, both compliant (each reaches only the other module's `Contracts` seam, never its `.Api` internals):
+None found. Three business-module-to-business-module dependencies exist, all compliant (each reaches only the other module's `Contracts` seam, never its `.Api` internals):
 
 - `Identity.Api` references `Notifications.Contracts`, consumed by `UserCreatedEventHandler` for a welcome-email side effect via `IMailService`.
-- `Organization.Api` references `Identity.Contracts`, consumed by `CreateEmployeeLoginCommandHandler`/`LinkEmployeeLoginCommandHandler`/`UnlinkEmployeeLoginCommandHandler` via `IUserService`, to create or link an Identity login for an employee and store the resulting `User.Id` as an opaque string on `Employee.UserId` (no FK — the same opaque-reference pattern `Notifications.Notification.FromUserId`/`ToUserId` already uses against `Identity`).
+- `Organization.Api` references `Identity.Contracts`, consumed by `CreateEmployeeLoginCommandHandler`/`LinkEmployeeLoginCommandHandler`/`UnlinkEmployeeLoginCommandHandler` via `IUserService`, to create or link an Identity login for an employee and store the resulting `User.Id` as an opaque string on `Employee.UserId` (no FK — the same opaque-reference pattern `Notifications.Notification.FromUserId`/`ToUserId` already uses against `Identity`), plus stamping/clearing that user's `employee_id` claim via `IUserService.SetClaimAsync`.
+- `Approval.Api` references `Notifications.Contracts`, consumed by `ApprovalStepPendingEventHandler`/`ApprovalFinalizedEventHandler` via `INotificationService.SendAsync`, to notify the relevant approver/requester when a step becomes pending or a request is finalized.
 
-Neither reverse direction exists: `Notifications` references nothing belonging to `Identity`, and `Identity`/`Notifications` reference nothing belonging to `Organization`. See `modules/Identity.md`, `modules/Notifications.md`, and `modules/Organization.md` for full detail.
+None of the reverse directions exist: `Notifications` references nothing belonging to `Identity`, `Organization`, or `Approval`; `Identity`/`Notifications`/`Approval` reference nothing belonging to `Organization`; and no module besides `Approval.Api` itself references `Approval.Contracts`/`Approval.Api`. See `modules/Identity.md`, `modules/Notifications.md`, `modules/Organization.md`, and `modules/Approval.md` for full detail.
 
 ## Notes
 

@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Organization.Tests.TestSupport;
 using StarterKit.Organization.Api.Application.Employees.Commands;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.Companies;
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 using StarterKit.Organization.Contracts.Employees;
 using StarterKit.Organization.Contracts.OrgUnits;
 using Xunit;
@@ -141,6 +143,69 @@ public class AssignEmployeeToOrgUnitCommandHandlerTests
             .ToList();
         Assert.Single(memberships, x => x.OrgUnitId == unit1.Id && !x.IsPrimary);
         Assert.Single(memberships, x => x.OrgUnitId == unit2.Id && x.IsPrimary);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldPersistAssignmentTypeAndIsManager()
+    {
+        // Arrange
+        using var host = new OrganizationTestHost();
+        var company = new Company { Name = "A", Code = "A" };
+        await host.Context.Companies.AddAsync(company);
+        await host.Context.SaveChangesAsync();
+        var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "A", LastName = "B" };
+        var unit = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "U", Code = "U" };
+        await host.Context.Employees.AddAsync(employee);
+        await host.Context.OrgUnits.AddAsync(unit);
+        await host.Context.SaveChangesAsync();
+        var handler = new AssignEmployeeToOrgUnitCommandHandler(host.Context, host.DateTime);
+
+        // Act
+        var result = await handler.Handle(
+            new AssignEmployeeToOrgUnitCommand(
+                employee.Id,
+                new AssignEmployeeOrgUnitRequest
+                {
+                    OrgUnitId = unit.Id,
+                    AssignmentType = AssignmentType.Acting,
+                    IsManager = true,
+                }),
+            CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var membership = host.Context.EmployeeOrgUnitMemberships
+            .Single(x => x.EmployeeId == employee.Id && x.OrgUnitId == unit.Id);
+        Assert.Equal(AssignmentType.Acting, membership.AssignmentType);
+        Assert.True(membership.IsManager);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldDefaultToCurrentAndNonManager_WhenNotSpecified()
+    {
+        // Arrange
+        using var host = new OrganizationTestHost();
+        var company = new Company { Name = "A", Code = "A" };
+        await host.Context.Companies.AddAsync(company);
+        await host.Context.SaveChangesAsync();
+        var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "A", LastName = "B" };
+        var unit = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "U", Code = "U" };
+        await host.Context.Employees.AddAsync(employee);
+        await host.Context.OrgUnits.AddAsync(unit);
+        await host.Context.SaveChangesAsync();
+        var handler = new AssignEmployeeToOrgUnitCommandHandler(host.Context, host.DateTime);
+
+        // Act
+        var result = await handler.Handle(
+            new AssignEmployeeToOrgUnitCommand(employee.Id, new AssignEmployeeOrgUnitRequest { OrgUnitId = unit.Id }),
+            CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var membership = host.Context.EmployeeOrgUnitMemberships
+            .Single(x => x.EmployeeId == employee.Id && x.OrgUnitId == unit.Id);
+        Assert.Equal(AssignmentType.Current, membership.AssignmentType);
+        Assert.False(membership.IsManager);
     }
 
     [Fact]

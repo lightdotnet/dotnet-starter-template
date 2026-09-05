@@ -1,4 +1,5 @@
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 
 namespace StarterKit.Organization.Api.Application.OrgUnits.Commands;
 
@@ -12,7 +13,8 @@ internal class DeleteOrgUnitCommandHandler(OrganizationDbContext context)
         CancellationToken cancellationToken)
     {
         var entity = await context.OrgUnits
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .Where(new OrgUnitByIdSpec(request.Id))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null)
             return Result.NotFound($"Org unit {request.Id} not found");

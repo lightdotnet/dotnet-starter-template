@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.Companies;
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 using StarterKit.Organization.Contracts.Common;
 using StarterKit.Organization.Contracts.Employees;
 using StarterKit.Organization.Contracts.OrgUnits;

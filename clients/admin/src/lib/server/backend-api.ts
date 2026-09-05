@@ -40,3 +40,4 @@ function createBackendApiClient(client: ApiClientName) {
 export const identityApi = createBackendApiClient(ApiClients.Identity);
 export const notificationsApi = createBackendApiClient(ApiClients.Notifications);
 export const organizationApi = createBackendApiClient(ApiClients.Organization);
+export const approvalApi = createBackendApiClient(ApiClients.Approval);

@@ -15,8 +15,13 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { updateEmployeeMembershipAction } from "@/modules/organization/employees/api/update-employee-membership-action";
-import type { EmployeeMembershipDto } from "@/modules/organization/employees/types/employee";
+import { AssignmentType, type EmployeeMembershipDto } from "@/modules/organization/employees/types/employee";
 import type { EmployeeLevelDto } from "@/modules/organization/departments/types/employee-level";
+
+const ASSIGNMENT_TYPE_OPTIONS = [
+  { value: AssignmentType.Current, label: "Current" },
+  { value: AssignmentType.Acting, label: "Acting" },
+];
 
 interface UpdateMembershipDialogProps {
   open: boolean;
@@ -37,6 +42,10 @@ export function UpdateMembershipDialog({
 }: UpdateMembershipDialogProps) {
   const [levelId, setLevelId] = useState(membership?.levelId ?? "");
   const [isPrimary, setIsPrimary] = useState(membership?.isPrimary ?? false);
+  const [assignmentType, setAssignmentType] = useState<AssignmentType>(
+    membership?.assignmentType ?? AssignmentType.Current,
+  );
+  const [isManager, setIsManager] = useState(membership?.isManager ?? false);
   const [saving, run] = useGuardedAction();
 
   if (!membership) return null;
@@ -49,6 +58,8 @@ export function UpdateMembershipDialog({
         updateEmployeeMembershipAction(employeeId, membership.orgUnitId, {
           levelId: levelId || undefined,
           isPrimary,
+          assignmentType,
+          isManager,
         }),
       "Updated.",
       () => {
@@ -76,9 +87,22 @@ export function UpdateMembershipDialog({
               options={levels.map((level) => ({ value: level.id, label: level.name }))}
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="assignmentType">Status</Label>
+            <NativeSelect
+              id="assignmentType"
+              value={assignmentType}
+              onChange={(value) => setAssignmentType(value as AssignmentType)}
+              options={ASSIGNMENT_TYPE_OPTIONS}
+            />
+          </div>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={isPrimary} onCheckedChange={(checked) => setIsPrimary(checked === true)} />
             Primary department/team
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox checked={isManager} onCheckedChange={(checked) => setIsManager(checked === true)} />
+            Manager of this department/team
           </label>
         </div>
 

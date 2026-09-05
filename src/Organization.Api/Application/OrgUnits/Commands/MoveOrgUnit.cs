@@ -1,5 +1,5 @@
 using StarterKit.Organization.Api.Data;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 
 namespace StarterKit.Organization.Api.Application.OrgUnits.Commands;
 
@@ -13,7 +13,8 @@ internal class MoveOrgUnitCommandHandler(OrganizationDbContext context)
         CancellationToken cancellationToken)
     {
         var entity = await context.OrgUnits
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .Where(new OrgUnitByIdSpec(request.Id))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null)
             return Result.NotFound($"Org unit {request.Id} not found");
@@ -33,7 +34,8 @@ internal class MoveOrgUnitCommandHandler(OrganizationDbContext context)
             return Result.Error("An org unit cannot be its own parent.");
 
         var newParent = await context.OrgUnits
-            .FirstOrDefaultAsync(x => x.Id == newParentId, cancellationToken);
+            .Where(new OrgUnitByIdSpec(newParentId))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (newParent is null)
             return Result.NotFound($"Org unit {newParentId} not found");
@@ -64,7 +66,7 @@ internal class MoveOrgUnitCommandHandler(OrganizationDbContext context)
                 return true;
 
             currentId = await context.OrgUnits
-                .Where(x => x.Id == currentId)
+                .Where(new OrgUnitByIdSpec(currentId))
                 .Select(x => x.ParentId)
                 .SingleOrDefaultAsync(cancellationToken);
         }

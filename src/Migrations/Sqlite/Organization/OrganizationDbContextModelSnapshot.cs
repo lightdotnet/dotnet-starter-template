@@ -220,6 +220,9 @@ namespace Sqlite.Organization
                         .HasMaxLength(450)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("AssignmentType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("Created")
                         .HasColumnType("INTEGER");
 
@@ -233,6 +236,9 @@ namespace Sqlite.Organization
                         .HasColumnType("TEXT");
 
                     b.Property<long?>("EndDate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsManager")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsPrimary")

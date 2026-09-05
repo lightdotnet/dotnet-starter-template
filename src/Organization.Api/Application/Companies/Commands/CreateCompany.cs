@@ -1,5 +1,5 @@
 using StarterKit.Organization.Api.Data;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.Companies;
 
 namespace StarterKit.Organization.Api.Application.Companies.Commands;
 

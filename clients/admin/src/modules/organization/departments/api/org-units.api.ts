@@ -25,6 +25,10 @@ export function getOrgUnitEmployees(id: string) {
   return guardCall(() => requestJson<Result<EmployeeDto[]>>(`org_unit/${id}/employee`));
 }
 
+export function getOrgUnitManagers(id: string) {
+  return guardCall(() => requestJson<Result<EmployeeDto[]>>(`org_unit/${id}/manager`));
+}
+
 export function createOrgUnit(request: CreateOrgUnitRequest) {
   return guardCall(() =>
     requestJson<Result<string>>("org_unit", { method: "POST", body: request }),

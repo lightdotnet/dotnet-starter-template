@@ -1,6 +1,8 @@
 using Organization.Tests.TestSupport;
 using StarterKit.Organization.Api.Application.Companies.Queries;
-using StarterKit.Organization.Api.Entities;
+using StarterKit.Organization.Api.Domain.Companies;
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 using StarterKit.Organization.Contracts.Common;
 using StarterKit.Organization.Contracts.Companies;
 using Xunit;

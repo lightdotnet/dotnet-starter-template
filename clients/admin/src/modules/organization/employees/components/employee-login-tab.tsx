@@ -21,10 +21,18 @@ const initialCreateState: CreateEmployeeLoginFormState = {};
 interface EmployeeLoginTabProps {
   employeeId: string;
   userId?: string | null;
+  defaultEmail?: string | null;
+  defaultPhoneNumber?: string | null;
   onChanged: () => void;
 }
 
-export function EmployeeLoginTab({ employeeId, userId, onChanged }: EmployeeLoginTabProps) {
+export function EmployeeLoginTab({
+  employeeId,
+  userId,
+  defaultEmail,
+  defaultPhoneNumber,
+  onChanged,
+}: EmployeeLoginTabProps) {
   const [unlinking, runUnlink] = useGuardedAction();
   const [linking, runLink] = useGuardedAction();
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -95,11 +103,11 @@ export function EmployeeLoginTab({ employeeId, userId, onChanged }: EmployeeLogi
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="loginEmail">Email</Label>
-              <Input id="loginEmail" name="email" type="email" />
+              <Input id="loginEmail" name="email" type="email" defaultValue={defaultEmail ?? ""} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="loginPhone">Phone number</Label>
-              <Input id="loginPhone" name="phoneNumber" />
+              <Input id="loginPhone" name="phoneNumber" defaultValue={defaultPhoneNumber ?? ""} />
             </div>
           </div>
           <div>

@@ -8,6 +8,7 @@ import {
   FolderTree,
   Pencil,
   Plus,
+  ShieldCheck,
   Users2,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -24,6 +25,7 @@ import { CreateOrgUnitDialog } from "@/modules/organization/departments/componen
 import { EditOrgUnitDialog } from "@/modules/organization/departments/components/edit-org-unit-dialog";
 import { DeleteOrgUnitDialog } from "@/modules/organization/departments/components/delete-org-unit-dialog";
 import { MoveOrgUnitDialog } from "@/modules/organization/departments/components/move-org-unit-dialog";
+import { ViewOrgUnitManagersDialog } from "@/modules/organization/departments/components/view-org-unit-managers-dialog";
 import { OrgUnitType, type OrgUnitTreeNodeDto } from "@/modules/organization/departments/types/org-unit";
 
 interface OrgUnitTreeProps {
@@ -35,7 +37,7 @@ interface OrgUnitTreeProps {
   canDelete?: boolean;
 }
 
-type DialogAction = "create" | "edit" | "delete" | "move";
+type DialogAction = "create" | "edit" | "delete" | "move" | "managers";
 
 export function OrgUnitTree({
   companyId,
@@ -74,6 +76,12 @@ export function OrgUnitTree({
     setSelectedNode(node);
     setDialogKey((key) => key + 1);
     setDialog("move");
+  }
+
+  function openManagers(node: OrgUnitTreeNodeDto) {
+    setSelectedNode(node);
+    setDialogKey((key) => key + 1);
+    setDialog("managers");
   }
 
   function refresh() {
@@ -116,6 +124,7 @@ export function OrgUnitTree({
               onEdit={openEdit}
               onDelete={openDelete}
               onMove={openMove}
+              onViewManagers={openManagers}
             />
           ))}
         </div>
@@ -151,6 +160,12 @@ export function OrgUnitTree({
         node={selectedNode}
         onMoved={refresh}
       />
+      <ViewOrgUnitManagersDialog
+        key={`managers-${dialogKey}`}
+        open={dialog === "managers"}
+        onOpenChange={(open) => setDialog(open ? "managers" : null)}
+        node={selectedNode}
+      />
     </div>
   );
 }
@@ -165,6 +180,7 @@ interface OrgUnitTreeNodeProps {
   onEdit: (node: OrgUnitTreeNodeDto) => void;
   onDelete: (node: OrgUnitTreeNodeDto) => void;
   onMove: (node: OrgUnitTreeNodeDto) => void;
+  onViewManagers: (node: OrgUnitTreeNodeDto) => void;
 }
 
 function OrgUnitTreeNode({
@@ -177,6 +193,7 @@ function OrgUnitTreeNode({
   onEdit,
   onDelete,
   onMove,
+  onViewManagers,
 }: OrgUnitTreeNodeProps) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = node.children.length > 0;
@@ -215,6 +232,14 @@ function OrgUnitTreeNode({
         {node.status !== "Active" && <Badge variant="outline">{node.status}</Badge>}
 
         <div className="ml-auto flex items-center gap-1">
+          <Button
+            aria-label="View managers"
+            size="icon-xs"
+            variant="outline"
+            onClick={() => onViewManagers(node)}
+          >
+            <ShieldCheck />
+          </Button>
           {(canCreate || canUpdate || canDelete) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -264,6 +289,7 @@ function OrgUnitTreeNode({
               onEdit={onEdit}
               onDelete={onDelete}
               onMove={onMove}
+              onViewManagers={onViewManagers}
             />
           ))}
         </div>

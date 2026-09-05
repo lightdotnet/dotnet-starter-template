@@ -4,7 +4,7 @@ Project-specific guidance for `clients/admin/`. See the root [CLAUDE.md](../../C
 
 ## Purpose
 
-Internal admin console for the ModularMonolith starter template — the first and, so far, only client app. Real backend integration against `Identity.Api`, `Notifications.Api`, and `Organization.Api` (each wired as its own named backend client): encrypted-cookie auth with proactive token refresh, full Users/Roles CRUD (incl. a custom-claims editor), real-time Notifications (SignalR) with a topbar bell and a Home-page inbox, Organization administration (Companies, Departments & Teams, Employees — including assigning employees into the department/team hierarchy and creating/linking their Identity login), permission-gated navigation.
+Internal admin console for the ModularMonolith starter template — the first and, so far, only client app. Real backend integration against `Identity.Api`, `Notifications.Api`, `Organization.Api`, and `Approval.Api` (each wired as its own named backend client): encrypted-cookie auth with proactive token refresh, full Users/Roles CRUD (incl. a custom-claims editor), real-time Notifications (SignalR) with a topbar bell and a Home-page inbox, Organization administration (Companies, Departments & Teams, Employees — including assigning employees into the department/team hierarchy with a status/manager flag and creating/linking their Identity login), a generic Approvals workflow (per-user pending decisions plus an admin test harness for building multi-level approver chains), permission-gated navigation.
 
 ## Stack
 
@@ -12,7 +12,7 @@ Next.js 16 (App Router, rooted at `src/app/`), React 19, TypeScript (`strict: tr
 
 ## Architectural Constraints ("do not" rules)
 
-- **One consolidated `<feature>.api.ts` file per feature** under `features/<name>/api/` (not one file per endpoint) — `*-action.ts` Server Actions stay one file per action.
+- **One consolidated `<feature>.api.ts` file per feature** under `modules/<domain>/<feature>/api/` (or `features/home/` for the one feature that hasn't moved under `modules/`) — not one file per endpoint; `*-action.ts` Server Actions stay one file per action.
 - **Cross-feature imports go through a feature's `index.ts` barrel** — only narrow, reasoned exceptions (server-only-export avoidance) bypass it directly; see [docs/architecture/architecture.md § Key Design Patterns](docs/architecture/architecture.md#key-design-patterns) for the current exception list.
 - **`lib/server/*` is server-only** (never import from a Client Component) — `lib/shared/*` is the client-safe split.
 - Auth/session state lives only in the encrypted `admin_session` httpOnly cookie — never pass an access token through any other channel except the one deliberate SignalR-handshake exception (see Architecture below).
@@ -38,3 +38,13 @@ Nothing in this repo currently documents conventions shared *across* client apps
 
 ---
 _Last synced: 2026-09-05_
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

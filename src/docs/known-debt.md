@@ -29,7 +29,7 @@
 
 ## Test coverage
 
-- **No `tests/Notifications.Tests` project** — `Identity` has `tests/Identity.Tests` (100 tests), `Notifications` has no automated coverage yet.
+- **No `tests/Notifications.Tests` or `tests/Approval.Tests` project** — `Identity` has `tests/Identity.Tests` (98 tests), `Organization` has `tests/Organization.Tests` (49 tests); `Notifications` and `Approval` have no automated coverage yet.
 
 ## Dependency hygiene
 

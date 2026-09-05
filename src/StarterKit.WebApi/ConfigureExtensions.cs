@@ -4,6 +4,7 @@ using Light.AspNetCore.Builder;
 using Light.AspNetCore.Middlewares;
 using Light.AspNetCore.Swagger;
 using Light.Mediator;
+using StarterKit.Approval.Api;
 using StarterKit.Identity.Api;
 using StarterKit.Infrastructure;
 using StarterKit.Infrastructure.Cors;
@@ -26,6 +27,7 @@ public static class ConfigureExtensions
             typeof(IdentityModule).Assembly,
             typeof(NotificationModule).Assembly,
             typeof(OrganizationModule).Assembly,
+            typeof(ApprovalModule).Assembly,
         ];
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)

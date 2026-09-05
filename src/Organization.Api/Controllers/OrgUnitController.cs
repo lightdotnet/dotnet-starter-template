@@ -30,6 +30,12 @@ public class OrgUnitController : VersionedApiController
         return Ok(await Mediator.Send(new GetOrgUnitEmployeesQuery(id)));
     }
 
+    [HttpGet("{id}/manager")]
+    public async Task<IActionResult> GetManagersAsync([FromRoute] string id)
+    {
+        return Ok(await Mediator.Send(new GetOrgUnitManagersQuery(id)));
+    }
+
     [HttpPost]
     [MustHavePermission(OrganizationPermissions.OrgUnits.Create)]
     public async Task<IActionResult> PostAsync([FromBody] CreateOrgUnitRequest request)

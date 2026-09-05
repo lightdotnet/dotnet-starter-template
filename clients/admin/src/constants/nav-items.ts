@@ -10,6 +10,7 @@ import { NOTIFICATIONS_NAV_ITEM } from "@/modules/notifications/constants/nav-it
 import { COMPANIES_NAV_ITEM } from "@/modules/organization/companies/constants/nav-item";
 import { DEPARTMENTS_NAV_ITEM } from "@/modules/organization/departments/constants/nav-item";
 import { EMPLOYEES_NAV_ITEM } from "@/modules/organization/employees/constants/nav-item";
+import { APPROVALS_NAV_ITEM } from "@/modules/approvals/constants/nav-item";
 import type { NavItem } from "@/types/nav";
 
 export const NAV_ITEMS: NavItem[] = [
@@ -34,6 +35,7 @@ export const NAV_ITEMS: NavItem[] = [
       EMPLOYEES_NAV_ITEM,
     ],
   },
+  APPROVALS_NAV_ITEM,
   {
     label: "Settings",
     href: "/settings",

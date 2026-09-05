@@ -15,8 +15,14 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { assignEmployeeOrgUnitAction } from "@/modules/organization/employees/api/assign-employee-org-unit-action";
+import { AssignmentType } from "@/modules/organization/employees/types/employee";
 import type { OrgUnitTreeNodeDto } from "@/modules/organization/departments/types/org-unit";
 import type { EmployeeLevelDto } from "@/modules/organization/departments/types/employee-level";
+
+const ASSIGNMENT_TYPE_OPTIONS = [
+  { value: AssignmentType.Current, label: "Current" },
+  { value: AssignmentType.Acting, label: "Acting" },
+];
 
 interface AssignOrgUnitDialogProps {
   open: boolean;
@@ -40,6 +46,8 @@ export function AssignOrgUnitDialog({
   const [orgUnitId, setOrgUnitId] = useState("");
   const [levelId, setLevelId] = useState(NONE_VALUE);
   const [isPrimary, setIsPrimary] = useState(false);
+  const [assignmentType, setAssignmentType] = useState<AssignmentType>(AssignmentType.Current);
+  const [isManager, setIsManager] = useState(false);
   const [saving, run] = useGuardedAction();
 
   function handleOpenChange(nextOpen: boolean) {
@@ -47,6 +55,8 @@ export function AssignOrgUnitDialog({
       setOrgUnitId("");
       setLevelId(NONE_VALUE);
       setIsPrimary(false);
+      setAssignmentType(AssignmentType.Current);
+      setIsManager(false);
     }
     onOpenChange(nextOpen);
   }
@@ -60,6 +70,8 @@ export function AssignOrgUnitDialog({
           orgUnitId,
           levelId: levelId || undefined,
           isPrimary,
+          assignmentType,
+          isManager,
         }),
       "Assigned.",
       () => {
@@ -100,9 +112,22 @@ export function AssignOrgUnitDialog({
               options={levels.map((level) => ({ value: level.id, label: level.name }))}
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="assignmentType">Status</Label>
+            <NativeSelect
+              id="assignmentType"
+              value={assignmentType}
+              onChange={(value) => setAssignmentType(value as AssignmentType)}
+              options={ASSIGNMENT_TYPE_OPTIONS}
+            />
+          </div>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={isPrimary} onCheckedChange={(checked) => setIsPrimary(checked === true)} />
             Primary department/team
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox checked={isManager} onCheckedChange={(checked) => setIsManager(checked === true)} />
+            Manager of this department/team
           </label>
         </div>
 

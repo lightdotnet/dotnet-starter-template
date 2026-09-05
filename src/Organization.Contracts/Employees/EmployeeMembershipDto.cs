@@ -16,6 +16,10 @@ public class EmployeeMembershipDto
 
     public bool IsPrimary { get; set; }
 
+    public AssignmentType AssignmentType { get; set; }
+
+    public bool IsManager { get; set; }
+
     public DateTimeOffset StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }

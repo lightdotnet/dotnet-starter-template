@@ -1,4 +1,5 @@
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.Companies;
 
 namespace StarterKit.Organization.Api.Application.Companies.Commands;
 
@@ -12,7 +13,8 @@ internal class DeleteCompanyCommandHandler(OrganizationDbContext context)
         CancellationToken cancellationToken)
     {
         var entity = await context.Companies
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .Where(new CompanyByIdSpec(request.Id))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null)
             return Result.NotFound($"Company {request.Id} not found");

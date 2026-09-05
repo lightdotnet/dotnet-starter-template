@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Approval.Api\Approval.Api.csproj" />
     <ProjectReference Include="..\..\Identity.Api\Identity.Api.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\..\Organization.Api\Organization.Api.csproj" />
@@ -43,6 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Approval\" />
     <Folder Include="Identity\" />
     <Folder Include="Organization\" />
   </ItemGroup>

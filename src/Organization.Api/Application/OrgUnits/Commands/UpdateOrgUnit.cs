@@ -1,4 +1,5 @@
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 
 namespace StarterKit.Organization.Api.Application.OrgUnits.Commands;
 
@@ -14,7 +15,8 @@ internal class UpdateOrgUnitCommandHandler(OrganizationDbContext context)
         var model = request.Model;
 
         var entity = await context.OrgUnits
-            .FirstOrDefaultAsync(x => x.Id == model.Id, cancellationToken);
+            .Where(new OrgUnitByIdSpec(model.Id))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity is null)
             return Result.NotFound($"Org unit {model.Id} not found");

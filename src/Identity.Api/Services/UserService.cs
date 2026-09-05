@@ -208,4 +208,40 @@ public class UserService(UserManager<User> userManager) : IUserService
 
         return users.Select(s => s.MapToDto());
     }
+
+    public virtual async Task<IResult> SetClaimAsync(string userId, string claimType, string? claimValue)
+    {
+        var user = await userManager
+            .FindByIdAsync(userId)
+            .ConfigureAwait(false);
+
+        if (user == null)
+            return Result.NotFound($"User {userId} not found");
+
+        var existingClaims = await userManager.GetClaimsAsync(user).ConfigureAwait(false);
+        var existingClaim = existingClaims.FirstOrDefault(c => c.Type == claimType);
+
+        IdentityResult identityResult;
+
+        if (string.IsNullOrEmpty(claimValue))
+        {
+            identityResult = existingClaim is null
+                ? IdentityResult.Success
+                : await userManager.RemoveClaimAsync(user, existingClaim).ConfigureAwait(false);
+        }
+        else if (existingClaim is null)
+        {
+            identityResult = await userManager
+                .AddClaimAsync(user, new Claim(claimType, claimValue))
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            identityResult = await userManager
+                .ReplaceClaimAsync(user, existingClaim, new Claim(claimType, claimValue))
+                .ConfigureAwait(false);
+        }
+
+        return identityResult.ToResult();
+    }
 }

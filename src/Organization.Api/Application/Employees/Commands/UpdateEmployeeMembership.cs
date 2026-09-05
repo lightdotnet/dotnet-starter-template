@@ -1,4 +1,5 @@
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 
 namespace StarterKit.Organization.Api.Application.Employees.Commands;
 
@@ -13,9 +14,8 @@ internal class UpdateEmployeeMembershipCommandHandler(OrganizationDbContext cont
         CancellationToken cancellationToken)
     {
         var membership = await context.EmployeeOrgUnitMemberships
-            .FirstOrDefaultAsync(
-                x => x.EmployeeId == request.EmployeeId && x.OrgUnitId == request.OrgUnitId && x.EndDate == null,
-                cancellationToken);
+            .Where(new ActiveEmployeeOrgUnitMembershipSpec(request.EmployeeId, request.OrgUnitId))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (membership is null)
             return Result.NotFound("Membership not found");
@@ -39,6 +39,8 @@ internal class UpdateEmployeeMembershipCommandHandler(OrganizationDbContext cont
 
         membership.LevelId = model.LevelId;
         membership.IsPrimary = model.IsPrimary;
+        membership.AssignmentType = model.AssignmentType;
+        membership.IsManager = model.IsManager;
 
         await context.SaveChangesAsync(cancellationToken);
 

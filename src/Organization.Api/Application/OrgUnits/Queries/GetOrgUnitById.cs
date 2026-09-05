@@ -1,5 +1,6 @@
 using Mapster;
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.OrgUnits;
 
 namespace StarterKit.Organization.Api.Application.OrgUnits.Queries;
 
@@ -14,7 +15,7 @@ internal class GetOrgUnitByIdQueryHandler(OrganizationDbContext context)
     {
         var dto = await context.OrgUnits
             .AsNoTracking()
-            .Where(x => x.Id == request.Id)
+            .Where(new OrgUnitByIdSpec(request.Id))
             .ProjectToType<OrgUnitDto>()
             .SingleOrDefaultAsync(cancellationToken);
 

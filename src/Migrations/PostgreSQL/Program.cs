@@ -21,3 +21,7 @@ var organizationInitialiser = serviceProvider.GetRequiredService<OrganizationCon
 await organizationInitialiser.InitialiseAsync();
 
 await organizationInitialiser.TrySeedAsync();
+
+var approvalInitialiser = serviceProvider.GetRequiredService<StarterKit.Approval.Api.Data.ApprovalContextInitialiser>();
+
+await approvalInitialiser.InitialiseAsync();

@@ -1,5 +1,7 @@
 using StarterKit.Identity.Contracts.Services;
 using StarterKit.Organization.Api.Data;
+using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Shared.Constants;
 
 namespace StarterKit.Organization.Api.Application.Employees.Commands;
 
@@ -14,7 +16,8 @@ internal class LinkEmployeeLoginCommandHandler(OrganizationDbContext context, IU
         CancellationToken cancellationToken)
     {
         var employee = await context.Employees
-            .FirstOrDefaultAsync(x => x.Id == request.EmployeeId, cancellationToken);
+            .Where(new EmployeeByIdSpec(request.EmployeeId))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (employee is null)
             return Result.NotFound($"Employee {request.EmployeeId} not found");
@@ -38,6 +41,8 @@ internal class LinkEmployeeLoginCommandHandler(OrganizationDbContext context, IU
         employee.UserId = userId;
 
         await context.SaveChangesAsync(cancellationToken);
+
+        await userService.SetClaimAsync(userId, ClaimTypeConstants.EmployeeId, employee.Id);
 
         return Result.Success();
     }
