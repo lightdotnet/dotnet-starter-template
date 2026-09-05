@@ -11,6 +11,7 @@ using StarterKit.Infrastructure.HealthChecks;
 using StarterKit.Infrastructure.Modularity;
 using StarterKit.Infrastructure.Services;
 using StarterKit.Notifications.Api;
+using StarterKit.Organization.Api;
 using StarterKit.Shared;
 using StarterKit.Shared.Authorization;
 using System.Reflection;
@@ -24,6 +25,7 @@ public static class ConfigureExtensions
             Assembly.GetExecutingAssembly(),
             typeof(IdentityModule).Assembly,
             typeof(NotificationModule).Assembly,
+            typeof(OrganizationModule).Assembly,
         ];
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)

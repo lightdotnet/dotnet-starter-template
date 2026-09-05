@@ -7,4 +7,6 @@ public abstract class DbConnectionNames
     public const string Identity = Default;
 
     public const string Catalog = Default;
+
+    public const string Organization = Default;
 }

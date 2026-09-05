@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StarterKit.Identity.Api.Entities;
 using StarterKit.Infrastructure;
 using StarterKit.Notifications.Api.Data;
+using StarterKit.Organization.Api.Data;
 using StarterKit.Persistence;
 using StarterKit.Persistence.MigrationSupport;
 using System.Reflection;
@@ -21,6 +22,8 @@ public static class DependencyInjection
         services.AddIdentity(configuration);
 
         services.AddNotification(configuration);
+
+        services.AddOrganization(configuration);
 
         return services;
     }
@@ -75,5 +78,20 @@ public static class DependencyInjection
                     o.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
                 })
                 .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
+    }
+
+    private static void AddOrganization(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString(DbConnectionNames.Organization);
+
+        services.AddDbContext<OrganizationDbContext>(options =>
+            options
+                .UseSqlServer(connectionString, o =>
+                {
+                    o.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
+                })
+                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
+
+        services.AddScoped<OrganizationContextInitialiser>();
     }
 }

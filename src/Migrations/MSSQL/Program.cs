@@ -1,4 +1,4 @@
-﻿using Light.Domain;
+using Light.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using MSSQL;
 
@@ -16,3 +16,9 @@ var identityInitialiser = serviceProvider.GetRequiredService<IdentityContextInit
 await identityInitialiser.InitialiseAsync();
 
 await identityInitialiser.TrySeedAsync();
+
+var organizationInitialiser = serviceProvider.GetRequiredService<OrganizationContextInitialiser>();
+
+await organizationInitialiser.InitialiseAsync();
+
+await organizationInitialiser.TrySeedAsync();

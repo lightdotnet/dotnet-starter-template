@@ -1,4 +1,4 @@
-import { Settings, ShieldCheck, ShieldCog } from "lucide-react";
+import { Building2, Settings, ShieldCheck, ShieldCog } from "lucide-react";
 // Imported directly (not via each feature's barrel): the barrels also re-export
 // server-only code (Server Components, session-backed API calls), and this file
 // is reachable from the client-side Sidebar — pulling in the full barrel would
@@ -7,6 +7,9 @@ import { HOME_NAV_ITEM } from "@/features/home/constants/nav-item";
 import { USERS_NAV_ITEM } from "@/features/users/constants/nav-item";
 import { ROLES_NAV_ITEM } from "@/features/roles/constants/nav-item";
 import { NOTIFICATIONS_NAV_ITEM } from "@/features/notifications/constants/nav-item";
+import { COMPANIES_NAV_ITEM } from "@/features/companies/constants/nav-item";
+import { DEPARTMENTS_NAV_ITEM } from "@/features/departments/constants/nav-item";
+import { EMPLOYEES_NAV_ITEM } from "@/features/employees/constants/nav-item";
 import type { NavItem } from "@/types/nav";
 
 export const NAV_ITEMS: NavItem[] = [
@@ -19,6 +22,16 @@ export const NAV_ITEMS: NavItem[] = [
       USERS_NAV_ITEM,
       ROLES_NAV_ITEM,
       NOTIFICATIONS_NAV_ITEM,
+    ],
+  },
+  {
+    label: "Organization",
+    href: "/organization",
+    icon: Building2,
+    children: [
+      COMPANIES_NAV_ITEM,
+      DEPARTMENTS_NAV_ITEM,
+      EMPLOYEES_NAV_ITEM,
     ],
   },
   {

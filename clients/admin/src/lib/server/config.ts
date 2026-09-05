@@ -13,6 +13,7 @@ function requireEnv(name: string): string {
 const API_BASE_URL_ENV_VARS: Record<ApiClientName, string> = {
   [ApiClients.Identity]: "IDENTITY_API_BASE_URL",
   [ApiClients.Notifications]: "NOTIFICATIONS_API_BASE_URL",
+  [ApiClients.Organization]: "ORGANIZATION_API_BASE_URL",
 };
 
 /**

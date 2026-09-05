@@ -4,7 +4,7 @@ Project-specific guidance for `clients/admin/`. See the root [CLAUDE.md](../../C
 
 ## Purpose
 
-Internal admin console for the ModularMonolith starter template — the first and, so far, only client app. Real backend integration against both `Identity.Api` and `Notifications.Api` (each wired as its own named backend client): encrypted-cookie auth with proactive token refresh, full Users/Roles CRUD (incl. a custom-claims editor), real-time Notifications (SignalR) with a topbar bell and a Home-page inbox, permission-gated navigation.
+Internal admin console for the ModularMonolith starter template — the first and, so far, only client app. Real backend integration against `Identity.Api`, `Notifications.Api`, and `Organization.Api` (each wired as its own named backend client): encrypted-cookie auth with proactive token refresh, full Users/Roles CRUD (incl. a custom-claims editor), real-time Notifications (SignalR) with a topbar bell and a Home-page inbox, Organization administration (Companies, Departments & Teams, Employees — including assigning employees into the department/team hierarchy and creating/linking their Identity login), permission-gated navigation.
 
 ## Stack
 
@@ -37,4 +37,4 @@ No automated test suite exists yet (no Jest/Vitest/Playwright/Testing Library) �
 Nothing in this repo currently documents conventions shared *across* client apps — `admin` is the only one, and everything above is specific to it. If a second app under `clients/` is added, revisit whether any of this generalizes into a genuinely cross-client-apps doc rather than assuming `admin`'s conventions apply by default.
 
 ---
-_Last synced: 2026-08-22_
+_Last synced: 2026-09-05_
