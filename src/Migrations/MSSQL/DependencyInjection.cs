@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StarterKit.Identity.Api.Entities;
@@ -78,6 +78,8 @@ public static class DependencyInjection
                     o.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
                 })
                 .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
+
+        services.AddScoped<NotificationContextInitialiser>();
     }
 
     private static void AddOrganization(this IServiceCollection services, IConfiguration configuration)
