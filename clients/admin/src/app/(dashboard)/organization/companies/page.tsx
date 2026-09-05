@@ -1,1 +1,1 @@
-export { CompaniesPage as default } from "@/features/companies";
+export { CompaniesPage as default } from "@/modules/organization/companies";

@@ -1,1 +1,1 @@
-export { EmployeesPage as default } from "@/features/employees";
+export { EmployeesPage as default } from "@/modules/organization/employees";

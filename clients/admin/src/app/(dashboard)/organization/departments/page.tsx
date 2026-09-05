@@ -1,1 +1,1 @@
-export { DepartmentsPage as default } from "@/features/departments";
+export { DepartmentsPage as default } from "@/modules/organization/departments";

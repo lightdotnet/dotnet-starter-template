@@ -4,12 +4,12 @@ import { Building2, Settings, ShieldCheck, ShieldCog } from "lucide-react";
 // is reachable from the client-side Sidebar — pulling in the full barrel would
 // drag that server-only chain into the client bundle.
 import { HOME_NAV_ITEM } from "@/features/home/constants/nav-item";
-import { USERS_NAV_ITEM } from "@/features/users/constants/nav-item";
-import { ROLES_NAV_ITEM } from "@/features/roles/constants/nav-item";
-import { NOTIFICATIONS_NAV_ITEM } from "@/features/notifications/constants/nav-item";
-import { COMPANIES_NAV_ITEM } from "@/features/companies/constants/nav-item";
-import { DEPARTMENTS_NAV_ITEM } from "@/features/departments/constants/nav-item";
-import { EMPLOYEES_NAV_ITEM } from "@/features/employees/constants/nav-item";
+import { USERS_NAV_ITEM } from "@/modules/identity/users/constants/nav-item";
+import { ROLES_NAV_ITEM } from "@/modules/identity/roles/constants/nav-item";
+import { NOTIFICATIONS_NAV_ITEM } from "@/modules/notifications/constants/nav-item";
+import { COMPANIES_NAV_ITEM } from "@/modules/organization/companies/constants/nav-item";
+import { DEPARTMENTS_NAV_ITEM } from "@/modules/organization/departments/constants/nav-item";
+import { EMPLOYEES_NAV_ITEM } from "@/modules/organization/employees/constants/nav-item";
 import type { NavItem } from "@/types/nav";
 
 export const NAV_ITEMS: NavItem[] = [
