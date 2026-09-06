@@ -9,6 +9,7 @@ import {
   type DataTableColumn,
   type DataTableErrorState,
 } from "@/components/shared/data-table";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import { ApprovalHistorySheet } from "@/modules/approvals/components/approval-history-sheet";
 import { DecideApprovalDialog } from "@/modules/approvals/components/decide-approval-dialog";
 import type { ApprovalRequestDto } from "@/modules/approvals/types/approval";
@@ -58,7 +59,10 @@ export function MyApprovalsTable({ records, error, userNamesById }: MyApprovalsT
     {
       id: "requester",
       header: "Requester",
-      cell: (request) => userNamesById.get(request.requesterUserId) ?? request.requesterUserId,
+      cell: (request) =>
+        request.requesterName ||
+        userNamesById.get(request.requesterUserId) ||
+        request.requesterUserId,
     },
     {
       id: "level",
@@ -68,7 +72,7 @@ export function MyApprovalsTable({ records, error, userNamesById }: MyApprovalsT
     {
       id: "created",
       header: "Requested",
-      cell: (request) => new Date(request.created).toLocaleString(),
+      cell: (request) => <LocalDateTime value={request.created} />,
     },
     {
       id: "actions",

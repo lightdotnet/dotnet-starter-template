@@ -102,7 +102,7 @@ public class UserApprovalControllerTests
         // never trust the caller-supplied RequesterUserId.
         var (controller, mediatorMock) = CreateSut();
         var spoofedRequest = new CreateApprovalRequest(
-            "Leave", "req-1", "someone-else", "someone-else", "Title", null, null,
+            "Leave", "req-1", "someone-else", "someone-else", null, "Title", null, null, null,
             [new ApproverStepInput(1, "approver-1", "approver-1")]);
         var expected = Result<string>.Success("new-id");
         mediatorMock

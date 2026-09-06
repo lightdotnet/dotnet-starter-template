@@ -32,6 +32,7 @@ export async function decideApprovalAction(
     return { error: result.message || "Failed to record your decision." };
   }
 
-  revalidatePath("/approvals");
+  revalidatePath("/approvals/requests");
+  revalidatePath("/approvals/requests/[id]", "page");
   return { success: true };
 }

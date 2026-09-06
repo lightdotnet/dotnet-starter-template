@@ -78,7 +78,7 @@ public class ApprovalControllerTests
         // chosen requester/approver chain as-is.
         var (controller, mediatorMock) = CreateSut();
         var request = new CreateApprovalRequest(
-            "Leave", "req-1", "any-requester", "any-requester", "Title", null, null,
+            "Leave", "req-1", "any-requester", "any-requester", null, "Title", null, null, null,
             [new ApproverStepInput(1, "approver-1", "approver-1")]);
         var expected = Result<string>.Success("new-id");
         mediatorMock

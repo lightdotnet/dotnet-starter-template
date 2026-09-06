@@ -41,11 +41,40 @@ internal class CreateEmployeeLoginCommandHandler(OrganizationDbContext context, 
         if (!userResult.IsSuccess)
             return userResult;
 
-        employee.UserId = userResult.Data;
+        // Claim the link with a conditional UPDATE (WHERE UserId IS NULL) so two concurrent
+        // CreateEmployeeLogin calls for the same employee cannot both succeed and strand one of
+        // the freshly minted Identity users. A plain SaveChangesAsync would let the second UPDATE
+        // silently overwrite the first.
+        var linked = await context.Employees
+            .Where(x => x.Id == request.EmployeeId && x.UserId == null)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.UserId, userResult.Data),
+                cancellationToken);
 
-        await context.SaveChangesAsync(cancellationToken);
+        if (linked == 0)
+        {
+            // Another request won the race (or a link appeared after the check above) - roll back
+            // the user we just created so it does not linger without an employee.
+            await userService.DeleteAsync(userResult.Data);
+            return Result<string>.Error("Employee already has a login account.");
+        }
 
-        await userService.SetClaimAsync(userResult.Data, ClaimTypeConstants.EmployeeId, employee.Id);
+        try
+        {
+            await userService.SetClaimAsync(userResult.Data, ClaimTypeConstants.EmployeeId, employee.Id);
+        }
+        catch
+        {
+            // Undo the whole operation: release the link we just took and drop the claim owner.
+            // Runs regardless of why we failed, so it must not observe the request's cancellation.
+            await context.Employees
+                .Where(x => x.Id == request.EmployeeId && x.UserId == userResult.Data)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(x => x.UserId, (string?)null),
+                    CancellationToken.None);
+            await userService.DeleteAsync(userResult.Data);
+            throw;
+        }
 
         return userResult;
     }

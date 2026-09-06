@@ -1,4 +1,4 @@
-using StarterKit.Approval.Api.Entities;
+using StarterKit.Approval.Api.Domain.Approvals;
 using StarterKit.Persistence.Context;
 using StarterKit.Persistence.Extensions;
 using StarterKit.Shared;
@@ -16,6 +16,8 @@ public class ApprovalDbContext(
     public virtual DbSet<ApprovalRequest> ApprovalRequests => Set<ApprovalRequest>();
 
     public virtual DbSet<ApprovalStep> ApprovalSteps => Set<ApprovalStep>();
+
+    public virtual DbSet<ApprovalDocumentType> ApprovalDocumentTypes => Set<ApprovalDocumentType>();
 
     public override int SaveChanges()
     {
@@ -41,6 +43,8 @@ public class ApprovalDbContext(
 
             entity.HasIndex(x => x.RequesterUserId);
 
+            entity.HasIndex(x => x.DocumentTypeId);
+
             entity.ConfigureAuditableEntity();
 
             entity.Property(x => x.RequestType).HasMaxLength(100);
@@ -51,9 +55,18 @@ public class ApprovalDbContext(
 
             entity.Property(x => x.RequesterEmployeeId).HasMaxLength(450);
 
+            entity.Property(x => x.RequesterName).HasMaxLength(256);
+
             entity.Property(x => x.Title).HasMaxLength(250);
 
             entity.Property(x => x.Content).HasMaxLength(4000);
+
+            entity.Property(x => x.DocumentTypeId).HasMaxLength(450);
+
+            entity.HasOne(x => x.DocumentType)
+                .WithMany()
+                .HasForeignKey(x => x.DocumentTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<ApprovalStep>(entity =>
@@ -72,12 +85,29 @@ public class ApprovalDbContext(
 
             entity.Property(x => x.ApproverEmployeeId).HasMaxLength(450);
 
+            entity.Property(x => x.ApproverName).HasMaxLength(256);
+
             entity.Property(x => x.Comment).HasMaxLength(1000);
 
             entity.HasOne(x => x.ApprovalRequest)
                 .WithMany(x => x.Steps)
                 .HasForeignKey(x => x.ApprovalRequestId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ApprovalDocumentType>(entity =>
+        {
+            entity.ToTable(name: "ApprovalDocumentTypes");
+
+            entity.HasIndex(x => x.Code).IsUnique();
+
+            entity.ConfigureAuditableEntity();
+
+            entity.Property(x => x.Name).HasMaxLength(200);
+
+            entity.Property(x => x.Code).HasMaxLength(50);
+
+            entity.Property(x => x.Description).HasMaxLength(1000);
         });
     }
 }

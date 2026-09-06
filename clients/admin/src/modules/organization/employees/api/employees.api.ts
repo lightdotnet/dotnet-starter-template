@@ -22,6 +22,8 @@ export function searchEmployees(params: EmployeeSearchParams = {}) {
         orgUnitId: params.orgUnitId,
         employmentStatus: params.employmentStatus,
         searchValue: params.searchValue,
+        linkedToUserOnly:
+          params.linkedToUserOnly === undefined ? undefined : String(params.linkedToUserOnly),
         pageNumber: String(params.pageNumber ?? 1),
         pageSize: String(params.pageSize ?? 20),
       },

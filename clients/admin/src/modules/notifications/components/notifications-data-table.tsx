@@ -11,6 +11,7 @@ import {
   type DataTableColumn,
   type DataTableErrorState,
 } from "@/components/shared/data-table";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import { SendNotificationDialog } from "@/modules/notifications/components/send-notification-dialog";
 import { UserSelect } from "@/modules/notifications/components/user-select";
 import { NotificationStatus, type NotificationDto } from "@/modules/notifications/types/notification";
@@ -114,7 +115,10 @@ export function NotificationsDataTable({
         <div>
           <p className="font-medium">{notification.title}</p>
           <div className="flex items-start justify-end">
-            <small className="text-muted-foreground text-right">{new Date(notification.created).toLocaleString()}</small>
+            <LocalDateTime
+              value={notification.created}
+              className="text-muted-foreground text-right text-sm"
+            />
           </div>
           <textarea
             className="mt-1 whitespace-pre-wrap text-muted-foreground w-full"

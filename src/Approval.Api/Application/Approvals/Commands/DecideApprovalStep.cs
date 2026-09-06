@@ -8,10 +8,17 @@ internal sealed record DecideApprovalStepCommand(
     bool Approved,
     string? Comment) : ICommand<IResult>;
 
-internal class DecideApprovalStepCommandHandler(IApprovalService approvalService)
+internal class DecideApprovalStepCommandHandler(
+    IApprovalService approvalService)
     : ICommandHandler<DecideApprovalStepCommand, IResult>
 {
-    public Task<IResult> Handle(DecideApprovalStepCommand request, CancellationToken cancellationToken) =>
+    public Task<IResult> Handle(
+        DecideApprovalStepCommand request,
+        CancellationToken cancellationToken) =>
         approvalService.DecideAsync(
-            request.ApprovalRequestId, request.DecidedByUserId, request.Approved, request.Comment, cancellationToken);
+            request.ApprovalRequestId,
+            request.DecidedByUserId,
+            request.Approved,
+            request.Comment,
+            cancellationToken);
 }

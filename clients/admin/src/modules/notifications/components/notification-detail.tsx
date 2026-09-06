@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import {
   Empty,
   EmptyDescription,
@@ -37,7 +38,7 @@ export function NotificationDetail({ notification }: NotificationDetailProps) {
         </div>
         <p className="text-xs text-muted-foreground">
           {notification.fromName ? `From ${notification.fromName} · ` : ""}
-          {new Date(notification.created).toLocaleString()}
+          <LocalDateTime value={notification.created} />
         </p>
       </div>
 

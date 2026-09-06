@@ -10,6 +10,8 @@ public class ApprovalStepDto : BaseDto
 
     public string ApproverEmployeeId { get; set; } = null!;
 
+    public string? ApproverName { get; set; }
+
     public ApprovalStepStatus Status { get; set; }
 
     public string? Comment { get; set; }

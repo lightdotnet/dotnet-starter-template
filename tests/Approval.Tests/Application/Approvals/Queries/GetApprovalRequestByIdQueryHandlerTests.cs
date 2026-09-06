@@ -1,6 +1,6 @@
 using Approval.Tests.TestSupport;
 using StarterKit.Approval.Api.Application.Approvals.Queries;
-using StarterKit.Approval.Api.Entities;
+using StarterKit.Approval.Api.Domain.Approvals;
 using StarterKit.Approval.Contracts.Approvals;
 using Xunit;
 
@@ -48,5 +48,49 @@ public class GetApprovalRequestByIdQueryHandlerTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(entity.Id, result.Data.Id);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldFlattenDocumentType_WhenRequestIsTagged()
+    {
+        // Arrange
+        using var host = new ApprovalTestHost();
+        var documentType = new ApprovalDocumentType { Name = "Leave request", Code = "LEAVE", IsActive = true };
+        await host.Context.ApprovalDocumentTypes.AddAsync(documentType);
+        await host.Context.SaveChangesAsync();
+        var entity = new ApprovalRequest
+        {
+            RequestType = "LEAVE",
+            RequestId = "req-1",
+            RequesterUserId = "requester",
+            RequesterName = "Requester One",
+            Title = "Title",
+            Status = ApprovalStatus.Pending,
+            CurrentLevel = 1,
+            DocumentTypeId = documentType.Id,
+            Steps =
+            [
+                new ApprovalStep
+                {
+                    Level = 1,
+                    ApproverUserId = "approver-1",
+                    ApproverEmployeeId = "emp-1",
+                    ApproverName = "Approver One",
+                },
+            ],
+        };
+        await host.Context.ApprovalRequests.AddAsync(entity);
+        await host.Context.SaveChangesAsync();
+        var handler = new GetApprovalRequestByIdQueryHandler(host.Context);
+
+        // Act
+        var result = await handler.Handle(new GetApprovalRequestByIdQuery(entity.Id), CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(documentType.Id, result.Data.DocumentTypeId);
+        Assert.Equal("Leave request", result.Data.DocumentTypeName);
+        Assert.Equal("Requester One", result.Data.RequesterName);
+        Assert.Equal("Approver One", result.Data.Steps.Single().ApproverName);
     }
 }

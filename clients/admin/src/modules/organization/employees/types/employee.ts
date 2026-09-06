@@ -66,6 +66,8 @@ export interface EmployeeSearchParams {
   orgUnitId?: string;
   employmentStatus?: EmploymentStatus;
   searchValue?: string;
+  /** When true, only employees with a linked Identity user are returned. */
+  linkedToUserOnly?: boolean;
   pageNumber?: number;
   pageSize?: number;
 }

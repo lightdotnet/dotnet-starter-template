@@ -1,6 +1,7 @@
 using StarterKit.Identity.Contracts.Services;
 using StarterKit.Organization.Api.Data;
 using StarterKit.Organization.Api.Domain.Employees;
+using StarterKit.Persistence.Extensions;
 using StarterKit.Shared.Constants;
 
 namespace StarterKit.Organization.Api.Application.Employees.Commands;
@@ -40,7 +41,16 @@ internal class LinkEmployeeLoginCommandHandler(OrganizationDbContext context, IU
 
         employee.UserId = userId;
 
-        await context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
+        {
+            // Loses the race against a concurrent link of the same user account; the unique
+            // index on Employee.UserId is the source of truth here, the pre-check above is not.
+            return Result.Error("This user account is already linked to another employee.");
+        }
 
         await userService.SetClaimAsync(userId, ClaimTypeConstants.EmployeeId, employee.Id);
 

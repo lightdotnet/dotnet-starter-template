@@ -3,6 +3,7 @@ using StarterKit.Approval.Api.Application.Approvals.Commands;
 using StarterKit.Approval.Api.Application.Approvals.Queries;
 using StarterKit.Infrastructure.Endpoints;
 using StarterKit.Shared;
+using StarterKit.Shared.Extensions;
 
 namespace StarterKit.Approval.Api.Controllers;
 
@@ -43,14 +44,24 @@ public class UserApprovalController(ICurrentUser currentUser) : VersionedApiCont
     }
 
     /// <summary>
-    /// Creates an approval request as the current user. <see cref="CreateApprovalRequest.RequesterUserId"/>
-    /// is overridden server-side to the current user regardless of what the caller sends, so a
-    /// user can't create a request on someone else's behalf through this endpoint.
+    /// Creates an approval request as the current user. Both
+    /// <see cref="CreateApprovalRequest.RequesterUserId"/> and
+    /// <see cref="CreateApprovalRequest.RequesterEmployeeId"/> are resolved server-side (from the
+    /// current user id and the caller's <c>employee_id</c> claim), regardless of what the caller
+    /// sends, so a user can't create a request on someone else's behalf through this endpoint.
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> PostAsync([FromBody] CreateApprovalRequest request)
     {
-        var scopedRequest = request with { RequesterUserId = _currentUserId };
+        var scopedRequest = request with
+        {
+            RequesterUserId = _currentUserId,
+            // Opaque bookkeeping field; null when the user has no linked employee record.
+            RequesterEmployeeId = User.GetEmployeeId(),
+            // RequesterName is a cosmetic label (the enforced identity is RequesterUserId above);
+            // the JWT carries no name claim, so keep the client-supplied value - same pattern as
+            // Notifications' caller-supplied `fromName`.
+        };
         return Ok(await Mediator.Send(new CreateApprovalRequestCommand(scopedRequest)));
     }
 }

@@ -15,7 +15,7 @@ public class CreateApprovalRequestCommandHandlerTests
         // Arrange
         var serviceMock = new Mock<IApprovalService>();
         var model = new CreateApprovalRequest(
-            "Leave", "req-1", "requester-1", "emp-1", "Title", null, null,
+            "Leave", "req-1", "requester-1", "emp-1", null, "Title", null, null, null,
             [new ApproverStepInput(1, "approver-1", "approver-1")]);
         serviceMock
             .Setup(s => s.CreateAsync(model, It.IsAny<CancellationToken>()))

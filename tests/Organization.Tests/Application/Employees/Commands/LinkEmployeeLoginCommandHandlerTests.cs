@@ -99,6 +99,39 @@ public class LinkEmployeeLoginCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_ShouldReturnFriendlyError_WhenUniqueIndexRejectsTheLink()
+    {
+        // Arrange
+        // The Sqlite test host enforces the unique index on Employee.UserId, so this covers the
+        // race the application pre-check cannot: a competing link for the same user account that
+        // is not yet visible to the pre-check's query but is flushed by the same SaveChanges.
+        using var host = new OrganizationTestHost();
+        var company = new Company { Name = "A", Code = "A" };
+        await host.Context.Companies.AddAsync(company);
+        await host.Context.SaveChangesAsync();
+        var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "A", LastName = "B" };
+        await host.Context.Employees.AddAsync(employee);
+        await host.Context.SaveChangesAsync();
+        // Tracked-but-unsaved competing link: invisible to the pre-check's DB query, flushed together
+        // with this handler's update and therefore rejected by the unique index.
+        host.Context.Employees.Add(
+            new Employee { CompanyId = company.Id, EmployeeCode = "E2", FirstName = "C", LastName = "D", UserId = "user-1" });
+        var userServiceMock = new Mock<IUserService>();
+        userServiceMock
+            .Setup(s => s.GetByIdAsync("user-1"))
+            .ReturnsAsync(Result<UserDto>.Success(new UserDto { Id = "user-1", UserName = "jane" }));
+        var handler = new LinkEmployeeLoginCommandHandler(host.Context, userServiceMock.Object);
+
+        // Act
+        var result = await handler.Handle(
+            new LinkEmployeeLoginCommand(employee.Id, new LinkEmployeeLoginRequest { UserId = "user-1" }),
+            CancellationToken.None);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnNotFound_WhenUserDoesNotExist()
     {
         // Arrange

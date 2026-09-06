@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import { cn } from "@/lib/shared/utils";
 import {
   DropdownMenu,
@@ -117,9 +118,10 @@ export function NotificationBell() {
                       {notification.message}
                     </span>
                   )}
-                  <span className="text-[0.65rem] text-muted-foreground">
-                    {new Date(notification.created).toLocaleString()}
-                  </span>
+                  <LocalDateTime
+                    value={notification.created}
+                    className="text-[0.65rem] text-muted-foreground"
+                  />
                 </div>
               );
 

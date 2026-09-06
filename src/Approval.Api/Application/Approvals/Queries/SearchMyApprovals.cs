@@ -1,19 +1,22 @@
 using Light.EntityFrameworkCore.Extensions;
-using Light.Specification;
 using Mapster;
 using StarterKit.Approval.Api.Data;
 using StarterKit.Persistence.Extensions;
 
 namespace StarterKit.Approval.Api.Application.Approvals.Queries;
 
-internal sealed record SearchMyApprovalsQuery(string UserId, MyApprovalRequestSearchRequest Request)
+internal sealed record SearchMyApprovalsQuery(
+    string UserId,
+    MyApprovalRequestSearchRequest Request)
     : IQuery<PagedResult<ApprovalRequestDto>>;
 
-internal class SearchMyApprovalsQueryHandler(ApprovalDbContext context)
+internal class SearchMyApprovalsQueryHandler(
+    ApprovalDbContext context)
     : IQueryHandler<SearchMyApprovalsQuery, PagedResult<ApprovalRequestDto>>
 {
     public Task<PagedResult<ApprovalRequestDto>> Handle(
-        SearchMyApprovalsQuery request, CancellationToken cancellationToken)
+        SearchMyApprovalsQuery request,
+        CancellationToken cancellationToken)
     {
         var userId = request.UserId;
         var lookup = request.Request;
@@ -40,6 +43,6 @@ internal class SearchMyApprovalsQueryHandler(ApprovalDbContext context)
             .WhereIf(!string.IsNullOrEmpty(lookup.SearchValue), x => x.Title.Contains(lookup.SearchValue!))
             .OrderByDescending(x => x.Created)
             .ProjectToType<ApprovalRequestDto>()
-            .ToPagedResultAsync(lookup);
+            .ToPagedResultAsync(lookup, cancellationToken);
     }
 }

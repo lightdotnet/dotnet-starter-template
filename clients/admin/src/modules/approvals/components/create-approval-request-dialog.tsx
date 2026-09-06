@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { ApproverSelect } from "@/modules/approvals/components/approver-select";
@@ -22,17 +23,23 @@ import type {
   CreateApprovalRequestInput,
   CreateApprovalRequestState,
 } from "@/modules/approvals/api/create-approval-request-action";
-import { getDisplayName } from "@/lib/shared/user-display";
-import type { UserDto } from "@/modules/identity/users";
+import { getApprovalDocumentTypesAction } from "@/modules/approvals/api/get-document-types-action";
+import type { ApprovalDocumentTypeDto } from "@/modules/approvals/types/document-type";
+import type { EmployeeDto } from "@/modules/organization/employees";
 
 interface ApproverRow {
   key: number;
-  user: UserDto | null;
+  employee: EmployeeDto | null;
 }
 
 let nextRowKey = 1;
 function emptyRow(): ApproverRow {
-  return { key: nextRowKey++, user: null };
+  return { key: nextRowKey++, employee: null };
+}
+
+function approverName(employee: EmployeeDto): string {
+  const name = `${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
+  return name || employee.employeeCode;
 }
 
 interface CreateApprovalRequestDialogProps {
@@ -60,14 +67,39 @@ export function CreateApprovalRequestDialog({
   action = createApprovalRequestAction,
 }: CreateApprovalRequestDialogProps) {
   const [pending, run] = useGuardedAction();
-  const [requestType, setRequestType] = useState("Test");
+  const [documentTypeId, setDocumentTypeId] = useState("");
+  const [documentTypes, setDocumentTypes] = useState<ApprovalDocumentTypeDto[]>([]);
+  const [documentTypesLoading, setDocumentTypesLoading] = useState(false);
+  const [documentTypesError, setDocumentTypesError] = useState<string | undefined>();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [rows, setRows] = useState<ApproverRow[]>([emptyRow()]);
+  const [rows, setRows] = useState<ApproverRow[]>(() => [emptyRow()]);
   const [error, setError] = useState<string | undefined>();
 
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+    (async () => {
+      setDocumentTypesLoading(true);
+      setDocumentTypesError(undefined);
+      const result = await getApprovalDocumentTypesAction({ activeOnly: true });
+      if (cancelled) return;
+      setDocumentTypes(result.data ?? []);
+      setDocumentTypesError(result.data ? undefined : result.error);
+      setDocumentTypesLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
   function reset() {
-    setRequestType("Test");
+    setDocumentTypeId("");
+    setDocumentTypes([]);
+    setDocumentTypesLoading(false);
+    setDocumentTypesError(undefined);
     setTitle("");
     setContent("");
     setRows([emptyRow()]);
@@ -87,8 +119,8 @@ export function CreateApprovalRequestDialog({
     setRows((previous) => previous.filter((row) => row.key !== key));
   }
 
-  function setRowUser(key: number, user: UserDto) {
-    setRows((previous) => previous.map((row) => (row.key === key ? { ...row, user } : row)));
+  function setRowEmployee(key: number, employee: EmployeeDto) {
+    setRows((previous) => previous.map((row) => (row.key === key ? { ...row, employee } : row)));
   }
 
   function handleSubmit() {
@@ -99,18 +131,36 @@ export function CreateApprovalRequestDialog({
       return;
     }
 
-    if (rows.some((row) => !row.user)) {
-      setError("Every approver level needs a selected user.");
+    if (rows.some((row) => !row.employee)) {
+      setError("Every approver level needs a selected employee.");
       return;
     }
+
+    if (rows.some((row) => !row.employee!.userId)) {
+      setError("Selected employee has no login account.");
+      return;
+    }
+
+    const employeeIds = rows.map((row) => row.employee!.id);
+    if (new Set(employeeIds).size !== employeeIds.length) {
+      setError("The same employee appears at more than one level.");
+      return;
+    }
+
+    const selectedType = documentTypes.find((type) => type.id === documentTypeId);
 
     run(
       () =>
         action({
-          requestType,
+          requestType: selectedType?.code ?? "General",
           title,
           content,
-          approverUserIds: rows.map((row) => row.user!.id),
+          documentTypeId: documentTypeId || undefined,
+          approvers: rows.map((row) => ({
+            userId: row.employee!.userId!,
+            employeeId: row.employee!.id,
+            name: approverName(row.employee!),
+          })),
         }),
       "Approval request created.",
       () => {
@@ -137,13 +187,17 @@ export function CreateApprovalRequestDialog({
             </Alert>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="requestType">Request type</Label>
-              <Input
-                id="requestType"
-                value={requestType}
-                onChange={(event) => setRequestType(event.target.value)}
+              <Label htmlFor="documentType">Document type (optional)</Label>
+              <NativeSelect
+                id="documentType"
+                value={documentTypeId}
+                onChange={setDocumentTypeId}
+                loading={documentTypesLoading}
+                error={documentTypesError}
+                placeholder="None"
+                options={documentTypes.map((type) => ({ value: type.id, label: type.name }))}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -169,8 +223,9 @@ export function CreateApprovalRequestDialog({
                 <span className="w-14 shrink-0 text-sm text-muted-foreground">Level {index + 1}</span>
                 <div className="flex-1">
                   <ApproverSelect
-                    value={row.user?.id ?? ""}
-                    onValueChange={(user) => setRowUser(row.key, user)}
+                    value={row.employee?.id ?? ""}
+                    ariaLabel={`Approver level ${index + 1}`}
+                    onValueChange={(employee) => setRowEmployee(row.key, employee)}
                   />
                 </div>
                 <Button
@@ -189,9 +244,13 @@ export function CreateApprovalRequestDialog({
               <Plus className="size-4" />
               Add level
             </Button>
-            {rows.some((row) => row.user) && (
+            {rows.some((row) => row.employee) && (
               <p className="text-xs text-muted-foreground">
-                Chain: {rows.filter((row) => row.user).map((row) => getDisplayName(row.user!)).join(" → ")}
+                Chain:{" "}
+                {rows
+                  .filter((row) => row.employee)
+                  .map((row) => approverName(row.employee!))
+                  .join(" → ")}
               </p>
             )}
           </div>

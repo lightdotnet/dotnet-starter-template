@@ -1,7 +1,6 @@
 using Mapster;
 using StarterKit.Approval.Api.Data;
-using StarterKit.Approval.Api.Entities;
-using StarterKit.Approval.Api.Events;
+using StarterKit.Approval.Api.Domain.Approvals;
 using StarterKit.Approval.Contracts.Services;
 using StarterKit.Shared;
 
@@ -13,10 +12,18 @@ internal class ApprovalService(
     IDateTime clock) : IApprovalService
 {
     public async Task<IResult<string>> CreateAsync(
-        CreateApprovalRequest request, CancellationToken cancellationToken = default)
+        CreateApprovalRequest request,
+        CancellationToken cancellationToken = default)
     {
         if (request.ApproverChain.Count == 0)
             return Result<string>.Error("At least one approver level is required.");
+
+        if (request.DocumentTypeId is not null
+            && !await context.ApprovalDocumentTypes
+                .AnyAsync(x => x.Id == request.DocumentTypeId, cancellationToken))
+        {
+            return Result<string>.Error($"Approval document type {request.DocumentTypeId} not found");
+        }
 
         var orderedChain = request.ApproverChain.OrderBy(x => x.Level).ToList();
 
@@ -26,20 +33,22 @@ internal class ApprovalService(
             RequestId = request.RequestId,
             RequesterUserId = request.RequesterUserId,
             RequesterEmployeeId = request.RequesterEmployeeId,
+            RequesterName = request.RequesterName,
             Title = request.Title,
             Content = request.Content,
             DeepLinkUrl = request.DeepLinkUrl,
+            DocumentTypeId = request.DocumentTypeId,
             CurrentLevel = orderedChain[0].Level,
             Status = ApprovalStatus.Pending,
+            Steps = [.. orderedChain.Select(step => new ApprovalStep
+            {
+                Level = step.Level,
+                ApproverUserId = step.ApproverUserId,
+                ApproverEmployeeId = step.ApproverEmployeeId,
+                ApproverName = step.ApproverName,
+                Status = ApprovalStepStatus.Pending,
+            })]
         };
-
-        entity.Steps = orderedChain.Select(step => new ApprovalStep
-        {
-            Level = step.Level,
-            ApproverUserId = step.ApproverUserId,
-            ApproverEmployeeId = step.ApproverEmployeeId,
-            Status = ApprovalStepStatus.Pending,
-        }).ToList();
 
         await context.ApprovalRequests.AddAsync(entity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
@@ -48,7 +57,11 @@ internal class ApprovalService(
 
         await publisher.Publish(
             new ApprovalStepPendingEvent(
-                entity.Id, entity.Title, entity.DeepLinkUrl, firstStep.ApproverUserId, entity.RequesterUserId),
+                entity.Id,
+                entity.Title,
+                entity.DeepLinkUrl,
+                firstStep.ApproverUserId,
+                entity.RequesterUserId),
             cancellationToken);
 
         return Result<string>.Success(entity.Id);
@@ -133,7 +146,9 @@ internal class ApprovalService(
         return Result.Success();
     }
 
-    public async Task<IResult> CancelAsync(string approvalRequestId, CancellationToken cancellationToken = default)
+    public async Task<IResult> CancelAsync(
+        string approvalRequestId,
+        CancellationToken cancellationToken = default)
     {
         var entity = await context.ApprovalRequests
             .FirstOrDefaultAsync(x => x.Id == approvalRequestId, cancellationToken);
@@ -153,12 +168,19 @@ internal class ApprovalService(
     }
 
     public Task<ApprovalRequestDto?> GetByRequestAsync(
-        string requestType, string requestId, CancellationToken cancellationToken = default)
+        string requestType,
+        string requestId,
+        CancellationToken cancellationToken = default)
     {
+        // (RequestType, RequestId) is an opaque reference to an object owned by the calling module,
+        // not a unique key here - a caller can legitimately raise a new request for the same object
+        // after an earlier one was rejected or cancelled. Return the most recent match rather than
+        // throwing when more than one exists.
         return context.ApprovalRequests
             .AsNoTracking()
             .Where(x => x.RequestType == requestType && x.RequestId == requestId)
+            .OrderByDescending(x => x.Created)
             .ProjectToType<ApprovalRequestDto>()
-            .SingleOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

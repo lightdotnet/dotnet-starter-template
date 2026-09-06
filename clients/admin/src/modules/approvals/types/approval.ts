@@ -28,6 +28,8 @@ export interface ApprovalStepDto {
   level: number;
   approverUserId: string;
   approverEmployeeId: string;
+  /** Display label for the approver, captured at creation time. */
+  approverName?: string | null;
   status: ApprovalStepStatus;
   comment?: string | null;
   decidedAt?: string | null;
@@ -38,12 +40,16 @@ export interface ApprovalRequestDto {
   requestType: string;
   requestId: string;
   requesterUserId: string;
-  requesterEmployeeId: string;
+  requesterEmployeeId?: string | null;
+  /** Display label for the requester, captured at creation time. */
+  requesterName?: string | null;
   title: string;
   content?: string | null;
   deepLinkUrl?: string | null;
   currentLevel: number;
   status: ApprovalStatus;
+  documentTypeId?: string | null;
+  documentTypeName?: string | null;
   created: string;
   finalizedAt?: string | null;
   steps: ApprovalStepDto[];
@@ -53,16 +59,19 @@ export interface ApproverStepInput {
   level: number;
   approverUserId: string;
   approverEmployeeId: string;
+  approverName?: string;
 }
 
 export interface CreateApprovalRequestPayload {
   requestType: string;
   requestId: string;
   requesterUserId: string;
-  requesterEmployeeId: string;
+  requesterEmployeeId?: string;
+  requesterName?: string;
   title: string;
   content?: string;
   deepLinkUrl?: string;
+  documentTypeId?: string;
   approverChain: ApproverStepInput[];
 }
 

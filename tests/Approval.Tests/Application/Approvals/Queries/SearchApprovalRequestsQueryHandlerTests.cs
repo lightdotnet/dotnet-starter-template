@@ -1,7 +1,7 @@
 using Approval.Tests.TestSupport;
 using Light.Contracts;
 using StarterKit.Approval.Api.Application.Approvals.Queries;
-using StarterKit.Approval.Api.Entities;
+using StarterKit.Approval.Api.Domain.Approvals;
 using StarterKit.Approval.Contracts.Approvals;
 using Xunit;
 

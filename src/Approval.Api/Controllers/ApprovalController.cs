@@ -4,7 +4,6 @@ using StarterKit.Approval.Api.Application.Approvals.Commands;
 using StarterKit.Approval.Api.Application.Approvals.Queries;
 using StarterKit.Approval.Contracts.Authorization;
 using StarterKit.Infrastructure.Endpoints;
-using StarterKit.Shared;
 
 namespace StarterKit.Approval.Api.Controllers;
 

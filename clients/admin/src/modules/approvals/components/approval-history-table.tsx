@@ -11,9 +11,11 @@ import {
   type DataTableColumn,
   type DataTableErrorState,
 } from "@/components/shared/data-table";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import { ApprovalHistorySheet } from "@/modules/approvals/components/approval-history-sheet";
 import { CreateApprovalRequestDialog } from "@/modules/approvals/components/create-approval-request-dialog";
-import { ApprovalStatus, type ApprovalRequestDto } from "@/modules/approvals/types/approval";
+import { APPROVAL_STATUS_VARIANT } from "@/modules/approvals/constants/status-variant";
+import type { ApprovalRequestDto } from "@/modules/approvals/types/approval";
 
 /** How the current user relates to a given row — a request can be both (they created it and
  * later decided one of its steps), so this is a set, not a single value. */
@@ -33,13 +35,6 @@ interface ApprovalHistoryTableProps {
 const ROLE_LABEL: Record<ApprovalOwnerRole, string> = {
   requester: "Requester",
   decided: "Decided",
-};
-
-const STATUS_VARIANT: Record<ApprovalStatus, "default" | "outline" | "destructive" | "secondary"> = {
-  [ApprovalStatus.Pending]: "secondary",
-  [ApprovalStatus.Approved]: "default",
-  [ApprovalStatus.Rejected]: "destructive",
-  [ApprovalStatus.Cancelled]: "outline",
 };
 
 /** Read-only self-service view — merges "requests you created" and "requests you decided" into
@@ -101,7 +96,10 @@ export function ApprovalHistoryTable({ records, error, userNamesById, rolesById 
     {
       id: "requester",
       header: "Requester",
-      cell: (request) => userNamesById.get(request.requesterUserId) ?? request.requesterUserId,
+      cell: (request) =>
+        request.requesterName ||
+        userNamesById.get(request.requesterUserId) ||
+        request.requesterUserId,
     },
     {
       id: "level",
@@ -111,12 +109,14 @@ export function ApprovalHistoryTable({ records, error, userNamesById, rolesById 
     {
       id: "status",
       header: "Status",
-      cell: (request) => <Badge variant={STATUS_VARIANT[request.status]}>{request.status}</Badge>,
+      cell: (request) => (
+        <Badge variant={APPROVAL_STATUS_VARIANT[request.status]}>{request.status}</Badge>
+      ),
     },
     {
       id: "created",
       header: "Requested",
-      cell: (request) => new Date(request.created).toLocaleString(),
+      cell: (request) => <LocalDateTime value={request.created} />,
     },
     {
       id: "history",

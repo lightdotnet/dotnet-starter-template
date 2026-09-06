@@ -8,9 +8,10 @@ using StarterKit.Organization.Contracts.Authorization;
 namespace StarterKit.Organization.Api.Controllers;
 
 [ApiExplorerSettings(GroupName = "organization")]
-[MustHavePermission(OrganizationPermissions.Employees.View)]
 public class EmployeeController : VersionedApiController
 {
+    // Company-wide employee directory lookup: any authenticated user may search for basic
+    // contact details. The projection in SearchEmployeesQuery omits sensitive PII.
     [HttpGet("search")]
     public async Task<IActionResult> SearchAsync([FromQuery] EmployeeSearchRequest request)
     {
@@ -18,6 +19,7 @@ public class EmployeeController : VersionedApiController
     }
 
     [HttpGet("{id}")]
+    [MustHavePermission(OrganizationPermissions.Employees.View)]
     public async Task<IActionResult> GetAsync([FromRoute] string id)
     {
         return Ok(await Mediator.Send(new GetEmployeeByIdQuery(id)));

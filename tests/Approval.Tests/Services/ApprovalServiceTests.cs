@@ -1,8 +1,8 @@
 using Approval.Tests.TestSupport;
 using Light.Mediator;
+using Microsoft.EntityFrameworkCore;
 using Moq;
-using StarterKit.Approval.Api.Entities;
-using StarterKit.Approval.Api.Events;
+using StarterKit.Approval.Api.Domain.Approvals;
 using StarterKit.Approval.Api.Services;
 using StarterKit.Approval.Contracts.Approvals;
 using StarterKit.Approval.Contracts.Services;
@@ -18,11 +18,14 @@ public class ApprovalServiceTests
             RequestId: "req-1",
             RequesterUserId: "requester-1",
             RequesterEmployeeId: "emp-1",
+            RequesterName: "Requester One",
             Title: "Title",
             Content: "Content",
             DeepLinkUrl: null,
+            DocumentTypeId: null,
             ApproverChain: chain
-                .Select(c => new ApproverStepInput(c.Level, c.ApproverUserId, c.ApproverUserId))
+                .Select(c => new ApproverStepInput(
+                    c.Level, c.ApproverUserId, c.ApproverUserId, $"Approver {c.Level}"))
                 .ToList());
 
     [Fact]
@@ -55,10 +58,14 @@ public class ApprovalServiceTests
 
         // Assert
         Assert.True(result.IsSuccess);
-        var entity = await host.Context.ApprovalRequests.FindAsync(result.Data);
-        Assert.NotNull(entity);
+        var entity = await host.Context.ApprovalRequests
+            .Include(x => x.Steps)
+            .SingleAsync(x => x.Id == result.Data);
         Assert.Equal(ApprovalStatus.Pending, entity.Status);
         Assert.Equal(1, entity.CurrentLevel);
+        // Display labels supplied by the caller are persisted verbatim (Approval cannot resolve them).
+        Assert.Equal("Requester One", entity.RequesterName);
+        Assert.Equal("Approver 1", entity.Steps.Single(s => s.Level == 1).ApproverName);
         publisherMock.Verify(
             p => p.Publish(
                 It.Is<ApprovalStepPendingEvent>(e =>
@@ -287,5 +294,48 @@ public class ApprovalServiceTests
         // Assert
         Assert.NotNull(dto);
         Assert.Equal(requestId, dto!.Id);
+    }
+
+    [Fact]
+    public async Task GetByRequestAsync_ShouldReturnMostRecent_WhenMultipleMatchExist()
+    {
+        // Arrange: (RequestType, RequestId) is not unique - a re-submission after a rejection
+        // leaves two rows. The query must return the latest rather than throw.
+        using var host = new ApprovalTestHost();
+
+        host.DateTime.UtcNow = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        await host.Context.ApprovalRequests.AddAsync(new ApprovalRequest
+        {
+            RequestType = "Leave",
+            RequestId = "L-1",
+            RequesterUserId = "u1",
+            Title = "First",
+            Status = ApprovalStatus.Rejected,
+            CurrentLevel = 1,
+            Steps = [new ApprovalStep { Level = 1, ApproverUserId = "a1", ApproverEmployeeId = "e1" }],
+        });
+        await host.Context.SaveChangesAsync();
+
+        host.DateTime.UtcNow = host.DateTime.UtcNow.AddDays(1);
+        await host.Context.ApprovalRequests.AddAsync(new ApprovalRequest
+        {
+            RequestType = "Leave",
+            RequestId = "L-1",
+            RequesterUserId = "u1",
+            Title = "Second",
+            Status = ApprovalStatus.Pending,
+            CurrentLevel = 1,
+            Steps = [new ApprovalStep { Level = 1, ApproverUserId = "a1", ApproverEmployeeId = "e1" }],
+        });
+        await host.Context.SaveChangesAsync();
+
+        var service = new ApprovalService(host.Context, Mock.Of<IPublisher>(), host.DateTime);
+
+        // Act
+        var dto = await service.GetByRequestAsync("Leave", "L-1");
+
+        // Assert
+        Assert.NotNull(dto);
+        Assert.Equal("Second", dto!.Title);
     }
 }

@@ -23,7 +23,52 @@ namespace PostgreSQL.Approval
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalRequest", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalDocumentType", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("ApprovalDocumentTypes", "approval");
+                });
+
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -46,6 +91,10 @@ namespace PostgreSQL.Approval
                     b.Property<string>("DeepLinkUrl")
                         .HasColumnType("text");
 
+                    b.Property<string>("DocumentTypeId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
                     b.Property<DateTimeOffset?>("FinalizedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -67,9 +116,12 @@ namespace PostgreSQL.Approval
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("RequesterEmployeeId")
-                        .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)");
+
+                    b.Property<string>("RequesterName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("RequesterUserId")
                         .IsRequired()
@@ -86,6 +138,8 @@ namespace PostgreSQL.Approval
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DocumentTypeId");
+
                     b.HasIndex("RequesterUserId");
 
                     b.HasIndex("RequestType", "RequestId");
@@ -93,7 +147,7 @@ namespace PostgreSQL.Approval
                     b.ToTable("ApprovalRequests", "approval");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalStep", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalStep", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -108,6 +162,10 @@ namespace PostgreSQL.Approval
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)");
+
+                    b.Property<string>("ApproverName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("ApproverUserId")
                         .IsRequired()
@@ -150,9 +208,19 @@ namespace PostgreSQL.Approval
                     b.ToTable("ApprovalSteps", "approval");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalStep", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
-                    b.HasOne("StarterKit.Approval.Api.Entities.ApprovalRequest", "ApprovalRequest")
+                    b.HasOne("StarterKit.Approval.Api.Domain.Approvals.ApprovalDocumentType", "DocumentType")
+                        .WithMany()
+                        .HasForeignKey("DocumentTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DocumentType");
+                });
+
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalStep", b =>
+                {
+                    b.HasOne("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", "ApprovalRequest")
                         .WithMany("Steps")
                         .HasForeignKey("ApprovalRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -161,7 +229,7 @@ namespace PostgreSQL.Approval
                     b.Navigation("ApprovalRequest");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalRequest", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
                     b.Navigation("Steps");
                 });

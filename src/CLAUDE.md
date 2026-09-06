@@ -47,13 +47,16 @@ Plus shared/host projects: `src/Shared` (shared kernel, leaf), `src/Infrastructu
 dotnet test tests/Framework.Tests/Framework.Tests.csproj
 dotnet test tests/Identity.Tests/Identity.Tests.csproj
 dotnet test tests/Organization.Tests/Organization.Tests.csproj
+dotnet test tests/Approval.Tests/Approval.Tests.csproj
 ```
 
-`Notifications` and `Approval` have no dedicated test project yet (see Known Debt).
+xUnit v3 runs on Microsoft.Testing.Platform. On the .NET 10 SDK `dotnet test` refuses the legacy VSTest path — if it errors with "opt-in to the new dotnet test experience", run the built test executable directly instead (`tests/<Name>/bin/Debug/net10.0/<Name>.exe`, filters: `-class <FQN>` / `-method <FQN>`).
+
+`Notifications` has no dedicated test project yet (see Known Debt).
 
 ## Known Debt
 
 See [docs/known-debt.md](docs/known-debt.md) — the single, current-state-only list of open backend technical debt/pending architecture decisions. Update it directly when debt is found or resolved; don't re-scatter items back into the architecture docs above.
 
 ---
-_Last synced: 2026-09-05_
+_Last synced: 2026-09-06_

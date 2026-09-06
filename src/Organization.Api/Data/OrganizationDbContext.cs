@@ -115,7 +115,7 @@ public class OrganizationDbContext(
 
             entity.HasIndex(x => new { x.CompanyId, x.EmployeeCode }).IsUnique();
 
-            entity.HasIndex(x => x.UserId);
+            entity.HasIndex(x => x.UserId).IsUnique();
 
             entity.ConfigureAuditableEntity();
 

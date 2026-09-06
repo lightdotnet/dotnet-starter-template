@@ -12,7 +12,12 @@ Cross-cutting facts that span both `src/` and `clients/*` — the integration bo
 
 | App | Client generation strategy | Base URL / env config | Auth flow |
 |---|---|---|---|
-| admin | Hand-written, one file per feature (`features/<name>/api/<feature>.api.ts`) — no OpenAPI-generated client | Three named backend clients (`identityApi`/`notificationsApi`/`organizationApi` via `lib/server/api-clients.ts`), each with its own server-only base-URL env var (`IDENTITY_API_BASE_URL`/`NOTIFICATIONS_API_BASE_URL`/`ORGANIZATION_API_BASE_URL`, base URL owns the version prefix); real-time notifications need client-exposed `NEXT_PUBLIC_SIGNALR_HUB_URL` | Encrypted httpOnly cookie session (`admin_session`, AES-256-GCM), permissions/roles decoded from the access-token JWT; `src/proxy.ts` enforces the session cap, `components/layout/session-gate.tsx` proactively refreshes a near-expiry token client-side; SignalR handshake gets a short-lived token via a dedicated Server Action — see [clients/admin/docs/architecture/overview.md § Auth Flow](../clients/admin/docs/architecture/overview.md#auth-flow) for detail |
+| admin | Hand-written, one consolidated `<feature>.api.ts` per feature under `modules/<domain>/<feature>/api/` — no OpenAPI-generated client | Four named backend clients (`identityApi`/`notificationsApi`/`organizationApi`/`approvalApi` via `lib/server/`), each with its own server-only base-URL env var (`IDENTITY_API_BASE_URL`/`NOTIFICATIONS_API_BASE_URL`/`ORGANIZATION_API_BASE_URL`/`APPROVAL_API_BASE_URL`, base URL owns the version prefix); real-time notifications need client-exposed `NEXT_PUBLIC_SIGNALR_HUB_URL` | Encrypted httpOnly cookie session (`admin_session`, AES-256-GCM), permissions/roles decoded from the access-token JWT; `src/proxy.ts` enforces the session cap, `components/layout/session-gate.tsx` proactively refreshes a near-expiry token client-side; SignalR handshake gets a short-lived token via a dedicated Server Action — see [clients/admin/docs/architecture/overview.md § Auth Flow](../clients/admin/docs/architecture/overview.md#auth-flow) for detail |
+
+## Notable cross-cutting facts
+
+- **Notification deep links.** A `Notification.Url` starting with `/` is an app-relative deep link the admin client renders as a `next/link` (e.g. the Approval module sends `/approvals/requests/{id}` so clicking the notification opens that request). External/absolute URLs stay plain non-navigating rows.
+- **`employee_id` claim.** When an employee is linked to an Identity login, that user carries an `employee_id` claim in the JWT; the Approval module's self-service create reads it to stamp `RequesterEmployeeId` server-side.
 
 ---
-_Last synced: 2026-09-05_
+_Last synced: 2026-09-06_

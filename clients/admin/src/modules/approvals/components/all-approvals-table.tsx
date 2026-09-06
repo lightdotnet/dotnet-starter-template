@@ -11,10 +11,12 @@ import {
   type DataTableColumn,
   type DataTableErrorState,
 } from "@/components/shared/data-table";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import { ApprovalHistorySheet } from "@/modules/approvals/components/approval-history-sheet";
 import { CreateApprovalRequestDialog } from "@/modules/approvals/components/create-approval-request-dialog";
 import { createTestApprovalRequestAction } from "@/modules/approvals/api/create-test-approval-request-action";
-import { ApprovalStatus, type ApprovalRequestDto } from "@/modules/approvals/types/approval";
+import { APPROVAL_STATUS_VARIANT } from "@/modules/approvals/constants/status-variant";
+import type { ApprovalRequestDto } from "@/modules/approvals/types/approval";
 
 interface AllApprovalsTableProps {
   records: ApprovalRequestDto[];
@@ -23,13 +25,6 @@ interface AllApprovalsTableProps {
   /** userId -> display name, resolved once by the page for every table + the history sheet. */
   userNamesById: Map<string, string>;
 }
-
-const STATUS_VARIANT: Record<ApprovalStatus, "default" | "outline" | "destructive" | "secondary"> = {
-  [ApprovalStatus.Pending]: "secondary",
-  [ApprovalStatus.Approved]: "default",
-  [ApprovalStatus.Rejected]: "destructive",
-  [ApprovalStatus.Cancelled]: "outline",
-};
 
 /** Read-only, most-recent-50 view — lets you watch a chain's status/level advance across decisions without a full search/pagination UI (this is an admin verification view, not a primary workflow). */
 export function AllApprovalsTable({ records, error, canCreate, userNamesById }: AllApprovalsTableProps) {
@@ -77,7 +72,10 @@ export function AllApprovalsTable({ records, error, canCreate, userNamesById }: 
     {
       id: "requester",
       header: "Requester",
-      cell: (request) => userNamesById.get(request.requesterUserId) ?? request.requesterUserId,
+      cell: (request) =>
+        request.requesterName ||
+        userNamesById.get(request.requesterUserId) ||
+        request.requesterUserId,
     },
     {
       id: "level",
@@ -87,12 +85,14 @@ export function AllApprovalsTable({ records, error, canCreate, userNamesById }: 
     {
       id: "status",
       header: "Status",
-      cell: (request) => <Badge variant={STATUS_VARIANT[request.status]}>{request.status}</Badge>,
+      cell: (request) => (
+        <Badge variant={APPROVAL_STATUS_VARIANT[request.status]}>{request.status}</Badge>
+      ),
     },
     {
       id: "created",
       header: "Requested",
-      cell: (request) => new Date(request.created).toLocaleString(),
+      cell: (request) => <LocalDateTime value={request.created} />,
     },
     {
       id: "history",

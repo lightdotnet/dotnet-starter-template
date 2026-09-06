@@ -13,35 +13,44 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { searchUsersAction } from "@/modules/identity/users/api/search-users-action";
-import { getDisplayName } from "@/lib/shared/user-display";
-import type { UserDto } from "@/modules/identity/users";
+import { searchEmployeesAction } from "@/modules/organization/employees/api/search-employees-action";
+import type { EmployeeDto } from "@/modules/organization/employees";
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 const MIN_SEARCH_LENGTH = 3;
 
-function optionLabel(user: UserDto) {
-  return `${getDisplayName(user)} (@${user.userName})`;
+function optionLabel(employee: EmployeeDto) {
+  const name = `${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
+  return name ? `${name} (${employee.employeeCode})` : employee.employeeCode;
 }
 
 interface ApproverSelectProps {
   value: string;
-  onValueChange: (user: UserDto) => void;
+  onValueChange: (employee: EmployeeDto) => void;
   placeholder?: string;
+  ariaLabel?: string;
 }
 
 /**
- * On-demand Identity user picker for one level of an approval chain — same
- * debounced-search shape as `organization/employees/components/user-select.tsx`,
- * kept as its own small copy per that component's own convention comment
- * rather than a cross-feature import.
+ * On-demand Organization employee picker for one level of an approval chain —
+ * restricted to employees that have a linked Identity login (`linkedToUserOnly`),
+ * so the parent gets both a real `employee.id` and the backing `employee.userId`.
+ * Same debounced-search shape as the other on-demand pickers in this codebase,
+ * kept as its own small copy per that convention rather than a cross-feature
+ * component import.
  */
-export function ApproverSelect({ value, onValueChange, placeholder = "Select an approver" }: ApproverSelectProps) {
+export function ApproverSelect({
+  value,
+  onValueChange,
+  placeholder = "Select an approver",
+  ariaLabel,
+}: ApproverSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
-  const [options, setOptions] = React.useState<UserDto[]>([]);
+  const [options, setOptions] = React.useState<EmployeeDto[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = React.useState<string | null>(null);
 
   const trimmedQuery = query.trim();
@@ -54,13 +63,16 @@ export function ApproverSelect({ value, onValueChange, placeholder = "Select an 
     const timeout = setTimeout(() => {
       (async () => {
         setLoading(true);
-        const result = await searchUsersAction({
+        setError(null);
+        const result = await searchEmployeesAction({
           searchValue: trimmedQuery,
+          linkedToUserOnly: true,
           pageNumber: 1,
           pageSize: PAGE_SIZE,
         });
         if (cancelled) return;
         setOptions(result.data?.records ?? []);
+        setError(result.data ? null : (result.error ?? "Could not load employees."));
         setLoading(false);
       })();
     }, SEARCH_DEBOUNCE_MS);
@@ -71,9 +83,9 @@ export function ApproverSelect({ value, onValueChange, placeholder = "Select an 
     };
   }, [belowThreshold, trimmedQuery]);
 
-  function handleSelect(user: UserDto) {
-    setSelectedLabel(optionLabel(user));
-    onValueChange(user);
+  function handleSelect(employee: EmployeeDto) {
+    setSelectedLabel(optionLabel(employee));
+    onValueChange(employee);
     setOpen(false);
   }
 
@@ -87,6 +99,7 @@ export function ApproverSelect({ value, onValueChange, placeholder = "Select an 
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-label={ariaLabel}
           data-placeholder={!value || undefined}
           className="w-full justify-between font-normal data-placeholder:text-muted-foreground"
         >
@@ -111,14 +124,20 @@ export function ApproverSelect({ value, onValueChange, placeholder = "Select an 
                 <Loader2Icon className="size-4 animate-spin" />
                 Searching...
               </div>
+            ) : error ? (
+              <p className="py-4 text-center text-sm text-destructive">{error}</p>
             ) : (
               <>
-                <CommandEmpty>No users found.</CommandEmpty>
+                <CommandEmpty>No employees with a login account match.</CommandEmpty>
                 <CommandGroup>
-                  {options.map((user) => (
-                    <CommandItem key={user.id} value={user.id} onSelect={() => handleSelect(user)}>
-                      <CheckIcon className={cn(user.id === value ? "opacity-100" : "opacity-0")} />
-                      <span className="truncate">{optionLabel(user)}</span>
+                  {options.map((employee) => (
+                    <CommandItem
+                      key={employee.id}
+                      value={employee.id}
+                      onSelect={() => handleSelect(employee)}
+                    >
+                      <CheckIcon className={cn(employee.id === value ? "opacity-100" : "opacity-0")} />
+                      <span className="truncate">{optionLabel(employee)}</span>
                     </CommandItem>
                   ))}
                 </CommandGroup>

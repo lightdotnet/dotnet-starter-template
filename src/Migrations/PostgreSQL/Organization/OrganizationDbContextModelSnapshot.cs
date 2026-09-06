@@ -23,7 +23,7 @@ namespace PostgreSQL.Organization
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.Company", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.Companies.Company", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -85,7 +85,7 @@ namespace PostgreSQL.Organization
                     b.ToTable("Companies", "organization");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.Employee", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.Employees.Employee", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -163,7 +163,8 @@ namespace PostgreSQL.Organization
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.HasIndex("CompanyId", "EmployeeCode")
                         .IsUnique();
@@ -171,7 +172,7 @@ namespace PostgreSQL.Organization
                     b.ToTable("Employees", "organization");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.EmployeeLevel", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.Employees.EmployeeLevel", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -219,7 +220,7 @@ namespace PostgreSQL.Organization
                     b.ToTable("EmployeeLevels", "organization");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.EmployeeOrgUnitMembership", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.OrgUnits.EmployeeOrgUnitMembership", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -279,7 +280,7 @@ namespace PostgreSQL.Organization
                     b.ToTable("EmployeeOrgUnitMemberships", "organization");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.OrgUnit", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.OrgUnits.OrgUnit", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -340,38 +341,38 @@ namespace PostgreSQL.Organization
                     b.ToTable("OrgUnits", "organization");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.Employee", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.Employees.Employee", b =>
                 {
-                    b.HasOne("StarterKit.Organization.Api.Entities.Company", null)
+                    b.HasOne("StarterKit.Organization.Api.Domain.Companies.Company", null)
                         .WithMany()
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.EmployeeLevel", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.Employees.EmployeeLevel", b =>
                 {
-                    b.HasOne("StarterKit.Organization.Api.Entities.Company", null)
+                    b.HasOne("StarterKit.Organization.Api.Domain.Companies.Company", null)
                         .WithMany()
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.EmployeeOrgUnitMembership", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.OrgUnits.EmployeeOrgUnitMembership", b =>
                 {
-                    b.HasOne("StarterKit.Organization.Api.Entities.Employee", "Employee")
+                    b.HasOne("StarterKit.Organization.Api.Domain.Employees.Employee", "Employee")
                         .WithMany("Memberships")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StarterKit.Organization.Api.Entities.EmployeeLevel", "Level")
+                    b.HasOne("StarterKit.Organization.Api.Domain.Employees.EmployeeLevel", "Level")
                         .WithMany()
                         .HasForeignKey("LevelId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("StarterKit.Organization.Api.Entities.OrgUnit", "OrgUnit")
+                    b.HasOne("StarterKit.Organization.Api.Domain.OrgUnits.OrgUnit", "OrgUnit")
                         .WithMany("Memberships")
                         .HasForeignKey("OrgUnitId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -384,15 +385,15 @@ namespace PostgreSQL.Organization
                     b.Navigation("OrgUnit");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.OrgUnit", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.OrgUnits.OrgUnit", b =>
                 {
-                    b.HasOne("StarterKit.Organization.Api.Entities.Company", null)
+                    b.HasOne("StarterKit.Organization.Api.Domain.Companies.Company", null)
                         .WithMany()
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("StarterKit.Organization.Api.Entities.OrgUnit", "Parent")
+                    b.HasOne("StarterKit.Organization.Api.Domain.OrgUnits.OrgUnit", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -400,12 +401,12 @@ namespace PostgreSQL.Organization
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.Employee", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.Employees.Employee", b =>
                 {
                     b.Navigation("Memberships");
                 });
 
-            modelBuilder.Entity("StarterKit.Organization.Api.Entities.OrgUnit", b =>
+            modelBuilder.Entity("StarterKit.Organization.Api.Domain.OrgUnits.OrgUnit", b =>
                 {
                     b.Navigation("Children");
 

@@ -66,8 +66,8 @@ export async function ApprovalsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
         <p className="text-sm text-muted-foreground">
-          Create requests, review what's waiting on you, and track requests you've created or
-          already decided.
+          Create requests, review what&apos;s waiting on you, and track requests you&apos;ve created
+          or already decided.
         </p>
       </div>
 

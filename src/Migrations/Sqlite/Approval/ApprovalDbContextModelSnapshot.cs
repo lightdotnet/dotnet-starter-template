@@ -18,7 +18,52 @@ namespace Sqlite.Approval
                 .HasDefaultSchema("approval")
                 .HasAnnotation("ProductVersion", "10.0.11");
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalRequest", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalDocumentType", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Created")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("LastModified")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("ApprovalDocumentTypes", "approval");
+                });
+
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -39,6 +84,10 @@ namespace Sqlite.Approval
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("DeepLinkUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DocumentTypeId")
+                        .HasMaxLength(450)
                         .HasColumnType("TEXT");
 
                     b.Property<long?>("FinalizedAt")
@@ -62,8 +111,11 @@ namespace Sqlite.Approval
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RequesterEmployeeId")
-                        .IsRequired()
                         .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RequesterName")
+                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RequesterUserId")
@@ -81,6 +133,8 @@ namespace Sqlite.Approval
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DocumentTypeId");
+
                     b.HasIndex("RequesterUserId");
 
                     b.HasIndex("RequestType", "RequestId");
@@ -88,7 +142,7 @@ namespace Sqlite.Approval
                     b.ToTable("ApprovalRequests", "approval");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalStep", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalStep", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -102,6 +156,10 @@ namespace Sqlite.Approval
                     b.Property<string>("ApproverEmployeeId")
                         .IsRequired()
                         .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ApproverName")
+                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ApproverUserId")
@@ -145,9 +203,19 @@ namespace Sqlite.Approval
                     b.ToTable("ApprovalSteps", "approval");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalStep", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
-                    b.HasOne("StarterKit.Approval.Api.Entities.ApprovalRequest", "ApprovalRequest")
+                    b.HasOne("StarterKit.Approval.Api.Domain.Approvals.ApprovalDocumentType", "DocumentType")
+                        .WithMany()
+                        .HasForeignKey("DocumentTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DocumentType");
+                });
+
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalStep", b =>
+                {
+                    b.HasOne("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", "ApprovalRequest")
                         .WithMany("Steps")
                         .HasForeignKey("ApprovalRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -156,7 +224,7 @@ namespace Sqlite.Approval
                     b.Navigation("ApprovalRequest");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalRequest", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
                     b.Navigation("Steps");
                 });

@@ -23,7 +23,52 @@ namespace MSSQL.Approval
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalRequest", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalDocumentType", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("ApprovalDocumentTypes", "approval");
+                });
+
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -46,6 +91,10 @@ namespace MSSQL.Approval
                     b.Property<string>("DeepLinkUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DocumentTypeId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTimeOffset?>("FinalizedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -67,9 +116,12 @@ namespace MSSQL.Approval
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RequesterEmployeeId")
-                        .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RequesterName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("RequesterUserId")
                         .IsRequired()
@@ -86,6 +138,8 @@ namespace MSSQL.Approval
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DocumentTypeId");
+
                     b.HasIndex("RequesterUserId");
 
                     b.HasIndex("RequestType", "RequestId");
@@ -93,7 +147,7 @@ namespace MSSQL.Approval
                     b.ToTable("ApprovalRequests", "approval");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalStep", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalStep", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(450)
@@ -108,6 +162,10 @@ namespace MSSQL.Approval
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ApproverName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("ApproverUserId")
                         .IsRequired()
@@ -150,9 +208,19 @@ namespace MSSQL.Approval
                     b.ToTable("ApprovalSteps", "approval");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalStep", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
-                    b.HasOne("StarterKit.Approval.Api.Entities.ApprovalRequest", "ApprovalRequest")
+                    b.HasOne("StarterKit.Approval.Api.Domain.Approvals.ApprovalDocumentType", "DocumentType")
+                        .WithMany()
+                        .HasForeignKey("DocumentTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DocumentType");
+                });
+
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalStep", b =>
+                {
+                    b.HasOne("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", "ApprovalRequest")
                         .WithMany("Steps")
                         .HasForeignKey("ApprovalRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -161,7 +229,7 @@ namespace MSSQL.Approval
                     b.Navigation("ApprovalRequest");
                 });
 
-            modelBuilder.Entity("StarterKit.Approval.Api.Entities.ApprovalRequest", b =>
+            modelBuilder.Entity("StarterKit.Approval.Api.Domain.Approvals.ApprovalRequest", b =>
                 {
                     b.Navigation("Steps");
                 });
