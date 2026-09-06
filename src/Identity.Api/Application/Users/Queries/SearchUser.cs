@@ -29,6 +29,7 @@ internal class SearchUserQueryHandler(
                     x.UserName!.Contains(searchValue!)
                     || x.FirstName!.Contains(searchValue!)
                     || x.LastName!.Contains(searchValue!)
+                    || ((x.FirstName ?? "") + " " + (x.LastName ?? "")).Contains(searchValue!)
                     || x.Email!.Contains(searchValue!)
                     || x.PhoneNumber!.Contains(searchValue!)
                 )
