@@ -14,6 +14,14 @@ export enum ApprovalStepStatus {
   Skipped = "Skipped",
 }
 
+/** Mirrors `Approval.Contracts/Approvals/ApprovalRelation.cs` — serialized by name. */
+export enum ApprovalRelation {
+  All = "All",
+  Requested = "Requested",
+  AwaitingMyDecision = "AwaitingMyDecision",
+  DecidedByMe = "DecidedByMe",
+}
+
 export interface ApprovalStepDto {
   id: string;
   approvalRequestId: string;
@@ -32,6 +40,7 @@ export interface ApprovalRequestDto {
   requesterUserId: string;
   requesterEmployeeId: string;
   title: string;
+  content?: string | null;
   deepLinkUrl?: string | null;
   currentLevel: number;
   status: ApprovalStatus;
@@ -52,6 +61,7 @@ export interface CreateApprovalRequestPayload {
   requesterUserId: string;
   requesterEmployeeId: string;
   title: string;
+  content?: string;
   deepLinkUrl?: string;
   approverChain: ApproverStepInput[];
 }
@@ -70,6 +80,10 @@ export interface ApprovalSearchParams {
 }
 
 export interface MyApprovalsParams {
+  relation?: ApprovalRelation;
+  requestType?: string;
+  status?: ApprovalStatus;
+  searchValue?: string;
   pageNumber?: number;
   pageSize?: number;
 }

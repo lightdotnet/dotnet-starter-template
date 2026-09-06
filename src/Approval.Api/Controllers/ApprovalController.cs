@@ -8,17 +8,19 @@ using StarterKit.Shared;
 
 namespace StarterKit.Approval.Api.Controllers;
 
+/// <summary>
+/// Admin/back-office surface — unrestricted visibility across every request, gated by
+/// <see cref="ApprovalPermissions.Requests.ViewAll"/>. Self-service actions (a user's own
+/// requests, deciding a step assigned to them) live on <see cref="UserApprovalController"/> instead.
+/// </summary>
 [ApiExplorerSettings(GroupName = "approval")]
-[MustHavePermission(ApprovalPermissions.Requests.View)]
-public class ApprovalController(ICurrentUser currentUser) : VersionedApiController
+[MustHavePermission(ApprovalPermissions.Requests.ViewAll)]
+public class ApprovalController : VersionedApiController
 {
-    private readonly string _currentUserId = currentUser.UserId
-        ?? throw new ArgumentNullException(nameof(currentUser.UserId));
-
-    [HttpGet("mine")]
-    public async Task<IActionResult> GetMineAsync([FromQuery] PageQuery request)
+    [HttpGet]
+    public async Task<IActionResult> SearchAsync([FromQuery] ApprovalRequestSearchRequest request)
     {
-        return Ok(await Mediator.Send(new GetMyPendingApprovalsQuery(_currentUserId, request)));
+        return Ok(await Mediator.Send(new SearchApprovalRequestsQuery(request)));
     }
 
     [HttpGet("{id}")]
@@ -27,27 +29,14 @@ public class ApprovalController(ICurrentUser currentUser) : VersionedApiControll
         return Ok(await Mediator.Send(new GetApprovalRequestByIdQuery(id)));
     }
 
-    [HttpPut("{id}/decide")]
-    public async Task<IActionResult> DecideAsync([FromRoute] string id, [FromBody] DecideApprovalRequest request)
-    {
-        return Ok(await Mediator.Send(
-            new DecideApprovalStepCommand(id, _currentUserId, request.Approved, request.Comment)));
-    }
-
-    [HttpGet]
-    [MustHavePermission(ApprovalPermissions.Requests.ViewAll)]
-    public async Task<IActionResult> SearchAsync([FromQuery] ApprovalRequestSearchRequest request)
-    {
-        return Ok(await Mediator.Send(new SearchApprovalRequestsQuery(request)));
-    }
-
     /// <summary>
     /// Creates an approval request directly over HTTP. Normal request types (Leave, etc.) are
     /// expected to create theirs via <see cref="IApprovalService"/> in-process instead — this
-    /// endpoint exists for ad-hoc/admin-triggered requests and exercising the engine directly.
+    /// endpoint exists for ad-hoc/admin-triggered requests and exercising the engine directly
+    /// (e.g. picking an arbitrary requester/approver chain). A user creating a real request for
+    /// themselves goes through <see cref="UserApprovalController.PostAsync"/> instead.
     /// </summary>
     [HttpPost]
-    [MustHavePermission(ApprovalPermissions.Requests.ViewAll)]
     public async Task<IActionResult> PostAsync([FromBody] CreateApprovalRequest request)
     {
         return Ok(await Mediator.Send(new CreateApprovalRequestCommand(request)));

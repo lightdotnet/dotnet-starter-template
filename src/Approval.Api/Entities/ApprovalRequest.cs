@@ -14,6 +14,8 @@ public class ApprovalRequest : AuditableEntity
 
     public string Title { get; set; } = null!;
 
+    public string? Content { get; set; }
+
     public string? DeepLinkUrl { get; set; }
 
     public int CurrentLevel { get; set; } = 1;

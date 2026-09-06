@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,14 +34,25 @@ export function DecideApprovalDialog({
 }: DecideApprovalDialogProps) {
   const [pending, run] = useGuardedAction();
   const [comment, setComment] = useState("");
+  const [error, setError] = useState<string | undefined>();
 
   function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen) setComment("");
+    if (!nextOpen) {
+      setComment("");
+      setError(undefined);
+    }
     onOpenChange(nextOpen);
   }
 
   function handleConfirm() {
     if (!request) return;
+
+    if (!approved && !comment.trim()) {
+      setError("A reason is required when rejecting a request.");
+      return;
+    }
+
+    setError(undefined);
 
     run(
       () => decideApprovalAction(request.id, approved, comment),
@@ -58,18 +70,31 @@ export function DecideApprovalDialog({
         <DialogHeader>
           <DialogTitle>{approved ? "Approve request" : "Reject request"}</DialogTitle>
           <DialogDescription>
-            &quot;{request?.title ?? "This request"}&quot; — level {request?.currentLevel} of your
-            approval chain.
+            Level {request?.currentLevel} of your approval chain.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="comment">Comment (optional)</Label>
+          <p className="font-medium">{request?.title}</p>
+          {request?.content && (
+            <p className="whitespace-pre-wrap rounded-md border bg-muted/50 p-3 text-sm">{request.content}</p>
+          )}
+        </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="comment">{approved ? "Note (optional)" : "Reason"}</Label>
           <Textarea
             id="comment"
             value={comment}
             onChange={(event) => setComment(event.target.value)}
             rows={3}
+            required={!approved}
           />
         </div>
 

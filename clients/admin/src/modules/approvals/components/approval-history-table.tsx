@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { History, ListChecks, Plus } from "lucide-react";
+import { History, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,16 +13,27 @@ import {
 } from "@/components/shared/data-table";
 import { ApprovalHistorySheet } from "@/modules/approvals/components/approval-history-sheet";
 import { CreateApprovalRequestDialog } from "@/modules/approvals/components/create-approval-request-dialog";
-import { createTestApprovalRequestAction } from "@/modules/approvals/api/create-test-approval-request-action";
 import { ApprovalStatus, type ApprovalRequestDto } from "@/modules/approvals/types/approval";
 
-interface AllApprovalsTableProps {
+/** How the current user relates to a given row — a request can be both (they created it and
+ * later decided one of its steps), so this is a set, not a single value. */
+export type ApprovalOwnerRole = "requester" | "decided";
+
+interface ApprovalHistoryTableProps {
   records: ApprovalRequestDto[];
   error?: DataTableErrorState;
-  canCreate?: boolean;
   /** userId -> display name, resolved once by the page for every table + the history sheet. */
   userNamesById: Map<string, string>;
+  /** requestId -> the current user's role(s) on that request — computed once by the page from
+   * the same `relation=All` fetch (requester and/or decided-a-step), then reused as a lookup
+   * here instead of re-deriving it per row. */
+  rolesById: Map<string, ApprovalOwnerRole[]>;
 }
+
+const ROLE_LABEL: Record<ApprovalOwnerRole, string> = {
+  requester: "Requester",
+  decided: "Decided",
+};
 
 const STATUS_VARIANT: Record<ApprovalStatus, "default" | "outline" | "destructive" | "secondary"> = {
   [ApprovalStatus.Pending]: "secondary",
@@ -31,27 +42,27 @@ const STATUS_VARIANT: Record<ApprovalStatus, "default" | "outline" | "destructiv
   [ApprovalStatus.Cancelled]: "outline",
 };
 
-/** Read-only, most-recent-50 view — lets you watch a chain's status/level advance across decisions without a full search/pagination UI (this is an admin verification view, not a primary workflow). */
-export function AllApprovalsTable({ records, error, canCreate, userNamesById }: AllApprovalsTableProps) {
+/** Read-only self-service view — merges "requests you created" and "requests you decided" into
+ * one list, tagged with an owner-role badge per row; unlike `MyApprovalsTable` there are no
+ * decide actions here, just history + a "Create request" entry point. */
+export function ApprovalHistoryTable({ records, error, userNamesById, rolesById }: ApprovalHistoryTableProps) {
   const router = useRouter();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [createDialogKey, setCreateDialogKey] = useState(0);
   const [historyRequest, setHistoryRequest] = useState<ApprovalRequestDto | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createDialogKey, setCreateDialogKey] = useState(0);
 
-  const actions: DataTableAction[] | undefined = canCreate
-    ? [
-        {
-          key: "create",
-          label: "Create test request",
-          icon: Plus,
-          onClick: () => {
-            setCreateDialogKey((key) => key + 1);
-            setCreateOpen(true);
-          },
-        },
-      ]
-    : undefined;
+  const actions: DataTableAction[] = [
+    {
+      key: "create",
+      label: "Create request",
+      icon: Plus,
+      onClick: () => {
+        setCreateDialogKey((key) => key + 1);
+        setCreateOpen(true);
+      },
+    },
+  ];
 
   const columns: DataTableColumn<ApprovalRequestDto>[] = [
     {
@@ -64,6 +75,19 @@ export function AllApprovalsTable({ records, error, canCreate, userNamesById }: 
       header: "Title",
       hideable: false,
       cell: (request) => <span className="font-medium">{request.title}</span>,
+    },
+    {
+      id: "role",
+      header: "Role",
+      cell: (request) => (
+        <div className="flex gap-1">
+          {(rolesById.get(request.id) ?? []).map((role) => (
+            <Badge key={role} variant="outline">
+              {ROLE_LABEL[role]}
+            </Badge>
+          ))}
+        </div>
+      ),
     },
     {
       id: "content",
@@ -125,24 +149,22 @@ export function AllApprovalsTable({ records, error, canCreate, userNamesById }: 
         actions={actions}
         onRefresh={() => router.refresh()}
         emptyState={{
-          icon: ListChecks,
-          title: "No approval requests yet",
-          description: "Create a test request to see it here.",
+          icon: History,
+          title: "No requests yet",
+          description: "Requests you create or decide will show up here.",
         }}
-      />
-      <CreateApprovalRequestDialog
-        key={`create-${createDialogKey}`}
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onCreated={() => router.refresh()}
-        dialogTitle="Create test approval request"
-        action={createTestApprovalRequestAction}
       />
       <ApprovalHistorySheet
         open={historyOpen}
         onOpenChange={setHistoryOpen}
         request={historyRequest}
         userNamesById={userNamesById}
+      />
+      <CreateApprovalRequestDialog
+        key={`create-${createDialogKey}`}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={() => router.refresh()}
       />
     </>
   );

@@ -3,35 +3,24 @@
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/modules/identity/user-profile";
-import { createApprovalRequest } from "@/modules/approvals/api/approvals.api";
+import { createTestApprovalRequest } from "@/modules/approvals/api/approvals.api";
 import type { ApproverStepInput } from "@/modules/approvals/types/approval";
-
-export interface CreateApprovalRequestState {
-  error?: string;
-  success?: boolean;
-}
-
-export interface CreateApprovalRequestInput {
-  requestType: string;
-  title: string;
-  content?: string;
-  approverUserIds: string[];
-}
+import type { CreateApprovalRequestInput, CreateApprovalRequestState } from "@/modules/approvals/api/create-approval-request-action";
 
 /**
- * Self-service create, available to any authenticated user — creates a
- * request via `POST user_approval`, which overrides `requesterUserId` to the
- * caller server-side regardless of what's sent here (the value below is sent
- * only to satisfy the shared `CreateApprovalRequest` contract shape). The
- * picked approvers become the chain (level = row order).
+ * Admin/test harness for the generic Approval engine — creates a request via
+ * `POST approval` (requires `approval.requests.view_all`), with the picked
+ * approvers as the chain (level = row order). A real request type (e.g.
+ * Leave) resolves its chain server-side via `IApprovalService` instead of
+ * going through this HTTP endpoint; a regular user creating a request for
+ * themselves uses `createApprovalRequestAction` instead.
  *
  * `approverEmployeeId` has no real employee behind it here — Approval never
  * validates it (it's opaque bookkeeping), so the picked user's id is reused
  * as a placeholder rather than adding a second picker per row just for this
- * screen. For the admin/test harness that can pick an arbitrary requester
- * chain via `POST approval`, see `createTestApprovalRequestAction`.
+ * test screen.
  */
-export async function createApprovalRequestAction(
+export async function createTestApprovalRequestAction(
   input: CreateApprovalRequestInput,
 ): Promise<CreateApprovalRequestState> {
   const session = await resolveSession();
@@ -55,7 +44,7 @@ export async function createApprovalRequestAction(
 
   const requesterId = session.profile.id;
 
-  const result = await createApprovalRequest({
+  const result = await createTestApprovalRequest({
     requestType: input.requestType.trim() || "Test",
     requestId: randomUUID(),
     requesterUserId: requesterId,

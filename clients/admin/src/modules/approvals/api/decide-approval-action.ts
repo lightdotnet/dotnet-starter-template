@@ -19,6 +19,10 @@ export async function decideApprovalAction(
     return { error: "Your session has expired. Please sign in again." };
   }
 
+  if (!approved && !comment.trim()) {
+    return { error: "A reason is required when rejecting a request." };
+  }
+
   const result = await decideApproval(approvalRequestId, {
     approved,
     comment: comment.trim() || undefined,

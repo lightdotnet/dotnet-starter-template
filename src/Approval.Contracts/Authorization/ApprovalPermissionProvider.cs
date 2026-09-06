@@ -7,11 +7,6 @@ public class ApprovalPermissionProvider : IPermissionDefinitionProvider
     public IEnumerable<PermissionDefinition> Define()
     {
         yield return new(
-            ApprovalPermissions.Requests.View,
-            "View My Approval Requests",
-            ApprovalPermissions.Group);
-
-        yield return new(
             ApprovalPermissions.Requests.ViewAll,
             "View All Approval Requests",
             ApprovalPermissions.Group);

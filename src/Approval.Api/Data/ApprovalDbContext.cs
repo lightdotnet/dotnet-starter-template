@@ -52,6 +52,8 @@ public class ApprovalDbContext(
             entity.Property(x => x.RequesterEmployeeId).HasMaxLength(450);
 
             entity.Property(x => x.Title).HasMaxLength(250);
+
+            entity.Property(x => x.Content).HasMaxLength(4000);
         });
 
         builder.Entity<ApprovalStep>(entity =>

@@ -11,11 +11,18 @@ import type {
   MyApprovalsParams,
 } from "@/modules/approvals/types/approval";
 
-export function getMyPendingApprovals(params: MyApprovalsParams = {}) {
+/** Self-service — requests the current user is related to (as requester or approver), scoped
+ * server-side by `UserApprovalController`. `params.relation` narrows to one slice (requested by
+ * me / awaiting my decision / decided by me); omitted, it returns all of them. */
+export function getMyApprovals(params: MyApprovalsParams = {}) {
   return guardCall(() =>
-    requestJson<PagedResult<ApprovalRequestDto>>("approval/mine", {
+    requestJson<PagedResult<ApprovalRequestDto>>("user_approval", {
       method: "GET",
       query: {
+        relation: params.relation,
+        requestType: params.requestType,
+        status: params.status,
+        searchValue: params.searchValue,
         pageNumber: String(params.pageNumber ?? 1),
         pageSize: String(params.pageSize ?? 20),
       },
@@ -23,6 +30,7 @@ export function getMyPendingApprovals(params: MyApprovalsParams = {}) {
   );
 }
 
+/** Admin — every request, unrestricted. Requires `approval.requests.view_all`. */
 export function searchApprovals(params: ApprovalSearchParams = {}) {
   return guardCall(() =>
     requestJson<PagedResult<ApprovalRequestDto>>("approval", {
@@ -39,10 +47,19 @@ export function searchApprovals(params: ApprovalSearchParams = {}) {
 }
 
 export function getApprovalById(id: string) {
-  return guardCall(() => requestJson<Result<ApprovalRequestDto>>(`approval/${id}`));
+  return guardCall(() => requestJson<Result<ApprovalRequestDto>>(`user_approval/${id}`));
 }
 
+/** Self-service create — the backend overrides `requesterUserId` to the caller regardless of
+ * what's sent, so this always creates as the current user. */
 export function createApprovalRequest(request: CreateApprovalRequestPayload) {
+  return guardCall(() =>
+    requestJson<Result<string>>("user_approval", { method: "POST", body: request }),
+  );
+}
+
+/** Admin/test harness create — arbitrary requester + approver chain. Requires `approval.requests.view_all`. */
+export function createTestApprovalRequest(request: CreateApprovalRequestPayload) {
   return guardCall(() =>
     requestJson<Result<string>>("approval", { method: "POST", body: request }),
   );
@@ -50,6 +67,6 @@ export function createApprovalRequest(request: CreateApprovalRequestPayload) {
 
 export function decideApproval(id: string, request: DecideApprovalPayload) {
   return guardResponseCall(() =>
-    requestJson<ApiResponse>(`approval/${id}/decide`, { method: "PUT", body: request }),
+    requestJson<ApiResponse>(`user_approval/${id}/decide`, { method: "PUT", body: request }),
   );
 }

@@ -27,6 +27,7 @@ internal class ApprovalService(
             RequesterUserId = request.RequesterUserId,
             RequesterEmployeeId = request.RequesterEmployeeId,
             Title = request.Title,
+            Content = request.Content,
             DeepLinkUrl = request.DeepLinkUrl,
             CurrentLevel = orderedChain[0].Level,
             Status = ApprovalStatus.Pending,
@@ -77,6 +78,9 @@ internal class ApprovalService(
 
         if (step.ApproverUserId != decidedByUserId)
             return Result.Error("You are not the assigned approver for this step.");
+
+        if (!approved && string.IsNullOrWhiteSpace(comment))
+            return Result.Error("A reason is required when rejecting a request.");
 
         step.Comment = comment;
         step.DecidedAt = clock.AuditTime;

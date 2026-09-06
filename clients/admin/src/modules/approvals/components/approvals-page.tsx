@@ -1,22 +1,59 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMyPendingApprovals, searchApprovals } from "@/modules/approvals/api/approvals.api";
+import { redirect } from "next/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getMyApprovals, searchApprovals } from "@/modules/approvals/api/approvals.api";
 import { AllApprovalsTable } from "@/modules/approvals/components/all-approvals-table";
+import {
+  ApprovalHistoryTable,
+  type ApprovalOwnerRole,
+} from "@/modules/approvals/components/approval-history-table";
 import { MyApprovalsTable } from "@/modules/approvals/components/my-approvals-table";
 import { hasPermission } from "@/lib/server/authorization";
-import { requirePermission } from "@/lib/server/require-permission";
+import { resolveSession } from "@/modules/identity/user-profile";
+import { getAllUsers } from "@/modules/identity/users/api/users.api";
+import { getDisplayName } from "@/lib/shared/user-display";
 import { APPROVALS_PERMISSIONS } from "@/modules/approvals/constants/permissions";
+import { ApprovalRelation } from "@/modules/approvals/types/approval";
 
 export async function ApprovalsPage() {
-  const { session, denied } = await requirePermission(APPROVALS_PERMISSIONS.View);
-  if (denied) return denied;
+  const session = await resolveSession();
+  if (!session || !session.profile) {
+    redirect("/login");
+  }
 
+  const myId = session.profile.id;
   const canViewAll = hasPermission(session, APPROVALS_PERMISSIONS.ViewAll);
 
-  const mineResult = await getMyPendingApprovals({ pageSize: 50 });
-  const mineError =
-    !mineResult.isSuccess || !mineResult.data
-      ? { title: "Unable to load your approvals", description: mineResult.message || "Please try again." }
+  const usersResult = await getAllUsers();
+  const userNamesById = new Map(
+    (usersResult.data ?? []).map((user) => [user.id, getDisplayName(user)]),
+  );
+
+  const [awaitingResult, myRequestsResult] = await Promise.all([
+    getMyApprovals({ relation: ApprovalRelation.AwaitingMyDecision, pageSize: 50 }),
+    getMyApprovals({ relation: ApprovalRelation.All, pageSize: 50 }),
+  ]);
+
+  const awaitingError =
+    !awaitingResult.isSuccess || !awaitingResult.data
+      ? { title: "Unable to load your approvals", description: awaitingResult.message || "Please try again." }
       : undefined;
+
+  const myRequestsError =
+    !myRequestsResult.isSuccess || !myRequestsResult.data
+      ? { title: "Unable to load your requests", description: myRequestsResult.message || "Please try again." }
+      : undefined;
+
+  // `relation=All` also includes requests where the current user is an approver at a future
+  // step they haven't reached yet — narrow down to just "I created it" or "I decided a step on
+  // it" (the two lists being merged here), and tag each row with which of those apply.
+  const rolesById = new Map<string, ApprovalOwnerRole[]>();
+  const myRequests = (myRequestsResult.data?.records ?? []).filter((request) => {
+    const roles: ApprovalOwnerRole[] = [];
+    if (request.requesterUserId === myId) roles.push("requester");
+    if (request.steps.some((step) => step.approverUserId === myId && step.decidedAt)) roles.push("decided");
+    if (roles.length > 0) rolesById.set(request.id, roles);
+    return roles.length > 0;
+  });
 
   const allResult = canViewAll ? await searchApprovals({ pageSize: 50 }) : null;
   const allError =
@@ -29,30 +66,46 @@ export async function ApprovalsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
         <p className="text-sm text-muted-foreground">
-          Review requests routed to you, and — for testing — create ad-hoc requests against the
-          generic approval engine with a multi-level approver chain.
+          Create requests, review what's waiting on you, and track requests you've created or
+          already decided.
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Waiting on your decision</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MyApprovalsTable records={mineResult.data?.records ?? []} error={mineError} />
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="awaiting">
+        <TabsList>
+          <TabsTrigger value="awaiting">Waiting on your decision</TabsTrigger>
+          <TabsTrigger value="mine">My requests</TabsTrigger>
+          {canViewAll && <TabsTrigger value="all">All requests</TabsTrigger>}
+        </TabsList>
 
-      {canViewAll && (
-        <Card>
-          <CardHeader>
-            <CardTitle>All approval requests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AllApprovalsTable records={allResult?.data?.records ?? []} error={allError} canCreate />
-          </CardContent>
-        </Card>
-      )}
+        <TabsContent value="awaiting">
+          <MyApprovalsTable
+            records={awaitingResult.data?.records ?? []}
+            error={awaitingError}
+            userNamesById={userNamesById}
+          />
+        </TabsContent>
+
+        <TabsContent value="mine">
+          <ApprovalHistoryTable
+            records={myRequests}
+            error={myRequestsError}
+            userNamesById={userNamesById}
+            rolesById={rolesById}
+          />
+        </TabsContent>
+
+        {canViewAll && (
+          <TabsContent value="all">
+            <AllApprovalsTable
+              records={allResult?.data?.records ?? []}
+              error={allError}
+              canCreate
+              userNamesById={userNamesById}
+            />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }

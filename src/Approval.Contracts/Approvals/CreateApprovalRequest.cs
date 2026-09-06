@@ -11,5 +11,6 @@ public record CreateApprovalRequest(
     string RequesterUserId,
     string RequesterEmployeeId,
     string Title,
+    string? Content,
     string? DeepLinkUrl,
     IReadOnlyList<ApproverStepInput> ApproverChain);

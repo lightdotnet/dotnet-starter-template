@@ -6,8 +6,6 @@ public static class ApprovalPermissions
 
     public static class Requests
     {
-        public const string View = $"{Group}.requests.view";
-
         public const string ViewAll = $"{Group}.requests.view_all";
     }
 }

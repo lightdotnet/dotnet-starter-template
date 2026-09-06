@@ -14,9 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useGuardedAction } from "@/hooks/use-guarded-action";
 import { ApproverSelect } from "@/modules/approvals/components/approver-select";
 import { createApprovalRequestAction } from "@/modules/approvals/api/create-approval-request-action";
+import type {
+  CreateApprovalRequestInput,
+  CreateApprovalRequestState,
+} from "@/modules/approvals/api/create-approval-request-action";
 import { getDisplayName } from "@/lib/shared/user-display";
 import type { UserDto } from "@/modules/identity/users";
 
@@ -34,28 +39,37 @@ interface CreateApprovalRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
+  /** Dialog title — differs between the self-service and admin/test-harness call sites. */
+  dialogTitle?: string;
+  /** Server action to submit to — defaults to the self-service create (`user_approval`). */
+  action?: (input: CreateApprovalRequestInput) => Promise<CreateApprovalRequestState>;
 }
 
 /**
- * Test harness for the generic Approval engine: creates a request as the
- * current user with a hand-picked, ordered chain of approvers — level N is
- * simply row N. Exercises the same multi-level "advance on approve" logic a
- * real request type (e.g. Leave) will drive automatically once it exists.
+ * Builds an approval request with a hand-picked, ordered chain of approvers —
+ * level N is simply row N. Exercises the same multi-level "advance on
+ * approve" logic a real request type (e.g. Leave) will drive automatically
+ * once it exists. Reused by both the self-service "Create request" entry
+ * point and the admin/test-harness dialog (see `action` prop).
  */
 export function CreateApprovalRequestDialog({
   open,
   onOpenChange,
   onCreated,
+  dialogTitle = "Create approval request",
+  action = createApprovalRequestAction,
 }: CreateApprovalRequestDialogProps) {
   const [pending, run] = useGuardedAction();
   const [requestType, setRequestType] = useState("Test");
   const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [rows, setRows] = useState<ApproverRow[]>([emptyRow()]);
   const [error, setError] = useState<string | undefined>();
 
   function reset() {
     setRequestType("Test");
     setTitle("");
+    setContent("");
     setRows([emptyRow()]);
     setError(undefined);
   }
@@ -92,9 +106,10 @@ export function CreateApprovalRequestDialog({
 
     run(
       () =>
-        createApprovalRequestAction({
+        action({
           requestType,
           title,
+          content,
           approverUserIds: rows.map((row) => row.user!.id),
         }),
       "Approval request created.",
@@ -112,7 +127,7 @@ export function CreateApprovalRequestDialog({
         onPointerDownOutside={(event) => event.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create test approval request</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
@@ -135,6 +150,16 @@ export function CreateApprovalRequestDialog({
               <Label htmlFor="title">Title</Label>
               <Input id="title" value={title} onChange={(event) => setTitle(event.target.value)} required />
             </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="content">Content (optional)</Label>
+            <Textarea
+              id="content"
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
+              rows={3}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
