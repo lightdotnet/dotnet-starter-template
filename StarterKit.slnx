@@ -33,6 +33,7 @@
     <Project Path="src/Migrations/Sqlite/Sqlite.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Approval.Tests/Approval.Tests.csproj" />
     <Project Path="tests/Framework.Tests/Framework.Tests.csproj" />
     <Project Path="tests/Identity.Tests/Identity.Tests.csproj" />
     <Project Path="tests/Organization.Tests/Organization.Tests.csproj" />

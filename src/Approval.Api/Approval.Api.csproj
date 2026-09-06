@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Approval.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Lightsoft.AspNetCore.Authorization" />
 	<PackageReference Include="Lightsoft.EntityFrameworkCore" />
 	<PackageReference Include="Lightsoft.Mediator" />
