@@ -10,7 +10,7 @@ import type {
 
 export function getApprovalDocumentTypes(params: { activeOnly?: boolean } = {}) {
   return guardCall(() =>
-    requestJson<Result<ApprovalDocumentTypeDto[]>>("approval_document_type", {
+    requestJson<Result<ApprovalDocumentTypeDto[]>>("approval/document_type", {
       method: "GET",
       query: { activeOnly: params.activeOnly ? "true" : undefined },
     }),
@@ -19,24 +19,24 @@ export function getApprovalDocumentTypes(params: { activeOnly?: boolean } = {}) 
 
 export function getApprovalDocumentTypeById(id: string) {
   return guardCall(() =>
-    requestJson<Result<ApprovalDocumentTypeDto>>(`approval_document_type/${id}`),
+    requestJson<Result<ApprovalDocumentTypeDto>>(`approval/document_type/${id}`),
   );
 }
 
 export function createApprovalDocumentType(request: CreateApprovalDocumentTypeRequest) {
   return guardCall(() =>
-    requestJson<Result<string>>("approval_document_type", { method: "POST", body: request }),
+    requestJson<Result<string>>("approval/document_type", { method: "POST", body: request }),
   );
 }
 
 export function updateApprovalDocumentType(dto: ApprovalDocumentTypeDto) {
   return guardResponseCall(() =>
-    requestJson<ApiResponse>(`approval_document_type/${dto.id}`, { method: "PUT", body: dto }),
+    requestJson<ApiResponse>(`approval/document_type/${dto.id}`, { method: "PUT", body: dto }),
   );
 }
 
 export function deleteApprovalDocumentType(id: string) {
   return guardResponseCall(() =>
-    requestJson<ApiResponse>(`approval_document_type/${id}`, { method: "DELETE" }),
+    requestJson<ApiResponse>(`approval/document_type/${id}`, { method: "DELETE" }),
   );
 }

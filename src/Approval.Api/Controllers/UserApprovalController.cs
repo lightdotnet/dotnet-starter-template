@@ -14,6 +14,7 @@ namespace StarterKit.Approval.Api.Controllers;
 /// see <see cref="ApprovalController"/> for the unrestricted admin surface.
 /// </summary>
 [ApiExplorerSettings(GroupName = "approval")]
+[Route("api/v{version:apiVersion}/approval/user")]
 public class UserApprovalController(ICurrentUser currentUser) : VersionedApiController
 {
     private readonly string _currentUserId = currentUser.UserId

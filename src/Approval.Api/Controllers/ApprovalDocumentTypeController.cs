@@ -15,7 +15,7 @@ namespace StarterKit.Approval.Api.Controllers;
 /// permission-gated.
 /// </summary>
 [ApiExplorerSettings(GroupName = "approval")]
-[Route("api/v{version:apiVersion}/approval_document_type")]
+[Route("api/v{version:apiVersion}/approval/document_type")]
 public class ApprovalDocumentTypeController : VersionedApiController
 {
     [HttpGet]
