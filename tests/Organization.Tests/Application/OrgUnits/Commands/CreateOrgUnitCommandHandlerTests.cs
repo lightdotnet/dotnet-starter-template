@@ -26,7 +26,7 @@ public class CreateOrgUnitCommandHandlerTests
                 Name = "Engineering",
                 Code = "ENG",
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -40,10 +40,10 @@ public class CreateOrgUnitCommandHandlerTests
         var companyA = new Company { Name = "A", Code = "A" };
         var companyB = new Company { Name = "B", Code = "B" };
         await host.Context.Companies.AddRangeAsync(companyA, companyB);
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var parentInB = new OrgUnit { CompanyId = companyB.Id, Type = OrgUnitType.Department, Name = "B-root", Code = "B-ROOT" };
-        await host.Context.OrgUnits.AddAsync(parentInB);
-        await host.Context.SaveChangesAsync();
+        await host.Context.OrgUnits.AddAsync(parentInB, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new CreateOrgUnitCommandHandler(host.Context);
 
         // Act
@@ -56,7 +56,7 @@ public class CreateOrgUnitCommandHandlerTests
                 Name = "Sub",
                 Code = "SUB",
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -68,11 +68,12 @@ public class CreateOrgUnitCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         await host.Context.OrgUnits.AddAsync(
-            new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "Eng", Code = "ENG" });
-        await host.Context.SaveChangesAsync();
+            new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "Eng", Code = "ENG" },
+            TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new CreateOrgUnitCommandHandler(host.Context);
 
         // Act
@@ -84,7 +85,7 @@ public class CreateOrgUnitCommandHandlerTests
                 Name = "Engineering Duplicate",
                 Code = "ENG",
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -98,10 +99,11 @@ public class CreateOrgUnitCommandHandlerTests
         var companyA = new Company { Name = "A", Code = "A" };
         var companyB = new Company { Name = "B", Code = "B" };
         await host.Context.Companies.AddRangeAsync(companyA, companyB);
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         await host.Context.OrgUnits.AddAsync(
-            new OrgUnit { CompanyId = companyA.Id, Type = OrgUnitType.Department, Name = "Eng", Code = "ENG" });
-        await host.Context.SaveChangesAsync();
+            new OrgUnit { CompanyId = companyA.Id, Type = OrgUnitType.Department, Name = "Eng", Code = "ENG" },
+            TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new CreateOrgUnitCommandHandler(host.Context);
 
         // Act
@@ -113,7 +115,7 @@ public class CreateOrgUnitCommandHandlerTests
                 Name = "Eng",
                 Code = "ENG",
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

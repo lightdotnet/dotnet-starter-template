@@ -18,7 +18,7 @@ public class GetOrgUnitTreeQueryHandlerTests
         var handler = new GetOrgUnitTreeQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetOrgUnitTreeQuery("missing-company"), CancellationToken.None);
+        var result = await handler.Handle(new GetOrgUnitTreeQuery("missing-company"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Empty(result);
@@ -30,26 +30,26 @@ public class GetOrgUnitTreeQueryHandlerTests
         // Arrange: root -> child -> grandchild, plus a second independent root.
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var root = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "Root", Code = "ROOT" };
-        await host.Context.OrgUnits.AddAsync(root);
-        await host.Context.SaveChangesAsync();
+        await host.Context.OrgUnits.AddAsync(root, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var child = new OrgUnit { CompanyId = company.Id, ParentId = root.Id, Type = OrgUnitType.Department, Name = "Child", Code = "CHILD" };
-        await host.Context.OrgUnits.AddAsync(child);
-        await host.Context.SaveChangesAsync();
+        await host.Context.OrgUnits.AddAsync(child, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var grandchild = new OrgUnit { CompanyId = company.Id, ParentId = child.Id, Type = OrgUnitType.Team, Name = "Grandchild", Code = "GC" };
         var secondRoot = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "Root2", Code = "ROOT2" };
         await host.Context.OrgUnits.AddRangeAsync(grandchild, secondRoot);
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var handler = new GetOrgUnitTreeQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetOrgUnitTreeQuery(company.Id), CancellationToken.None);
+        var result = await handler.Handle(new GetOrgUnitTreeQuery(company.Id), TestContext.Current.CancellationToken);
 
         // Assert: two root nodes, first root has one child with one grandchild.
         Assert.Equal(2, result.Count);

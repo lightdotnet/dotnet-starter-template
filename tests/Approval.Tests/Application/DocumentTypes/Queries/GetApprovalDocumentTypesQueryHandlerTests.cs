@@ -16,11 +16,11 @@ public class GetApprovalDocumentTypesQueryHandlerTests
             new ApprovalDocumentType { Name = "Contract", Code = "CTR" },
             new ApprovalDocumentType { Name = "Agreement", Code = "AGR" },
             new ApprovalDocumentType { Name = "Invoice", Code = "INV" });
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetApprovalDocumentTypesQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetApprovalDocumentTypesQuery(), CancellationToken.None);
+        var result = await handler.Handle(new GetApprovalDocumentTypesQuery(), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(["Agreement", "Contract", "Invoice"], result.Select(x => x.Name));
@@ -34,11 +34,11 @@ public class GetApprovalDocumentTypesQueryHandlerTests
         await host.Context.ApprovalDocumentTypes.AddRangeAsync(
             new ApprovalDocumentType { Name = "Contract", Code = "CTR", IsActive = true },
             new ApprovalDocumentType { Name = "Invoice", Code = "INV", IsActive = false });
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetApprovalDocumentTypesQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetApprovalDocumentTypesQuery(ActiveOnly: true), CancellationToken.None);
+        var result = await handler.Handle(new GetApprovalDocumentTypesQuery(ActiveOnly: true), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(["Contract"], result.Select(x => x.Name));

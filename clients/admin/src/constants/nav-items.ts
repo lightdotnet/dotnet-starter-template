@@ -11,6 +11,7 @@ import { COMPANIES_NAV_ITEM } from "@/modules/organization/companies/constants/n
 import { DEPARTMENTS_NAV_ITEM } from "@/modules/organization/departments/constants/nav-item";
 import { EMPLOYEES_NAV_ITEM } from "@/modules/organization/employees/constants/nav-item";
 import { APPROVALS_NAV_ITEM } from "@/modules/approvals/constants/nav-item";
+import { LEAVE_REQUESTS_NAV_ITEM } from "@/modules/leave-requests/constants/nav-item";
 import type { NavItem } from "@/types/nav";
 
 export const NAV_ITEMS: NavItem[] = [
@@ -36,6 +37,7 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   APPROVALS_NAV_ITEM,
+  LEAVE_REQUESTS_NAV_ITEM,
   {
     label: "Settings",
     href: "/settings",

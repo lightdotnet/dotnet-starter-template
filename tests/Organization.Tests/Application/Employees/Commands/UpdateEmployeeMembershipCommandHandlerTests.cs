@@ -18,25 +18,25 @@ public class UpdateEmployeeMembershipCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "A", LastName = "B" };
         var unit1 = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "U1", Code = "U1" };
         var unit2 = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "U2", Code = "U2" };
-        await host.Context.Employees.AddAsync(employee);
+        await host.Context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
         await host.Context.OrgUnits.AddRangeAsync(unit1, unit2);
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         await host.Context.EmployeeOrgUnitMemberships.AddRangeAsync(
             new EmployeeOrgUnitMembership { EmployeeId = employee.Id, OrgUnitId = unit1.Id, IsPrimary = true, StartDate = DateTimeOffset.UtcNow },
             new EmployeeOrgUnitMembership { EmployeeId = employee.Id, OrgUnitId = unit2.Id, IsPrimary = false, StartDate = DateTimeOffset.UtcNow });
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new UpdateEmployeeMembershipCommandHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new UpdateEmployeeMembershipCommand(
                 employee.Id, unit2.Id, new UpdateEmployeeMembershipRequest { IsPrimary = true }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -56,22 +56,24 @@ public class UpdateEmployeeMembershipCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "A", LastName = "B" };
         var unit = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "U1", Code = "U1" };
-        await host.Context.Employees.AddAsync(employee);
-        await host.Context.OrgUnits.AddAsync(unit);
-        await host.Context.SaveChangesAsync();
-        await host.Context.EmployeeOrgUnitMemberships.AddAsync(new EmployeeOrgUnitMembership
-        {
-            EmployeeId = employee.Id,
-            OrgUnitId = unit.Id,
-            AssignmentType = AssignmentType.Current,
-            IsManager = false,
-            StartDate = DateTimeOffset.UtcNow,
-        });
-        await host.Context.SaveChangesAsync();
+        await host.Context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await host.Context.OrgUnits.AddAsync(unit, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await host.Context.EmployeeOrgUnitMemberships.AddAsync(
+            new EmployeeOrgUnitMembership
+            {
+                EmployeeId = employee.Id,
+                OrgUnitId = unit.Id,
+                AssignmentType = AssignmentType.Current,
+                IsManager = false,
+                StartDate = DateTimeOffset.UtcNow,
+            },
+            TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new UpdateEmployeeMembershipCommandHandler(host.Context);
 
         // Act
@@ -80,7 +82,7 @@ public class UpdateEmployeeMembershipCommandHandlerTests
                 employee.Id,
                 unit.Id,
                 new UpdateEmployeeMembershipRequest { AssignmentType = AssignmentType.Acting, IsManager = true }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -100,7 +102,7 @@ public class UpdateEmployeeMembershipCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new UpdateEmployeeMembershipCommand("missing", "missing", new UpdateEmployeeMembershipRequest()),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);

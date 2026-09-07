@@ -15,7 +15,7 @@ public class GetApprovalDocumentTypeByIdQueryHandlerTests
         var handler = new GetApprovalDocumentTypeByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetApprovalDocumentTypeByIdQuery("missing"), CancellationToken.None);
+        var result = await handler.Handle(new GetApprovalDocumentTypeByIdQuery("missing"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -27,12 +27,12 @@ public class GetApprovalDocumentTypeByIdQueryHandlerTests
         // Arrange
         using var host = new ApprovalTestHost();
         var entity = new ApprovalDocumentType { Name = "Invoice", Code = "INV" };
-        await host.Context.ApprovalDocumentTypes.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalDocumentTypes.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetApprovalDocumentTypeByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetApprovalDocumentTypeByIdQuery(entity.Id), CancellationToken.None);
+        var result = await handler.Handle(new GetApprovalDocumentTypeByIdQuery(entity.Id), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

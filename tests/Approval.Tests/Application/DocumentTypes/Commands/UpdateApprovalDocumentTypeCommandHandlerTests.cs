@@ -21,7 +21,7 @@ public class UpdateApprovalDocumentTypeCommandHandlerTests
             {
                 Id = "missing", Name = "Invoice", Code = "INV", IsActive = true,
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -35,7 +35,7 @@ public class UpdateApprovalDocumentTypeCommandHandlerTests
         var a = new ApprovalDocumentType { Name = "Invoice", Code = "INV" };
         var b = new ApprovalDocumentType { Name = "Contract", Code = "CTR" };
         await host.Context.ApprovalDocumentTypes.AddRangeAsync(a, b);
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new UpdateApprovalDocumentTypeCommandHandler(host.Context);
 
         // Act
@@ -44,7 +44,7 @@ public class UpdateApprovalDocumentTypeCommandHandlerTests
             {
                 Id = b.Id, Name = "Contract", Code = "INV", IsActive = true,
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -56,8 +56,8 @@ public class UpdateApprovalDocumentTypeCommandHandlerTests
         // Arrange
         using var host = new ApprovalTestHost();
         var entity = new ApprovalDocumentType { Name = "Invoice", Code = "INV", IsActive = true };
-        await host.Context.ApprovalDocumentTypes.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalDocumentTypes.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new UpdateApprovalDocumentTypeCommandHandler(host.Context);
 
         // Act
@@ -66,11 +66,11 @@ public class UpdateApprovalDocumentTypeCommandHandlerTests
             {
                 Id = entity.Id, Name = "Invoice v2", Code = "INV", Description = "Updated", IsActive = false,
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
-        var reloaded = await host.Context.ApprovalDocumentTypes.FindAsync(entity.Id);
+        var reloaded = await host.Context.ApprovalDocumentTypes.FindAsync([entity.Id], TestContext.Current.CancellationToken);
         Assert.Equal("Invoice v2", reloaded!.Name);
         Assert.False(reloaded.IsActive);
     }

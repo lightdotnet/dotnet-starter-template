@@ -15,6 +15,7 @@ const API_BASE_URL_ENV_VARS: Record<ApiClientName, string> = {
   [ApiClients.Notifications]: "NOTIFICATIONS_API_BASE_URL",
   [ApiClients.Organization]: "ORGANIZATION_API_BASE_URL",
   [ApiClients.Approval]: "APPROVAL_API_BASE_URL",
+  [ApiClients.LeaveManagement]: "LEAVE_MANAGEMENT_API_BASE_URL",
 };
 
 /**

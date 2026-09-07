@@ -23,7 +23,7 @@ public class CreateApprovalRequestCommandHandlerTests
         var handler = new CreateApprovalRequestCommandHandler(serviceMock.Object);
 
         // Act
-        var result = await handler.Handle(new CreateApprovalRequestCommand(model), CancellationToken.None);
+        var result = await handler.Handle(new CreateApprovalRequestCommand(model), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

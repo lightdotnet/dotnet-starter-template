@@ -15,14 +15,14 @@ public class CreateCompanyCommandHandlerTests
     {
         // Arrange
         using var host = new OrganizationTestHost();
-        await host.Context.Companies.AddAsync(new Company { Name = "Acme", Code = "ACME" });
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(new Company { Name = "Acme", Code = "ACME" }, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new CreateCompanyCommandHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new CreateCompanyCommand(new CreateCompanyRequest { Name = "Acme Corp", Code = "ACME" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -38,10 +38,10 @@ public class CreateCompanyCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new CreateCompanyCommand(new CreateCompanyRequest { Name = "Acme", Code = "ACME" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.NotNull(await host.Context.Companies.FindAsync(result.Data));
+        Assert.NotNull(await host.Context.Companies.FindAsync([result.Data], TestContext.Current.CancellationToken));
     }
 }

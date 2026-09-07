@@ -33,12 +33,12 @@ public class SearchApprovalRequestsQueryHandlerTests
         await host.Context.ApprovalRequests.AddRangeAsync(
             NewRequest("Leave", "Leave A", ApprovalStatus.Pending),
             NewRequest("Expense", "Expense B", ApprovalStatus.Approved));
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchApprovalRequestsQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
-            new SearchApprovalRequestsQuery(new ApprovalRequestSearchRequest()), CancellationToken.None);
+            new SearchApprovalRequestsQuery(new ApprovalRequestSearchRequest()), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(2, result.Data.TotalRecords);
@@ -53,14 +53,14 @@ public class SearchApprovalRequestsQueryHandlerTests
             NewRequest("Leave", "Leave A", ApprovalStatus.Pending),
             NewRequest("Leave", "Leave B", ApprovalStatus.Approved),
             NewRequest("Expense", "Expense C", ApprovalStatus.Pending));
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchApprovalRequestsQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new SearchApprovalRequestsQuery(
                 new ApprovalRequestSearchRequest { RequestType = "Leave", Status = ApprovalStatus.Pending }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(1, result.Data.TotalRecords);

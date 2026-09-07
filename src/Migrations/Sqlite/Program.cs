@@ -25,3 +25,7 @@ await organizationInitialiser.TrySeedAsync();
 var approvalInitialiser = serviceProvider.GetRequiredService<StarterKit.Approval.Api.Data.ApprovalContextInitialiser>();
 
 await approvalInitialiser.InitialiseAsync();
+
+var leaveManagementInitialiser = serviceProvider.GetRequiredService<StarterKit.LeaveManagement.Api.Data.LeaveManagementContextInitialiser>();
+
+await leaveManagementInitialiser.InitialiseAsync();

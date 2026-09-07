@@ -22,21 +22,21 @@ public class CreateEmployeeLoginCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var employee = new Employee
         {
             CompanyId = company.Id, EmployeeCode = "E1", FirstName = "A", LastName = "B", UserId = "existing-user",
         };
-        await host.Context.Employees.AddAsync(employee);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var userServiceMock = new Mock<IUserService>();
         var handler = new CreateEmployeeLoginCommandHandler(host.Context, userServiceMock.Object);
 
         // Act
         var result = await handler.Handle(
             new CreateEmployeeLoginCommand(employee.Id, new CreateEmployeeLoginRequest { UserName = "jane" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -49,11 +49,11 @@ public class CreateEmployeeLoginCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "Jane", LastName = "Doe" };
-        await host.Context.Employees.AddAsync(employee);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var userServiceMock = new Mock<IUserService>();
         userServiceMock
             .Setup(s => s.CreateAsync(It.IsAny<CreateUserRequest>()))
@@ -63,7 +63,7 @@ public class CreateEmployeeLoginCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new CreateEmployeeLoginCommand(employee.Id, new CreateEmployeeLoginRequest { UserName = "jane" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -72,7 +72,7 @@ public class CreateEmployeeLoginCommandHandlerTests
         // tracker, so a tracked read here would return the stale in-memory null UserId.
         var updated = await host.Context.Employees
             .AsNoTracking()
-            .FirstAsync(x => x.Id == employee.Id);
+            .FirstAsync(x => x.Id == employee.Id, TestContext.Current.CancellationToken);
         Assert.Equal("new-user-id", updated.UserId);
         userServiceMock.Verify(
             s => s.SetClaimAsync("new-user-id", ClaimTypeConstants.EmployeeId, employee.Id), Times.Once);
@@ -84,11 +84,11 @@ public class CreateEmployeeLoginCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "Jane", LastName = "Doe" };
-        await host.Context.Employees.AddAsync(employee);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var userServiceMock = new Mock<IUserService>();
         userServiceMock
             .Setup(s => s.CreateAsync(It.IsAny<CreateUserRequest>()))
@@ -98,11 +98,11 @@ public class CreateEmployeeLoginCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new CreateEmployeeLoginCommand(employee.Id, new CreateEmployeeLoginRequest { UserName = "jane" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
-        var updated = await host.Context.Employees.FindAsync(employee.Id);
+        var updated = await host.Context.Employees.FindAsync([employee.Id], TestContext.Current.CancellationToken);
         Assert.Null(updated!.UserId);
     }
 
@@ -112,11 +112,11 @@ public class CreateEmployeeLoginCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "Jane", LastName = "Doe" };
-        await host.Context.Employees.AddAsync(employee);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var userServiceMock = new Mock<IUserService>();
         userServiceMock
@@ -135,7 +135,7 @@ public class CreateEmployeeLoginCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new CreateEmployeeLoginCommand(employee.Id, new CreateEmployeeLoginRequest { UserName = "jane" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -144,7 +144,7 @@ public class CreateEmployeeLoginCommandHandlerTests
             s => s.SetClaimAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         var persisted = await host.Context.Employees
             .AsNoTracking()
-            .FirstAsync(x => x.Id == employee.Id);
+            .FirstAsync(x => x.Id == employee.Id, TestContext.Current.CancellationToken);
         Assert.Equal("concurrent-user", persisted.UserId);
     }
 }

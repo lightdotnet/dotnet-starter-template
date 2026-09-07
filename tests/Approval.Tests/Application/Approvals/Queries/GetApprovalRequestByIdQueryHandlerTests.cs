@@ -16,7 +16,7 @@ public class GetApprovalRequestByIdQueryHandlerTests
         var handler = new GetApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetApprovalRequestByIdQuery("missing"), CancellationToken.None);
+        var result = await handler.Handle(new GetApprovalRequestByIdQuery("missing"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -38,12 +38,12 @@ public class GetApprovalRequestByIdQueryHandlerTests
             CurrentLevel = 1,
             Steps = [new ApprovalStep { Level = 1, ApproverUserId = "approver-1", ApproverEmployeeId = "approver-1" }],
         };
-        await host.Context.ApprovalRequests.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalRequests.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetApprovalRequestByIdQuery(entity.Id), CancellationToken.None);
+        var result = await handler.Handle(new GetApprovalRequestByIdQuery(entity.Id), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -56,8 +56,8 @@ public class GetApprovalRequestByIdQueryHandlerTests
         // Arrange
         using var host = new ApprovalTestHost();
         var documentType = new ApprovalDocumentType { Name = "Leave request", Code = "LEAVE", IsActive = true };
-        await host.Context.ApprovalDocumentTypes.AddAsync(documentType);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalDocumentTypes.AddAsync(documentType, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var entity = new ApprovalRequest
         {
             RequestType = "LEAVE",
@@ -79,12 +79,12 @@ public class GetApprovalRequestByIdQueryHandlerTests
                 },
             ],
         };
-        await host.Context.ApprovalRequests.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalRequests.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetApprovalRequestByIdQuery(entity.Id), CancellationToken.None);
+        var result = await handler.Handle(new GetApprovalRequestByIdQuery(entity.Id), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

@@ -19,7 +19,7 @@ public class SearchCompaniesQueryHandlerTests
         await host.Context.Companies.AddRangeAsync(
             new Company { Name = "Acme Corp", Code = "ACME" },
             new Company { Name = "Globex", Code = "GLBX" });
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchCompaniesQueryHandler(host.Context);
 
         // Act: SQLite translates .Contains() to instr(), which is byte-for-byte case-sensitive
@@ -27,7 +27,7 @@ public class SearchCompaniesQueryHandlerTests
         // handler in this codebase using this exact WhereIf(...Contains...) pattern.
         var result = await handler.Handle(
             new SearchCompaniesQuery(new CompanySearchRequest { SearchValue = "Acme", PageNumber = 1, PageSize = 10 }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(1, result.Data.TotalRecords);
@@ -42,13 +42,13 @@ public class SearchCompaniesQueryHandlerTests
         await host.Context.Companies.AddRangeAsync(
             new Company { Name = "Active Co", Code = "AC", Status = OrganizationStatus.Active },
             new Company { Name = "Inactive Co", Code = "IC", Status = OrganizationStatus.Inactive });
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchCompaniesQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new SearchCompaniesQuery(new CompanySearchRequest { Status = OrganizationStatus.Inactive, PageNumber = 1, PageSize = 10 }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(1, result.Data.TotalRecords);

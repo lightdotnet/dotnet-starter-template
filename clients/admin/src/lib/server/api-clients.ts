@@ -5,6 +5,7 @@ export const ApiClients = {
   Notifications: "Notifications",
   Organization: "Organization",
   Approval: "Approval",
+  LeaveManagement: "LeaveManagement",
 } as const;
 
 export type ApiClientName = (typeof ApiClients)[keyof typeof ApiClients];

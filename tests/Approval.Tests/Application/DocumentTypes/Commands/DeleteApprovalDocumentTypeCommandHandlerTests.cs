@@ -15,7 +15,7 @@ public class DeleteApprovalDocumentTypeCommandHandlerTests
         var handler = new DeleteApprovalDocumentTypeCommandHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new DeleteApprovalDocumentTypeCommand("missing"), CancellationToken.None);
+        var result = await handler.Handle(new DeleteApprovalDocumentTypeCommand("missing"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -27,22 +27,24 @@ public class DeleteApprovalDocumentTypeCommandHandlerTests
         // Arrange
         using var host = new ApprovalTestHost();
         var docType = new ApprovalDocumentType { Name = "Invoice", Code = "INV" };
-        await host.Context.ApprovalDocumentTypes.AddAsync(docType);
-        await host.Context.SaveChangesAsync();
-        await host.Context.ApprovalRequests.AddAsync(new ApprovalRequest
-        {
-            RequestType = "Test",
-            RequestId = "req-1",
-            RequesterUserId = "requester",
-            RequesterEmployeeId = "emp-1",
-            Title = "Title",
-            DocumentTypeId = docType.Id,
-        });
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalDocumentTypes.AddAsync(docType, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await host.Context.ApprovalRequests.AddAsync(
+            new ApprovalRequest
+            {
+                RequestType = "Test",
+                RequestId = "req-1",
+                RequesterUserId = "requester",
+                RequesterEmployeeId = "emp-1",
+                Title = "Title",
+                DocumentTypeId = docType.Id,
+            },
+            TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new DeleteApprovalDocumentTypeCommandHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new DeleteApprovalDocumentTypeCommand(docType.Id), CancellationToken.None);
+        var result = await handler.Handle(new DeleteApprovalDocumentTypeCommand(docType.Id), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -54,12 +56,12 @@ public class DeleteApprovalDocumentTypeCommandHandlerTests
         // Arrange
         using var host = new ApprovalTestHost();
         var docType = new ApprovalDocumentType { Name = "Invoice", Code = "INV" };
-        await host.Context.ApprovalDocumentTypes.AddAsync(docType);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalDocumentTypes.AddAsync(docType, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new DeleteApprovalDocumentTypeCommandHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new DeleteApprovalDocumentTypeCommand(docType.Id), CancellationToken.None);
+        var result = await handler.Handle(new DeleteApprovalDocumentTypeCommand(docType.Id), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

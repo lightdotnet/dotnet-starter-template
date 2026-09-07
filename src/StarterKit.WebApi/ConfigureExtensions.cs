@@ -11,6 +11,7 @@ using StarterKit.Infrastructure.Cors;
 using StarterKit.Infrastructure.HealthChecks;
 using StarterKit.Infrastructure.Modularity;
 using StarterKit.Infrastructure.Services;
+using StarterKit.LeaveManagement.Api;
 using StarterKit.Notifications.Api;
 using StarterKit.Organization.Api;
 using StarterKit.Shared;
@@ -28,6 +29,7 @@ public static class ConfigureExtensions
             typeof(NotificationModule).Assembly,
             typeof(OrganizationModule).Assembly,
             typeof(ApprovalModule).Assembly,
+            typeof(LeaveManagementModule).Assembly,
         ];
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)

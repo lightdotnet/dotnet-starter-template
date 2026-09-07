@@ -16,7 +16,7 @@ public class GetMyApprovalRequestByIdQueryHandlerTests
         var handler = new GetMyApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery("missing", "user-1"), CancellationToken.None);
+        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery("missing", "user-1"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -38,12 +38,12 @@ public class GetMyApprovalRequestByIdQueryHandlerTests
             CurrentLevel = 1,
             Steps = [new ApprovalStep { Level = 1, ApproverUserId = "approver-1", ApproverEmployeeId = "approver-1" }],
         };
-        await host.Context.ApprovalRequests.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalRequests.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetMyApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery(entity.Id, "unrelated-user"), CancellationToken.None);
+        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery(entity.Id, "unrelated-user"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -65,12 +65,12 @@ public class GetMyApprovalRequestByIdQueryHandlerTests
             CurrentLevel = 1,
             Steps = [new ApprovalStep { Level = 1, ApproverUserId = "approver-1", ApproverEmployeeId = "approver-1" }],
         };
-        await host.Context.ApprovalRequests.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalRequests.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetMyApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery(entity.Id, "requester"), CancellationToken.None);
+        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery(entity.Id, "requester"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -97,12 +97,12 @@ public class GetMyApprovalRequestByIdQueryHandlerTests
                 new ApprovalStep { Level = 2, ApproverUserId = "approver-2", ApproverEmployeeId = "approver-2" },
             ],
         };
-        await host.Context.ApprovalRequests.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalRequests.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetMyApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
-        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery(entity.Id, "approver-2"), CancellationToken.None);
+        var result = await handler.Handle(new GetMyApprovalRequestByIdQuery(entity.Id, "approver-2"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -116,8 +116,8 @@ public class GetMyApprovalRequestByIdQueryHandlerTests
         // is what makes DocumentTypeName resolve - guard it with a test.
         using var host = new ApprovalTestHost();
         var documentType = new ApprovalDocumentType { Name = "Purchase order", Code = "PO", IsActive = true };
-        await host.Context.ApprovalDocumentTypes.AddAsync(documentType);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalDocumentTypes.AddAsync(documentType, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var entity = new ApprovalRequest
         {
             RequestType = "PO",
@@ -139,13 +139,13 @@ public class GetMyApprovalRequestByIdQueryHandlerTests
                 },
             ],
         };
-        await host.Context.ApprovalRequests.AddAsync(entity);
-        await host.Context.SaveChangesAsync();
+        await host.Context.ApprovalRequests.AddAsync(entity, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new GetMyApprovalRequestByIdQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
-            new GetMyApprovalRequestByIdQuery(entity.Id, "requester"), CancellationToken.None);
+            new GetMyApprovalRequestByIdQuery(entity.Id, "requester"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

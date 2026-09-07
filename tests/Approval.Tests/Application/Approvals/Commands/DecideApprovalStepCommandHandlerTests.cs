@@ -20,7 +20,7 @@ public class DecideApprovalStepCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new DecideApprovalStepCommand("req-1", "user-1", true, "Looks good"), CancellationToken.None);
+            new DecideApprovalStepCommand("req-1", "user-1", true, "Looks good"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

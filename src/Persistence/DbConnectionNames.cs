@@ -11,4 +11,6 @@ public abstract class DbConnectionNames
     public const string Organization = Default;
 
     public const string Approval = Default;
+
+    public const string LeaveManagement = Default;
 }

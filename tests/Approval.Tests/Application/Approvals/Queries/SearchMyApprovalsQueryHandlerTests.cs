@@ -46,13 +46,13 @@ public class SearchMyApprovalsQueryHandlerTests
         await host.Context.ApprovalRequests.AddRangeAsync(
             NewRequest("user-1", ApprovalStatus.Pending, 1, NewStep(1, "approver-1", ApprovalStepStatus.Pending)),
             NewRequest("user-2", ApprovalStatus.Pending, 1, NewStep(1, "approver-1", ApprovalStepStatus.Pending)));
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchMyApprovalsQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new SearchMyApprovalsQuery("user-1", new MyApprovalRequestSearchRequest { Relation = ApprovalRelation.Requested }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(1, result.Data.TotalRecords);
@@ -76,13 +76,13 @@ public class SearchMyApprovalsQueryHandlerTests
             NewRequest(
                 "requester", ApprovalStatus.Approved, 1,
                 NewStep(1, "user-1", ApprovalStepStatus.Approved, DateTimeOffset.UtcNow)));
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchMyApprovalsQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new SearchMyApprovalsQuery("user-1", new MyApprovalRequestSearchRequest { Relation = ApprovalRelation.AwaitingMyDecision }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(1, result.Data.TotalRecords);
@@ -101,13 +101,13 @@ public class SearchMyApprovalsQueryHandlerTests
                 NewStep(2, "someone-else", ApprovalStepStatus.Pending)),
             // user-1 is assigned but hasn't decided yet
             NewRequest("requester", ApprovalStatus.Pending, 1, NewStep(1, "user-1", ApprovalStepStatus.Pending)));
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchMyApprovalsQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new SearchMyApprovalsQuery("user-1", new MyApprovalRequestSearchRequest { Relation = ApprovalRelation.DecidedByMe }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(1, result.Data.TotalRecords);
@@ -126,13 +126,13 @@ public class SearchMyApprovalsQueryHandlerTests
                 NewStep(1, "someone-else", ApprovalStepStatus.Pending),
                 NewStep(2, "user-1", ApprovalStepStatus.Pending)),
             NewRequest("unrelated", ApprovalStatus.Pending, 1, NewStep(1, "someone-else", ApprovalStepStatus.Pending)));
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchMyApprovalsQueryHandler(host.Context);
 
         // Act
         var result = await handler.Handle(
             new SearchMyApprovalsQuery("user-1", new MyApprovalRequestSearchRequest { Relation = ApprovalRelation.All }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(2, result.Data.TotalRecords);
@@ -148,7 +148,7 @@ public class SearchMyApprovalsQueryHandlerTests
         var nonMatching = NewRequest("user-1", ApprovalStatus.Pending, 1, NewStep(1, "approver-1", ApprovalStepStatus.Pending));
         nonMatching.Title = "Expense report";
         await host.Context.ApprovalRequests.AddRangeAsync(matching, nonMatching);
-        await host.Context.SaveChangesAsync();
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new SearchMyApprovalsQueryHandler(host.Context);
 
         // Act
@@ -156,7 +156,7 @@ public class SearchMyApprovalsQueryHandlerTests
             new SearchMyApprovalsQuery(
                 "user-1",
                 new MyApprovalRequestSearchRequest { Relation = ApprovalRelation.Requested, SearchValue = "leave" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(1, result.Data.TotalRecords);

@@ -16,26 +16,28 @@ public class RemoveEmployeeFromOrgUnitCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var employee = new Employee { CompanyId = company.Id, EmployeeCode = "E1", FirstName = "A", LastName = "B" };
         var unit = new OrgUnit { CompanyId = company.Id, Type = OrgUnitType.Department, Name = "U", Code = "U" };
-        await host.Context.Employees.AddAsync(employee);
-        await host.Context.OrgUnits.AddAsync(unit);
-        await host.Context.SaveChangesAsync();
-        await host.Context.EmployeeOrgUnitMemberships.AddAsync(new EmployeeOrgUnitMembership
-        {
-            EmployeeId = employee.Id,
-            OrgUnitId = unit.Id,
-            IsPrimary = true,
-            StartDate = DateTimeOffset.UtcNow,
-        });
-        await host.Context.SaveChangesAsync();
+        await host.Context.Employees.AddAsync(employee, TestContext.Current.CancellationToken);
+        await host.Context.OrgUnits.AddAsync(unit, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await host.Context.EmployeeOrgUnitMemberships.AddAsync(
+            new EmployeeOrgUnitMembership
+            {
+                EmployeeId = employee.Id,
+                OrgUnitId = unit.Id,
+                IsPrimary = true,
+                StartDate = DateTimeOffset.UtcNow,
+            },
+            TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new RemoveEmployeeFromOrgUnitCommandHandler(host.Context, host.DateTime);
 
         // Act
         var result = await handler.Handle(
-            new RemoveEmployeeFromOrgUnitCommand(employee.Id, unit.Id), CancellationToken.None);
+            new RemoveEmployeeFromOrgUnitCommand(employee.Id, unit.Id), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -54,7 +56,7 @@ public class RemoveEmployeeFromOrgUnitCommandHandlerTests
 
         // Act
         var result = await handler.Handle(
-            new RemoveEmployeeFromOrgUnitCommand("missing-employee", "missing-unit"), CancellationToken.None);
+            new RemoveEmployeeFromOrgUnitCommand("missing-employee", "missing-unit"), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);

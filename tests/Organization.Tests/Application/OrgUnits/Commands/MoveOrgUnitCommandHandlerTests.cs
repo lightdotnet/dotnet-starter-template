@@ -21,7 +21,7 @@ public class MoveOrgUnitCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new MoveOrgUnitCommand(unit.Id, new MoveOrgUnitRequest { NewParentId = unit.Id }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -41,7 +41,7 @@ public class MoveOrgUnitCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new MoveOrgUnitCommand(unit.Id, new MoveOrgUnitRequest { NewParentId = otherCompanyUnit.Id }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -61,7 +61,7 @@ public class MoveOrgUnitCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new MoveOrgUnitCommand(root.Id, new MoveOrgUnitRequest { NewParentId = grandchild.Id }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -80,11 +80,11 @@ public class MoveOrgUnitCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new MoveOrgUnitCommand(child.Id, new MoveOrgUnitRequest { NewParentId = null }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
-        var updated = await host.Context.OrgUnits.FindAsync(child.Id);
+        var updated = await host.Context.OrgUnits.FindAsync([child.Id], TestContext.Current.CancellationToken);
         Assert.Null(updated!.ParentId);
     }
 
@@ -100,7 +100,7 @@ public class MoveOrgUnitCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new MoveOrgUnitCommand(unit.Id, new MoveOrgUnitRequest { NewParentId = "missing" }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -119,19 +119,19 @@ public class MoveOrgUnitCommandHandlerTests
         // Act
         var result = await handler.Handle(
             new MoveOrgUnitCommand(rootB.Id, new MoveOrgUnitRequest { NewParentId = rootA.Id }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
-        var updated = await host.Context.OrgUnits.FindAsync(rootB.Id);
+        var updated = await host.Context.OrgUnits.FindAsync([rootB.Id], TestContext.Current.CancellationToken);
         Assert.Equal(rootA.Id, updated!.ParentId);
     }
 
     private static async Task<Company> SeedCompanyAsync(OrganizationTestHost host, string suffix = "")
     {
         var company = new Company { Name = $"Company{suffix}", Code = $"C{suffix}{Guid.NewGuid():N}" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         return company;
     }
 
@@ -146,8 +146,8 @@ public class MoveOrgUnitCommandHandlerTests
             Name = name,
             Code = $"{name}-{Guid.NewGuid():N}",
         };
-        await host.Context.OrgUnits.AddAsync(unit);
-        await host.Context.SaveChangesAsync();
+        await host.Context.OrgUnits.AddAsync(unit, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         return unit;
     }
 }

@@ -23,7 +23,7 @@ public class CreateEmployeeLevelCommandHandlerTests
             {
                 CompanyId = "missing", Name = "Senior", Code = "SR", Rank = 3,
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -35,11 +35,12 @@ public class CreateEmployeeLevelCommandHandlerTests
         // Arrange
         using var host = new OrganizationTestHost();
         var company = new Company { Name = "A", Code = "A" };
-        await host.Context.Companies.AddAsync(company);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddAsync(company, TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         await host.Context.EmployeeLevels.AddAsync(
-            new EmployeeLevel { CompanyId = company.Id, Name = "Senior", Code = "SR", Rank = 3 });
-        await host.Context.SaveChangesAsync();
+            new EmployeeLevel { CompanyId = company.Id, Name = "Senior", Code = "SR", Rank = 3 },
+            TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new CreateEmployeeLevelCommandHandler(host.Context);
 
         // Act
@@ -48,7 +49,7 @@ public class CreateEmployeeLevelCommandHandlerTests
             {
                 CompanyId = company.Id, Name = "Senior Duplicate", Code = "SR", Rank = 4,
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -61,11 +62,12 @@ public class CreateEmployeeLevelCommandHandlerTests
         using var host = new OrganizationTestHost();
         var companyA = new Company { Name = "A", Code = "A" };
         var companyB = new Company { Name = "B", Code = "B" };
-        await host.Context.Companies.AddRangeAsync(companyA, companyB);
-        await host.Context.SaveChangesAsync();
+        await host.Context.Companies.AddRangeAsync([companyA, companyB], TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         await host.Context.EmployeeLevels.AddAsync(
-            new EmployeeLevel { CompanyId = companyA.Id, Name = "Senior", Code = "SR", Rank = 3 });
-        await host.Context.SaveChangesAsync();
+            new EmployeeLevel { CompanyId = companyA.Id, Name = "Senior", Code = "SR", Rank = 3 },
+            TestContext.Current.CancellationToken);
+        await host.Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var handler = new CreateEmployeeLevelCommandHandler(host.Context);
 
         // Act
@@ -74,7 +76,7 @@ public class CreateEmployeeLevelCommandHandlerTests
             {
                 CompanyId = companyB.Id, Name = "Senior", Code = "SR", Rank = 3,
             }),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
