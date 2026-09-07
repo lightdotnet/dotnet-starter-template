@@ -22,6 +22,10 @@ ASP.NET Core (C#) **Modular Monolith** — one solution (`StarterKit.slnx`), one
 
 Plus shared/host projects: `src/Shared` (shared kernel, leaf), `src/Infrastructure` (cross-cutting infra), `src/Persistence` (EF Core concerns), `src/StarterKit.WebApi` (composition-root host).
 
+## Design Approach
+
+Backend design is **DDD-first**: model the domain deliberately before writing handlers — aggregate boundaries and invariants, entity vs. value object, domain events for cross-aggregate/cross-module reactions, and business rules living on the aggregate/entity rather than in a `CommandHandler` or service (an anemic model is a smell). `Organization`/`Approval`/`LeaveManagement`'s `Domain/<Feature>/` folders are the pattern; each module doc's § Notable Conventions has the specifics. Stay pragmatic — plain enums where a value object adds nothing, `Light.Specification` only for reused/special-case predicates.
+
 ## Architectural Constraints ("do not" rules)
 
 - **Every module's `<Module>.Contracts` project is the only seam other modules or the host may reference.** Never reference another module's internals (its single-project folders, or a split module's `Domain`/`Application`/`Infrastructure`/`Api`) directly.

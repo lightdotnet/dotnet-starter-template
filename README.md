@@ -4,18 +4,21 @@ A starter template monorepo for a full-stack application: a C#/.NET backend orga
 
 ## Status — what's actually built so far
 
-Backend has a working host with two business modules; the `admin` client is a real, functioning app (not a UI shell) with no mock data remaining.
+Backend has a working host with **five business modules**; the `admin` client is a real, functioning app (not a UI shell) with no mock data remaining.
 
 | Piece | Status |
 |---|---|
 | `src/Shared`, `src/Infrastructure`, `src/Persistence` (shared kernel + EF Core concerns) | ✅ built |
-| `src/Identity.Api` + `src/Identity.Contracts` (Identity module — users, roles, claims, JWT auth, permission catalog) | ✅ built, tested (`tests/Identity.Tests`, ~96 tests) |
-| `src/Notifications.Api` + `src/Notifications.Contracts` (Notifications module — storage + real-time push over SignalR) | ✅ built — no dedicated test project yet |
-| `src/Migrations/{MSSQL,PostgreSQL,Sqlite}` (design-time EF Core migration projects) | ✅ built |
+| `src/Identity.Api` + `src/Identity.Contracts` — users, roles, claims, JWT auth/token issuance, permission catalog | ✅ built, tested (`tests/Identity.Tests`, ~100 tests) |
+| `src/Notifications.Api` + `src/Notifications.Contracts` — notification storage + real-time SignalR push (admin + self-service surfaces) | ✅ built — no dedicated test project yet |
+| `src/Organization.Api` + `src/Organization.Contracts` — companies, department/team hierarchy (`OrgUnit`), employee levels, employees, optional employee↔Identity-login linking; exposes `IOrgDirectoryService` | ✅ built, tested (`tests/Organization.Tests`, ~63 tests) |
+| `src/Approval.Api` + `src/Approval.Contracts` — generic multi-level approval-request engine driven via `IApprovalService`; not tied to any request type | ✅ built, tested (`tests/Approval.Tests`, ~57 tests) |
+| `src/LeaveManagement.Api` + `src/LeaveManagement.Contracts` — self-service leave requests; delegates the approval workflow to Approval, resolves approvers via Organization | ✅ built, tested (`tests/LeaveManagement.Tests`, ~30 tests) |
+| `src/Migrations/{MSSQL,PostgreSQL,Sqlite}` (design-time EF Core migration projects) | ✅ built — MSSQL covers all five modules; PostgreSQL/Sqlite cover all but Notifications |
 | `src/StarterKit.WebApi` (composition-root host) | ✅ built — runnable API |
 | `tests/Framework.Tests` (xUnit v3, shared kernel/infra/persistence) | ✅ built — ~69 tests |
-| `clients/admin` (Next.js admin console) | ✅ built — real auth, full Users/Roles CRUD, real-time Notifications; Home page (`/`) shows a session-backed profile summary plus the live notification inbox |
-| Additional `clients/*` apps (e.g. a primary `clients/web` end-user app) | ❌ not yet created |
+| `clients/admin` (Next.js admin console) | ✅ built — real auth; full CRUD for Users/Roles, Organization (companies/departments/employees), a generic Approvals workflow, and self-service Leave requests; real-time Notifications; permission-gated nav |
+| Additional `clients/*` apps (e.g. a primary end-user app) | ❌ not yet created |
 
 ## Structure
 
@@ -23,80 +26,98 @@ Projects that exist today, and how they depend on each other:
 
 ```text
 StarterKit.slnx
-├── src/Shared                    (leaf project — no dependencies)
-├── src/Infrastructure            → depends on Shared
-├── src/Persistence               → depends on Shared
-├── src/Identity.Contracts        → depends on Shared
-├── src/Identity.Api              → depends on Identity.Contracts, Infrastructure, Persistence
-├── src/Notifications.Contracts   → depends on Shared
-├── src/Notifications.Api         → depends on Notifications.Contracts, Infrastructure, Persistence
-├── src/Migrations/MSSQL          → depends on Identity.Api, Notifications.Api, Infrastructure, Persistence, Shared
-├── src/Migrations/PostgreSQL     → depends on Identity.Api, Infrastructure, Persistence, Shared
-├── src/Migrations/Sqlite         → depends on Identity.Api, Infrastructure, Persistence, Shared
-├── src/StarterKit.WebApi         → depends on Identity.Api, Notifications.Api, Infrastructure, Shared (composition-root host)
-├── tests/Framework.Tests         → depends on Shared, Infrastructure, Persistence
-├── tests/Identity.Tests          → depends on Identity.Api, Shared
-└── clients/admin                 (Next.js app — HTTP/JSON only, no shared source with src/)
+├── src/Shared                     (leaf project — no dependencies)
+├── src/Infrastructure             → Shared
+├── src/Persistence                → Shared
+├── src/Identity.Contracts         → Shared
+├── src/Identity.Api               → Identity.Contracts, Infrastructure, Persistence, Notifications.Contracts
+├── src/Notifications.Contracts    → Shared
+├── src/Notifications.Api          → Notifications.Contracts, Infrastructure, Persistence
+├── src/Organization.Contracts     → Shared
+├── src/Organization.Api           → Organization.Contracts, Infrastructure, Persistence, Identity.Contracts
+├── src/Approval.Contracts         → Shared
+├── src/Approval.Api               → Approval.Contracts, Infrastructure, Persistence, Notifications.Contracts
+├── src/LeaveManagement.Contracts  → Shared
+├── src/LeaveManagement.Api        → LeaveManagement.Contracts, Infrastructure, Persistence, Approval.Contracts, Organization.Contracts
+├── src/Migrations/MSSQL           → all five *.Api projects, Infrastructure, Persistence, Shared
+├── src/Migrations/PostgreSQL      → Identity/Organization/Approval/LeaveManagement *.Api, Infrastructure, Persistence, Shared
+├── src/Migrations/Sqlite          → Identity/Organization/Approval/LeaveManagement *.Api, Infrastructure, Persistence, Shared
+├── src/StarterKit.WebApi          → all five *.Api projects, Infrastructure, Shared (composition-root host)
+├── tests/Framework.Tests          → Shared, Infrastructure, Persistence
+├── tests/Identity.Tests           → Identity.Api, Shared
+├── tests/Organization.Tests       → Organization.Api, Identity.Contracts, Shared
+├── tests/Approval.Tests           → Approval.Api, Approval.Contracts, Shared
+├── tests/LeaveManagement.Tests    → LeaveManagement.Api, Approval.Contracts, Organization.Contracts, Shared
+└── clients/admin                  (Next.js app — HTTP/JSON only, no shared source with src/)
 ```
+
+Every module reaches another module only through its `<Module>.Contracts` seam — never its `.Api` internals. The five cross-module edges: `Identity → Notifications.Contracts` (welcome email), `Organization → Identity.Contracts` (employee-login), `Approval → Notifications.Contracts` (notify on decision), `LeaveManagement → Approval.Contracts` (approval workflow) and `LeaveManagement → Organization.Contracts` (approver directory).
 
 ## Architecture Diagram
 
-Solid boxes/arrows are built today; dashed ones are still planned or partial.
-
 ```mermaid
 graph TD
-    Shared["src/Shared<br/>shared kernel"]
-    Infra["src/Infrastructure<br/>cross-cutting infra"]
+    Shared["src/Shared<br/>shared kernel (leaf)"]
+    Infra["src/Infrastructure"]
     Persistence["src/Persistence<br/>EF Core concerns"]
-    IdentityContracts["src/Identity.Contracts"]
-    IdentityApi["src/Identity.Api<br/>Identity module"]
-    NotifContracts["src/Notifications.Contracts"]
-    NotifApi["src/Notifications.Api<br/>Notifications module"]
     Host["src/StarterKit.WebApi<br/>composition-root host"]
-    FrameworkTests["tests/Framework.Tests"]
-    IdentityTests["tests/Identity.Tests"]
     Admin["clients/admin<br/>Next.js admin console"]
-    Web["clients/web (or similar)<br/>(not yet built)"]
+
+    subgraph Identity
+        IdC["Identity.Contracts"]
+        IdA["Identity.Api"]
+    end
+    subgraph Notifications
+        NoC["Notifications.Contracts"]
+        NoA["Notifications.Api"]
+    end
+    subgraph Organization
+        OrC["Organization.Contracts"]
+        OrA["Organization.Api"]
+    end
+    subgraph Approval
+        ApC["Approval.Contracts"]
+        ApA["Approval.Api"]
+    end
+    subgraph LeaveManagement
+        LvC["LeaveManagement.Contracts"]
+        LvA["LeaveManagement.Api"]
+    end
 
     Infra --> Shared
     Persistence --> Shared
-    IdentityContracts --> Shared
-    IdentityApi --> IdentityContracts
-    IdentityApi --> Infra
-    IdentityApi --> Persistence
-    NotifContracts --> Shared
-    NotifApi --> NotifContracts
-    NotifApi --> Infra
-    NotifApi --> Persistence
-    Host --> IdentityApi
-    Host --> NotifApi
-    Host --> Infra
-    Host --> Shared
-    FrameworkTests --> Shared
-    FrameworkTests --> Infra
-    FrameworkTests --> Persistence
-    IdentityTests --> IdentityApi
-    IdentityTests --> Shared
+    IdC & NoC & OrC & ApC & LvC --> Shared
+    IdA --> IdC
+    NoA --> NoC
+    OrA --> OrC
+    ApA --> ApC
+    LvA --> LvC
 
-    Admin -.HTTP/JSON.-> Host
-    Web -.HTTP/JSON.-> Host
+    IdA -. welcome email .-> NoC
+    OrA -. employee-login .-> IdC
+    ApA -. notify on decision .-> NoC
+    LvA -. approval workflow .-> ApC
+    LvA -. approver directory .-> OrC
 
-    classDef built fill:#2f6f4f,stroke:#1e4a34,color:#fff;
-    classDef planned fill:none,stroke:#999,stroke-dasharray: 4 3,color:#888;
-    class Shared,Infra,Persistence,IdentityContracts,IdentityApi,NotifContracts,NotifApi,Host,FrameworkTests,IdentityTests,Admin built;
-    class Web planned;
+    Host --> IdA & NoA & OrA & ApA & LvA
+    Admin -. HTTP/JSON .-> Host
+
+    classDef leaf fill:#2f6f4f,stroke:#1e4a34,color:#fff;
+    class Shared leaf;
 ```
+
+Each `*.Api` project also depends on `Infrastructure` and `Persistence` (edges omitted above for readability).
 
 ## Tech Stack
 
 | Layer | Stack |
 |---|---|
 | Backend runtime | ASP.NET Core (C#), `net10.0` |
-| Backend architecture | Modular Monolith — flat projects under `src/`: `Identity` (`Identity.Api` + `Identity.Contracts`) and `Notifications` (`Notifications.Api` + `Notifications.Contracts`), plus shared kernel (`Shared`, `Infrastructure`, `Persistence`) and the `StarterKit.WebApi` composition-root host |
-| Backend data access | EF Core — provider-configurable via `DbProvider` in `appsettings.json` (`InMemory` / `PostgreSQL` / `MSSQL` / `Sqlite`), with a dedicated design-time migrations project per relational provider (`src/Migrations/{MSSQL,PostgreSQL,Sqlite}`) |
+| Backend architecture | Modular Monolith — flat projects under `src/`: five modules (`Identity`, `Notifications`, `Organization`, `Approval`, `LeaveManagement`), each an `<Module>.Api` + `<Module>.Contracts` pair, plus the shared kernel (`Shared`, `Infrastructure`, `Persistence`) and the `StarterKit.WebApi` composition-root host. One `DbContext` per module, all sharing one physical database separated by schema |
+| Backend data access | EF Core — provider-configurable via `DbProvider` in `appsettings.json` (`InMemory` / `PostgreSQL` / `MSSQL` / `Sqlite`), with a design-time migrations project per relational provider (`src/Migrations/{MSSQL,PostgreSQL,Sqlite}`) |
 | Vendor framework | `Lightsoft.*` package family (mediator, `Result`/`Paged` contracts, domain base types, ASP.NET Core authorization/modularity/CORS helpers, Serilog) |
-| Testing | xUnit v3 — `tests/Framework.Tests` (shared kernel/infra/persistence, ~69 tests), `tests/Identity.Tests` (Identity module, ~96 tests); no dedicated test project for Notifications yet; no mocking library — hand-written fakes |
-| Clients | `clients/admin/` — Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, pnpm. Real auth (encrypted-cookie sessions, proactive token refresh), full Users/Roles CRUD against `Identity.Api`, real-time Notifications via SignalR (browser connects directly to the backend). No mock data remaining. Currently the only client app — no other `clients/*` subfolder exists yet |
+| Testing | xUnit v3 on Microsoft.Testing.Platform — `tests/{Framework,Identity,Organization,Approval,LeaveManagement}.Tests` (~69 / ~100 / ~63 / ~57 / ~30 tests). No dedicated test project for Notifications yet; no mocking library beyond `Moq` for cross-module seam interfaces — otherwise hand-written fakes / real in-memory DbContexts |
+| Clients | `clients/admin/` — Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, pnpm. Real auth (encrypted-cookie sessions, proactive token refresh), CRUD for Identity / Organization / Approvals / Leave requests against the five backend modules, real-time Notifications via SignalR (browser connects directly to the backend). No mock data. Currently the only client app |
 
 ## Getting Started
 
@@ -104,23 +125,22 @@ graph TD
 
 ```bash
 dotnet build StarterKit.slnx
-dotnet test tests/Framework.Tests/Framework.Tests.csproj
-dotnet test tests/Identity.Tests/Identity.Tests.csproj
+dotnet test tests/Framework.Tests/Framework.Tests.csproj      # repeat per tests/*.Tests project
 dotnet run --project src/StarterKit.WebApi/StarterKit.WebApi.csproj
 ```
 
-Configure the DB provider and connection string in `src/StarterKit.WebApi/appsettings.json` (`DbProvider`: `InMemory` | `PostgreSQL` | `MSSQL` | `Sqlite`).
+Configure the DB provider and connection string in `src/StarterKit.WebApi/appsettings.json` (`DbProvider`: `InMemory` | `PostgreSQL` | `MSSQL` | `Sqlite`). On the .NET 10 SDK, if `dotnet test` refuses the legacy VSTest path, run the built test executable directly — see [src/CLAUDE.md § Testing](src/CLAUDE.md).
 
 ### Client (`clients/admin`)
 
 ```bash
 cd clients/admin
 pnpm install
-cp .env.example .env.local   # set API_BASE_URL, TOKEN_ENCRYPTION_KEY, NEXT_PUBLIC_SIGNALR_HUB_URL
+cp .env.example .env.local   # set the five *_API_BASE_URL vars, TOKEN_ENCRYPTION_KEY, SIGNALR_HUB_URL
 pnpm dev
 ```
 
-The backend must be running and reachable at `API_BASE_URL` for auth/data pages to work, and its CORS policy must allow the admin app's origin for the SignalR notification hub (`NEXT_PUBLIC_SIGNALR_HUB_URL`) to connect directly from the browser.
+All env vars are server-only (never `NEXT_PUBLIC_`). The backend must be running and reachable at the `*_API_BASE_URL` values for auth/data pages to work, and its CORS policy must allow the admin app's origin for the SignalR notification hub (`SIGNALR_HUB_URL`) to connect directly from the browser.
 
 ## Documentation
 

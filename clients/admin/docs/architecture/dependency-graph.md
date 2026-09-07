@@ -13,7 +13,7 @@ The full dependency/devDependency list with exact versions lives in `clients/adm
 - **Styling toolchain** (devDependencies): `tailwindcss` + `@tailwindcss/postcss` (Tailwind v4), `shadcn` (CLI that generated `components/ui/*`; also imported at runtime for `shadcn/tailwind.css`), `prettier` + `prettier-plugin-tailwindcss` (no config file/`format` script found — see [coding-conventions.md](../conventions/coding-conventions.md)).
 - **Tooling** (devDependencies): `eslint` + `eslint-config-next` (pinned to match `next`'s version), `typescript`, `@types/*`.
 
-Package manager: pnpm (`pnpm-lock.yaml`). `pnpm-workspace.yaml` exists but only configures build-script approval (`sharp`, `unrs-resolver`) — not a multi-package workspace. No package was added or removed in this sync (verified against `package.json`) — versions bumped in the ordinary course of dependency updates (e.g. `next` 16.3.0 → 16.3.4, `react`/`react-dom` 19.2.4 → 19.2.8, `eslint` ^9 → 10.9.1, `lucide-react` ^1.31.0 → ^1.39.0) are covered in [architecture.md](./architecture.md#external-dependencies)'s version table rather than duplicated here.
+Package manager: pnpm (`pnpm-lock.yaml`). `pnpm-workspace.yaml` exists but only configures build-script approval (`sharp`, `unrs-resolver`) — not a multi-package workspace. `package.json` is the source of truth for exact versions; ordinary version bumps in the course of dependency updates are not tracked in prose here or in `architecture.md`.
 
 ## Module Layout (for import-path purposes)
 

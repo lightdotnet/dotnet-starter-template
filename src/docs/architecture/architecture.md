@@ -1,53 +1,109 @@
 # Architecture: Backend
 
+Layering, dependency direction, and cross-cutting patterns. Per-module internals, public contracts,
+and module-specific debt live in each module doc under [modules/](modules/); the project-reference
+graph and the cross-module dependency inventory live in [dependency-graph.md](dependency-graph.md).
+
 ## Layering
 
-Module structure convention (adopted 2026-07-30): every module lives as one or more flat projects directly under `src/` (no `src/Modules/` nesting) — either a single `<Module>` (or `<Module>.Api`, when kept as a deliberate future-microservice-extraction candidate) project internally organized by folder, or, if complex enough, split Clean-Architecture-style into `<Module>.Domain`/`.Application`/`.Infrastructure`/`.Api`. Every module also gets a `<Module>.Contracts` seam project — the only project other modules or the host may reference.
+Module structure convention (adopted 2026-07-30): every module is one or more flat projects directly
+under `src/` (no `src/Modules/` nesting) — either a single `<Module>` / `<Module>.Api` project
+organized by folder, or, if complex enough, split Clean-Architecture-style into
+`<Module>.Domain`/`.Application`/`.Infrastructure`/`.Api`. Every module also gets a
+`<Module>.Contracts` seam — the only project other modules or the host may reference.
 
-Five modules are built so far, all single-project (not split Domain/Application/Infrastructure/Api). Full internal layering, public contract, and module-specific conventions/risks now live in each module's own doc — this section keeps only a structural summary:
+Five modules exist, all single-project (`.Api` suffix kept as a deliberate future-extraction
+candidate). Structural summary only — full layering per module doc:
 
-| Module | Structure | Notes |
-|---|---|---|
-| Identity | Single project (`src/Identity.Api`, deliberately named with the `.Api` suffix) + `src/Identity.Contracts` (seam) | See [modules/Identity.md](modules/Identity.md) for full layering (`Entities/`, `Application/`, `Services/`, `Jwt/`, `Controllers/`), public contract, and conventions. All writes + user search dispatch through mediator commands/queries (`Application/{Users,Roles}/{Commands,Queries}`), but the handlers still delegate to `UserService`/`RoleService` rather than owning the logic — a half-migration (see modules/Identity.md, D1). Tested (`tests/Identity.Tests`, 100 tests). |
-| Notifications | Single project (`src/Notifications.Api`, same `.Api`-suffix convention) + `src/Notifications.Contracts` (seam) | See [modules/Notifications.md](modules/Notifications.md) for full layering (`Entities/`, `Application/Notifications/{Commands,Queries}`, `Services/`, `Controllers/`, `SignalR/`), public contract, and conventions. Controllers split by **audience** (admin vs. self-service) rather than by resource — a pattern distinct from Identity's. Every controller action dispatches through a mediator command/query, matching Identity's CQRS-entrypoint convention. No dedicated test project yet. |
-| Organization | Single project (`src/Organization.Api`, same `.Api`-suffix convention) + `src/Organization.Contracts` (seam, split into per-feature subfolders — see modules/Organization.md) | See [modules/Organization.md](modules/Organization.md) for full layering (`Domain/{Companies,Employees,OrgUnits}`, `Data/`, `Application/{Companies,OrgUnits,EmployeeLevels,Employees}/{Commands,Queries}`, `Controllers/`), public contract, and conventions. Every controller action dispatches through a mediator command/query, but — unlike Identity/Notifications — the handlers own their logic directly against `OrganizationDbContext`, with no separate service-class layer (see Key Design Patterns below). Also exposes `IOrgDirectoryService`, a cross-module seam consumed by `LeaveManagement`. Tested (`tests/Organization.Tests`, 63 tests). |
-| Approval | Single project (`src/Approval.Api`, same `.Api`-suffix convention) + `src/Approval.Contracts` (seam) | See [modules/Approval.md](modules/Approval.md) for full layering (`Entities/`, `Data/`, `Events/`, `Services/`, `Application/Approvals/{Commands,Queries}`, `Controllers/`), public contract, and conventions. A generic multi-level approval engine, not tied to any request type. Splits by audience rather than following Organization's convention outright: write-path logic (`CreateAsync`/`DecideAsync`/`CancelAsync`) lives behind `IApprovalService` because it must be DI-reachable cross-module (now consumed by `LeaveManagement` in addition to the module's own controllers), while read-path query handlers own their logic directly like Organization's. Tested (`tests/Approval.Tests`, 57 tests). |
-| LeaveManagement | Single project (`src/LeaveManagement.Api`, same `.Api`-suffix convention) + `src/LeaveManagement.Contracts` (seam) | See [modules/LeaveManagement.md](modules/LeaveManagement.md) for full layering (`Domain/LeaveRequests/`, `Data/`, `Application/LeaveRequests/{Commands,Queries}`, `Controllers/`), public contract, and conventions. Self-service CRUD for employee leave requests; follows Organization's convention outright — every handler owns its `LeaveManagementDbContext` logic directly, with no service-class layer of its own, while injecting `Approval.Contracts.IApprovalService` and `Organization.Contracts.IOrgDirectoryService` directly to reach its two cross-module dependencies. Tested (`tests/LeaveManagement.Tests`, 30 tests). |
+| Module | Structure | CQRS shape | Tests |
+|---|---|---|---|
+| Identity | `Identity.Api` + `.Contracts` | Handlers delegate to `UserService`/`RoleService` — a half-migration ([known-debt.md](../known-debt.md) D1) | `tests/Identity.Tests`, 100 |
+| Notifications | `Notifications.Api` + `.Contracts` | Same half-migration as Identity; controllers split by **audience** (admin vs. self-service) not resource | none yet |
+| Organization | `Organization.Api` + `.Contracts` (seam split into per-feature subfolders) | Handlers own their `OrganizationDbContext` logic directly — no service layer | `tests/Organization.Tests`, 63 |
+| Approval | `Approval.Api` + `.Contracts` | Write path behind `IApprovalService` (must be DI-reachable cross-module); read-path handlers own their logic directly | `tests/Approval.Tests`, 57 |
+| LeaveManagement | `LeaveManagement.Api` + `.Contracts` | Handlers own their logic directly (Organization's shape); inject `IApprovalService` + `IOrgDirectoryService` straight into constructors | `tests/LeaveManagement.Tests`, 30 |
 
-Below the module layer, `src/Shared` (leaf) and `src/Persistence` (depends on `Shared`) remain the pre-module shared kernel; `src/Infrastructure` (depends on `Shared`) is cross-cutting infrastructure, no longer holding EF Core concerns (moved to `Persistence` in the 2026-07 refactor). `Persistence`'s `QueryableResultExtensions.ToPagedAsync` clamps `pageSize` to a max of 100 (`Math.Min(pageSize, 100)`) — affects any paginated endpoint, including the Identity user-search query, `NotificationService`'s list queries, Organization's company/employee search queries, Approval's request search/pending-approvals queries, and LeaveManagement's leave-request search query.
+Below the module layer: `src/Shared` (leaf) and `src/Persistence` (→ `Shared`) are the pre-module
+shared kernel; `src/Infrastructure` (→ `Shared`) is cross-cutting infra, no longer holding EF Core
+concerns (moved to `Persistence` in the 2026-07 refactor). `Persistence`'s
+`QueryableResultExtensions.ToPagedAsync` clamps `pageSize` to 100 — affects every paginated endpoint
+across all five modules.
 
 ## Dependency Direction
 
-Expected direction `Api → Application → Domain`; not enforceable by the compiler since all five modules are single projects — but the discipline holds informally: `Controllers/` in every module call only into services/`Mediator`, never directly into `Entities`/`Data`/DbContext. The "modules must not reference another module's internals" rule **is now verified across five modules**: `Identity` and `Notifications` don't reference each other at all (`Notifications` uses opaque `fromUserId`/`toUserId` strings, no FK or cross-module service call); `Organization.Api` references `Identity.Contracts` (only the seam, for `IUserService` in its employee-login commands); `Approval.Api` references `Notifications.Contracts` (only the seam, for `INotificationService.SendAsync` in its event handlers); `LeaveManagement.Api` references `Approval.Contracts` (only the seam, for `IApprovalService`, to drive the approval workflow) and `Organization.Contracts` (only the seam, for `IOrgDirectoryService`, to resolve approver candidates/display names) — all five cross-module dependencies reach only the target module's `Contracts` seam, with no reference the other direction. No cross-module boundary violation found. See [dependency-graph.md](dependency-graph.md) for the full project-reference diagram, verified via each `.csproj`'s `ProjectReference` entries.
+Expected `Api → Application → Domain`; not compiler-enforceable (all five modules are single
+projects) but the discipline holds informally — `Controllers/` call only services/`Mediator`, never
+`Entities`/`Data`/DbContext directly.
+
+The "no module references another module's internals" rule is **verified across all five modules** —
+every cross-module dependency reaches only the target's `Contracts` seam, with no reference the other
+direction and no cycle. The full list of the five compliant cross-module edges (importer, consumer,
+purpose) is in [dependency-graph.md § Cross-Module Boundary Violations](dependency-graph.md#cross-module-boundary-violations-backend-only);
+the project-reference diagram is in [§ Circular References](dependency-graph.md#circular-references).
 
 ## Key Design Patterns
 
-- **Mediator pattern** via vendor `Light.Mediator` (`IMediator`/`ISender`/`IPublisher`/`IRequest<T>`/`INotification`), with two pipeline behaviors registered in `StarterKit.WebApi/ConfigureExtensions.cs` (outermost first): `LoggingBehaviour<TRequest,TResponse>` (`src/Shared` — logs request type name + elapsed time only, never request/response bodies) then `ValidationBehaviour<TRequest,TResponse>` (FluentValidation) before the handler.
-- **Result pattern** via vendor `Light.Contracts.Result`/`Result<T>`/`PagedResult<T>` instead of throwing for expected failure cases.
-- **Domain events** via `BaseEntity.AddDomainEvent`/`ClearDomainEvents` (vendor `Light.Domain`), dispatched through `DispatchDomainEventsExtensions.DispatchDomainEvents` (`src/Persistence/Extensions/`) — intended to run inside a module's `SaveChangesAsync`, alongside `TrackingExtensions.AuditEntries` for audit/soft-delete stamping. Not currently wired into `IdentityDbContext`: Identity instead publishes its one domain event (`UserCreatedEvent`) manually from the `CreateUserCommandHandler`, bypassing this convention. `Organization` doesn't use domain events at all. `Approval` also publishes its two domain events (`ApprovalStepPendingEvent`/`ApprovalFinalizedEvent`) manually via `IPublisher.Publish` from `ApprovalService`, not through `DispatchDomainEventsExtensions` — same bypass pattern as Identity's `UserCreatedEvent`. `LeaveManagement` doesn't use domain events either — same as `Organization` — reconciling a pending request's status against `Approval` on every read instead (`LeaveRequestStatusSync.ReconcileAsync`), since `Approval`'s finalize/pending events are internal to `Approval.Api` and not exposed via `Approval.Contracts`.
-- **Extension-method-based DI registration** — each feature area exposes `Add<Feature>`/`Use<Feature>` extension methods on `IServiceCollection`/`IApplicationBuilder` rather than a monolithic startup class.
-- **CQRS at the controller boundary — three shapes across five modules**. `Identity` controllers bind a `Contracts` DTO and dispatch an `internal` mediator command/query for every write and for user search, but the handlers forward to `UserService`/`RoleService` (except `SearchUserQueryHandler`, which hits `UserManager` directly). `Notifications` controllers do the same for every action (reads included), forwarding to `INotificationService`/`IHubService` — a half-migrated state in both, not a settled dual pattern (see D1 in `known-debt.md`). `Organization`, built after D1 was identified, resolves it from the start: every handler under `Application/{Companies,OrgUnits,EmployeeLevels,Employees}/{Commands,Queries}` holds its `OrganizationDbContext` logic directly, with no service-class indirection to delegate to. `Approval` splits by audience within itself: write-path handlers (`CreateApprovalRequestCommand`/`DecideApprovalStepCommand`) forward to `IApprovalService` because that interface must also be DI-reachable from other modules, while read-path handlers (`GetApprovalRequestByIdQuery`/`SearchApprovalRequestsQuery`/`GetMyPendingApprovalsQuery`) own their `ApprovalDbContext` logic directly, matching Organization's convention. `LeaveManagement`, built after `Approval`, follows Organization's convention outright: every handler under `Application/LeaveRequests/{Commands,Queries}` holds its `LeaveManagementDbContext` logic directly (no service-class layer of its own), while directly injecting `Approval.Contracts.IApprovalService` and `Organization.Contracts.IOrgDirectoryService` — other modules' cross-module seams — straight into the handler constructors. See `modules/Identity.md`, `modules/Notifications.md`, `modules/Organization.md`, `modules/Approval.md`, `modules/LeaveManagement.md`.
-- **Audience-split controllers + real-time push** in `Notifications` — an admin controller (explicit permissions) and a self-service controller (permission-less, hard-scoped via `ICurrentUser`) over the same table, plus a push-only SignalR hub for live delivery. See `modules/Notifications.md`.
+- **Mediator** via vendor `Light.Mediator`, with two pipeline behaviors registered in
+  `StarterKit.WebApi/ConfigureExtensions.cs` (outermost first): `LoggingBehaviour` (logs request type
+  + elapsed time only, never bodies) then `ValidationBehaviour` (FluentValidation).
+- **Result pattern** via vendor `Light.Contracts.Result`/`Result<T>`/`PagedResult<T>` instead of
+  throwing for expected failures.
+- **Domain events** via `BaseEntity.AddDomainEvent`, meant to dispatch inside a module's
+  `SaveChangesAsync` (`DispatchDomainEventsExtensions`, `src/Persistence`). Not currently wired that
+  way anywhere: `Identity` and `Approval` publish their events manually via `IPublisher` from a
+  handler/service; `Organization` and `LeaveManagement` don't use domain events at all
+  (`LeaveManagement` reconciles status against `Approval` on every read instead, since `Approval`'s
+  events aren't exposed via its `Contracts`). The `Identity` case is tracked as
+  [known-debt.md](../known-debt.md) P6.
+- **Extension-method DI registration** — each feature area exposes `Add<Feature>`/`Use<Feature>`
+  rather than a monolithic startup class.
+- **CQRS at the controller boundary, three shapes.** Every controller action across all five modules
+  binds a `Contracts` DTO and dispatches an `internal` mediator command/query. What the handler does
+  differs: `Identity`/`Notifications` forward to a service class (the half-migration,
+  [known-debt.md](../known-debt.md) D1); `Organization`/`LeaveManagement` hold the DbContext logic
+  directly; `Approval` splits by audience — write-path handlers forward to `IApprovalService` (it
+  must be DI-reachable cross-module), read-path handlers hold their logic directly. See each module
+  doc for detail.
+- **Audience-split controllers + real-time push** in `Notifications` — an admin controller (explicit
+  permissions) and a self-service controller (permission-less, hard-scoped via `ICurrentUser`) over
+  one table, plus a push-only SignalR hub at `/signalr-hub`.
 
-## Shared Kernel / Common Building Blocks Used
+## Shared Kernel / Common Building Blocks
 
-- `src/Shared` (leaf) — `ICurrentUser`/`IDateTime` abstractions, `CurrentUserBase` (claims-driven — including an `EmployeeId` accessor backing Organization's employee-login-to-Identity-user link, see `modules/Identity.md`), `Status` value object, `PageQuery`/`IPage`, `SearchQuery` (`PageQuery` + `SearchValue`), `BaseDto`/`BaseDto<TId>`, `AffectedRowsResult`, entity wrappers (`AuditableEntity`, `AuditableEntity<T>`, `DomainEvent`), mediator pipeline behaviors (`LoggingBehaviour`, `ValidationBehaviour`), permission authorization (`SuperUserPolicy`, `AccessControl`, internal `PolicyProvider`/`AuthorizationHandler`), constants (`ClaimTypeConstants` — including `EmployeeId = "employee_id"` —, `CronTimeConstants`), `Utilities.ReflectionHelper`.
-- `src/Infrastructure` (depends on `Shared`) — CORS (`Cors/`), health checks (`HealthChecks/`), Mapster config (`Mappings/MapsterSettings.cs`), module/endpoint base classes (`Modularity/AppModule.cs`, `AppModuleEndpoint.cs`), API controller base classes + `BasicAuthAttribute` (`Endpoints/`), static Serilog bootstrap logger (`AppLogging.cs`).
-- `src/Persistence` (depends on `Shared`) — EF Core provider wiring (`DbContextExtensions.cs`, `DbProvider.cs`, `DbConnectionNames.cs` — now `Identity`/`Catalog`/`Organization`/`Approval`/`LeaveManagement`, all aliasing `Default`), DbContext base class (`Context/BaseDbContext.cs` — `OnModelCreating` sealed; derived contexts override `ConfigureModel(ModelBuilder)` instead), `TrackingExtensions`/`DispatchDomainEventsExtensions`, generic paging/result helpers (`Extensions/QueryableResultExtensions.cs`), migration-time runtime support (`MigrationSupport/`).
-- `src/Identity.Contracts`, `src/Notifications.Contracts`, `src/Organization.Contracts`, `src/Approval.Contracts`, and `src/LeaveManagement.Contracts` — the per-module `Contracts` seam. None of them is a true leaf: every one references `Shared` (`Identity.Contracts` reaches it solely for a transitive package); `Shared` itself is the only true leaf in the solution. Full inventory of each in `modules/Identity.md` / `modules/Notifications.md` / `modules/Organization.md` / `modules/Approval.md` / `modules/LeaveManagement.md`.
+- **`src/Shared`** (leaf) — `ICurrentUser`/`IDateTime`, `CurrentUserBase` (claims-driven, incl. an
+  `EmployeeId` accessor backing the employee-login link), `Status` value object, `PageQuery`/`IPage`/
+  `SearchQuery`, `BaseDto`/`BaseDto<TId>`, `AffectedRowsResult`, entity wrappers, the mediator
+  pipeline behaviors, permission authorization (`SuperUserPolicy`, `AccessControl`, internal
+  `PolicyProvider`/`AuthorizationHandler`), constants (`ClaimTypeConstants` incl.
+  `EmployeeId = "employee_id"`, `CronTimeConstants`), `ReflectionHelper`.
+- **`src/Infrastructure`** (→ `Shared`) — CORS, health checks, Mapster config, module/endpoint base
+  classes (`AppModule`, `AppModuleEndpoint`), API controller base classes + `BasicAuthAttribute`,
+  static Serilog bootstrap (`AppLogging`).
+- **`src/Persistence`** (→ `Shared`) — EF Core provider wiring (`DbContextExtensions`, `DbProvider`,
+  `DbConnectionNames` — `Identity`/`Catalog`/`Organization`/`Approval`/`LeaveManagement`, all
+  aliasing `Default`), `BaseDbContext` (`OnModelCreating` sealed; derived contexts override
+  `ConfigureModel`), `TrackingExtensions`/`DispatchDomainEventsExtensions`, paging/result helpers,
+  migration-time runtime support.
+- **`<Module>.Contracts`** — the per-module seam. None is a true leaf (every one references `Shared`);
+  `Shared` is the only true leaf. Full inventory per module doc.
 
 ## Module/Route Boundaries
 
-Five modules now exist, and the "modules must not reference another module's internals" rule holds throughout: `Identity` and `Notifications` don't reference each other; `Organization.Api` references only `Identity.Contracts` (its `Contracts` seam, for the employee-login integration); `Approval.Api` references only `Notifications.Contracts` (its `Contracts` seam, for the notify-on-decision integration); `LeaveManagement.Api` references only `Approval.Contracts` and `Organization.Contracts` (its two `Contracts` seams, for the approval workflow and approver-directory lookups respectively) — none of `Identity`/`Notifications`/`Approval` reference anything belonging to `Organization`, and nothing besides `LeaveManagement.Api` references `Approval`/`Organization`'s seams for a new business purpose. Full route/permission inventory per module lives in `modules/Identity.md` / `modules/Notifications.md` / `modules/Organization.md` / `modules/Approval.md` / `modules/LeaveManagement.md` § Public Contract. `StarterKit.WebApi` is the only host wiring all five up via `app.MapEndpoints(...)`; `Notifications` additionally maps a SignalR hub at `/signalr-hub`.
+`StarterKit.WebApi` is the only host — it wires all five modules via `app.MapEndpoints(...)` and maps
+the `Notifications` SignalR hub at `/signalr-hub`. The full route/permission inventory per module
+lives in each module doc's § Public Contract. Cross-module boundary compliance is covered in
+Dependency Direction above.
 
 ## Known Architectural Risks / Debt
 
-Module-specific risks/debt now live in each module's own doc (see `modules/Identity.md` / `modules/Notifications.md` / `modules/Organization.md` / `modules/Approval.md` / `modules/LeaveManagement.md` § Notable Conventions) — only genuinely cross-cutting risks (not owned by a single module) are tracked here:
+Module-specific debt lives in each module doc's § Notable Conventions and the canonical
+[known-debt.md](../known-debt.md). Only genuinely cross-cutting risks not owned by a single module
+are tracked here:
 
 | Finding | Severity | Notes |
 |---|---|---|
-| `Persistence/MigrationSupport/MigrationsExtensions.AddMigrationsServices` registers mediator handlers via `Assembly.GetExecutingAssembly()` (the `Persistence` assembly) | Medium | Won't pick up handlers defined in module assemblies like `Identity.Api`/`Notifications.Api`/`Organization.Api`/`Approval.Api`/`LeaveManagement.Api` — revisit once modules with domain-event handlers rely on this. |
-| `ApiControllerBase`/`VersionedApiController` (`src/Infrastructure/Endpoints/`) duplicate an identical `_mediator` lazy-property | Low | Likely unavoidable — they derive from two different vendor base classes. |
+| `Persistence/MigrationSupport/MigrationsExtensions.AddMigrationsServices` registers mediator handlers via `Assembly.GetExecutingAssembly()` (the `Persistence` assembly) | Medium | Won't pick up handlers in module assemblies — revisit once a module with domain-event handlers relies on migration-time dispatch. |
+| `ApiControllerBase`/`VersionedApiController` (`src/Infrastructure/Endpoints/`) duplicate an identical `_mediator` lazy property | Low | Likely unavoidable — they derive from two different vendor base classes. |
 
 ## Notes
 
