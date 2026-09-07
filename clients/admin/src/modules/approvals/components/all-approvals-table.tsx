@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { History, ListChecks, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,14 +20,22 @@ import type { ApprovalRequestDto } from "@/modules/approvals/types/approval";
 interface AllApprovalsTableProps {
   records: ApprovalRequestDto[];
   error?: DataTableErrorState;
+  isLoading?: boolean;
   canCreate?: boolean;
   /** userId -> display name, resolved once by the page for every table + the history sheet. */
   userNamesById: Map<string, string>;
+  onRefresh: () => void;
 }
 
 /** Read-only, most-recent-50 view — lets you watch a chain's status/level advance across decisions without a full search/pagination UI (this is an admin verification view, not a primary workflow). */
-export function AllApprovalsTable({ records, error, canCreate, userNamesById }: AllApprovalsTableProps) {
-  const router = useRouter();
+export function AllApprovalsTable({
+  records,
+  error,
+  isLoading,
+  canCreate,
+  userNamesById,
+  onRefresh,
+}: AllApprovalsTableProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [createDialogKey, setCreateDialogKey] = useState(0);
   const [historyRequest, setHistoryRequest] = useState<ApprovalRequestDto | null>(null);
@@ -122,8 +129,9 @@ export function AllApprovalsTable({ records, error, canCreate, userNamesById }: 
         rowKey={(request) => request.id}
         totalRecords={records.length}
         error={error}
+        isLoading={isLoading}
         actions={actions}
-        onRefresh={() => router.refresh()}
+        onRefresh={onRefresh}
         emptyState={{
           icon: ListChecks,
           title: "No approval requests yet",
@@ -134,7 +142,7 @@ export function AllApprovalsTable({ records, error, canCreate, userNamesById }: 
         key={`create-${createDialogKey}`}
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={() => router.refresh()}
+        onCreated={onRefresh}
         dialogTitle="Create test approval request"
         action={createTestApprovalRequestAction}
       />

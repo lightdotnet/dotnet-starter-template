@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { History, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,12 +23,14 @@ export type ApprovalOwnerRole = "requester" | "decided";
 interface ApprovalHistoryTableProps {
   records: ApprovalRequestDto[];
   error?: DataTableErrorState;
+  isLoading?: boolean;
   /** userId -> display name, resolved once by the page for every table + the history sheet. */
   userNamesById: Map<string, string>;
-  /** requestId -> the current user's role(s) on that request — computed once by the page from
-   * the same `relation=All` fetch (requester and/or decided-a-step), then reused as a lookup
-   * here instead of re-deriving it per row. */
+  /** requestId -> the current user's role(s) on that request — computed once from the same
+   * `relation=All` fetch (requester and/or decided-a-step), then reused as a lookup here instead
+   * of re-deriving it per row. */
   rolesById: Map<string, ApprovalOwnerRole[]>;
+  onRefresh: () => void;
 }
 
 const ROLE_LABEL: Record<ApprovalOwnerRole, string> = {
@@ -40,8 +41,14 @@ const ROLE_LABEL: Record<ApprovalOwnerRole, string> = {
 /** Read-only self-service view — merges "requests you created" and "requests you decided" into
  * one list, tagged with an owner-role badge per row; unlike `MyApprovalsTable` there are no
  * decide actions here, just history + a "Create request" entry point. */
-export function ApprovalHistoryTable({ records, error, userNamesById, rolesById }: ApprovalHistoryTableProps) {
-  const router = useRouter();
+export function ApprovalHistoryTable({
+  records,
+  error,
+  isLoading,
+  userNamesById,
+  rolesById,
+  onRefresh,
+}: ApprovalHistoryTableProps) {
   const [historyRequest, setHistoryRequest] = useState<ApprovalRequestDto | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -146,8 +153,9 @@ export function ApprovalHistoryTable({ records, error, userNamesById, rolesById 
         rowKey={(request) => request.id}
         totalRecords={records.length}
         error={error}
+        isLoading={isLoading}
         actions={actions}
-        onRefresh={() => router.refresh()}
+        onRefresh={onRefresh}
         emptyState={{
           icon: History,
           title: "No requests yet",
@@ -164,7 +172,7 @@ export function ApprovalHistoryTable({ records, error, userNamesById, rolesById 
         key={`create-${createDialogKey}`}
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={() => router.refresh()}
+        onCreated={onRefresh}
       />
     </>
   );

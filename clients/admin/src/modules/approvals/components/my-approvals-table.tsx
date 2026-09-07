@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Check, ClipboardCheck, History, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,12 +16,19 @@ import type { ApprovalRequestDto } from "@/modules/approvals/types/approval";
 interface MyApprovalsTableProps {
   records: ApprovalRequestDto[];
   error?: DataTableErrorState;
+  isLoading?: boolean;
   /** userId -> display name, resolved once by the page for every table + the history sheet. */
   userNamesById: Map<string, string>;
+  onRefresh: () => void;
 }
 
-export function MyApprovalsTable({ records, error, userNamesById }: MyApprovalsTableProps) {
-  const router = useRouter();
+export function MyApprovalsTable({
+  records,
+  error,
+  isLoading,
+  userNamesById,
+  onRefresh,
+}: MyApprovalsTableProps) {
   const [selected, setSelected] = useState<ApprovalRequestDto | null>(null);
   const [approved, setApproved] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -112,7 +118,8 @@ export function MyApprovalsTable({ records, error, userNamesById }: MyApprovalsT
         rowKey={(request) => request.id}
         totalRecords={records.length}
         error={error}
-        onRefresh={() => router.refresh()}
+        isLoading={isLoading}
+        onRefresh={onRefresh}
         emptyState={{
           icon: ClipboardCheck,
           title: "Nothing waiting on you",
@@ -124,7 +131,7 @@ export function MyApprovalsTable({ records, error, userNamesById }: MyApprovalsT
         onOpenChange={setDialogOpen}
         request={selected}
         approved={approved}
-        onDecided={() => router.refresh()}
+        onDecided={onRefresh}
       />
       <ApprovalHistorySheet
         open={historyOpen}

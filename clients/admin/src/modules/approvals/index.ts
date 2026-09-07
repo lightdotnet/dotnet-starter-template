@@ -3,12 +3,11 @@ export { ApprovalDocumentTypesPage } from "./components/approval-document-types-
 export { ApprovalRequestDetailPage } from "./components/approval-request-detail-page";
 export {
   getMyApprovals,
-  searchApprovals,
   getApprovalById,
   createApprovalRequest,
-  createTestApprovalRequest,
   decideApproval,
-} from "./api/approvals.api";
+} from "./api/user-approvals.api";
+export { searchApprovals, createTestApprovalRequest } from "./api/approvals.api";
 export {
   getApprovalDocumentTypes,
   getApprovalDocumentTypeById,

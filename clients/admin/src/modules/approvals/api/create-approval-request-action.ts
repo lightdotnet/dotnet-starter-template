@@ -3,7 +3,7 @@
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { resolveSession } from "@/modules/identity/user-profile";
-import { createApprovalRequest } from "@/modules/approvals/api/approvals.api";
+import { createApprovalRequest } from "@/modules/approvals/api/user-approvals.api";
 import { EMPLOYEE_ID_CLAIM_TYPE } from "@/modules/approvals/constants/claims";
 import { getDisplayName } from "@/lib/shared/user-display";
 import type { ApproverStepInput } from "@/modules/approvals/types/approval";

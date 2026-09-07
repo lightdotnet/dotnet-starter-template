@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LocalDateTime } from "@/components/shared/local-date-time";
-import { getApprovalById } from "@/modules/approvals/api/approvals.api";
+import { getApprovalById } from "@/modules/approvals/api/user-approvals.api";
 import { ApprovalDecisionActions } from "@/modules/approvals/components/approval-decision-actions";
 import { ApprovalTimeline } from "@/modules/approvals/components/approval-timeline";
 import { APPROVAL_STATUS_VARIANT } from "@/modules/approvals/constants/status-variant";
